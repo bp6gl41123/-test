@@ -1452,6 +1452,9 @@
             switchBilling();
             setTimeout(function(){ _touchFired = false; }, 300);
         }, { passive: false });
+        toggle.addEventListener('touchend', function(e) {
+            e.preventDefault();
+        }, { passive: false });
         toggle.addEventListener('click', function(e) {
             if (_touchFired) return;
             switchBilling();
