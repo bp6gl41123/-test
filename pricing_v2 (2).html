@@ -1815,14 +1815,13 @@
 
     <script>
     // 只對電腦版（有滑鼠）鎖寬度，視窗縮小出現捲軸不壓縮
-    if (window.matchMedia('(pointer: fine)').matches) {
-        document.body.style.minWidth = '1400px';
-        document.body.style.overflowX = 'auto';
-        // 鎖日卡 wrapper 最小寬度，卡片本身不受擠壓
-        var wrapper = document.querySelector('.daily-card-wrapper');
-        if (wrapper) {
-            wrapper.style.minWidth = '800px';
-        }
+    if (window.matchMedia('(pointer: fine)').matches && window.self === window.top) {
+    document.body.style.minWidth = '1400px';
+    document.body.style.overflowX = 'auto';
+    var wrapper = document.querySelector('.daily-card-wrapper');
+    if (wrapper) {
+        wrapper.style.minWidth = '800px';
+    }
         var section = document.querySelector('.daily-section');
         if (section) {
             section.style.justifyContent = 'flex-start';
