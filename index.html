@@ -157,7 +157,7 @@
         /* 2. 原本的母檔 CSS (完全保留)                         */
         /* ==================================================== */
         .container { max-width: 1650px; margin: 0 auto; position: relative; padding: 20px; }
-        .grid-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 30px; }
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 30px; }
         .expert-card { background: white; border: 1px solid #e1e4e8; border-radius: 10px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 .expert-card:hover { border-color: #1877f2; }
         .expert-card.active { border: 2.5px solid #1877f2; background-color: #e7f3ff; }
@@ -322,7 +322,22 @@
             position: relative; /* 這一行很重要，請確保你的 CSS 裡有這行 */
             /* ...其他原本的樣式保持不變... */
         }
-
+ @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .grid-container { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .expert-card { padding: 8px 3px; }
+            .name { font-size: 12px; }
+            .badge { font-size: 10px; }
+            .podium-container { gap: 8px; padding: 10px 5px 0 5px; }
+            .rank-1 { width: 140px; height: 180px; }
+            .rank-2 { width: 110px; height: 150px; }
+            .rank-3 { width: 110px; height: 140px; }
+            .rank-net { font-size: 18px; }
+            .rank-crown { font-size: 24px; }
+            .podium-card { padding: 15px 8px 30px 8px; }
+            .ranking-filter-bar { gap: 6px; flex-wrap: wrap; }
+            .r-btn { padding: 8px 12px; font-size: 13px; }
+         }
     </style> 
 </head>
 <body>
