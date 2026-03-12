@@ -856,13 +856,10 @@
             min-width: 0 !important;
         }
         #card-daily {
-            padding: 20px 20px 70px 20px !important;
-            width: 100vw !important;
-            left: 0 !important;
+            padding: 15px 16px 60px 16px !important;
+            width: 100% !important;
             box-sizing: border-box !important;
-            position: fixed !important;
-            top: 0 !important;
-            z-index: 99999 !important;
+            position: relative !important;
             display: block !important;
         }
         .daily-section {
@@ -898,10 +895,10 @@
         .daily-card-wrapper .price-block {
             padding-left: 8px !important;
         }
-
-        .plans-grid {
-            margin-top: 280px !important;
+        #card-daily {
+            padding: 20px 20px 70px 20px !important;
         }
+    }
 
     /* Toggle 隱形擴大點擊區域（外觀完全不變） */
     .toggle-switch {
@@ -1267,7 +1264,7 @@
                     <div class="price-block" style="display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; width: fit-content;">
                         <div class="price-main" id="daily-price" style="margin: 0; font-size: 20px;">$359 <span class="price-unit" style="font-size: 10px;">/ 天</span></div>
                         <div class="price-original" id="daily-daily" style="margin: 0; font-size: 12px; padding-top: 4px;">日均 $359</div>
-                        <div class="promo-text" id="daily-promo" style="opacity: 0; transition: opacity 0.5s ease-in-out; font-size: 13px; color: #10b981; font-weight: 800; margin-top: 6px; margin-bottom: 0; text-align: center; letter-spacing: 0.5px; padding: 5px 10px; background: rgba(16, 185, 129, 0.15); border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3); display: inline-block; white-space: nowrap;">買一天送一天</div>
+                        <div class="promo-text" id="daily-promo" style="opacity: 0; transition: opacity 0.5s ease-in-out; font-size: 13px; color: #10b981; font-weight: 800; margin-top: 14px; margin-bottom: 0; text-align: center; letter-spacing: 0.5px; padding: 5px 10px; background: rgba(16, 185, 129, 0.15); border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3); display: inline-block; white-space: nowrap;">買一天送一天</div>
                     </div>
                 </div>
                 
@@ -1286,7 +1283,7 @@
                 <!-- 中间空白处：对比文案（初始隐藏） -->
                 <div id="daily-compare-text" style="position: absolute !important; left: 310px !important; top: 42% !important; transform: translateY(-50%) !important; width: 600px !important; display: none !important;">
                     <div style="font-weight: 900; font-size: 18px; color: #f0f6ff; margin-bottom: 16px; line-height: 1.5; letter-spacing: 0.3px;">
-                        ▸ 知名網站 $150 買不到2位好手
+                        ▸ 知名網站 $149 買不到2位好手
                     </div>
                     
                     <div style="font-weight: 800; font-size: 20px; color: #f59e0b; margin-bottom: 18px; line-height: 1.6; letter-spacing: 0.2px;">
@@ -1499,7 +1496,7 @@
             annual: { price: 35040, daily: 96 }
         },
         discount: {  // 一次付模式（扣20%后）+ 买赠后日均
-            daily: { price: 299, daily: 149.5 },
+            daily: { price: 299, daily: 149 },
             weekly: { price: 1960, daily: 140 },
             monthly: { price: 5800, daily: 96.67 },
             annual: { price: 29200, daily: 40 },
