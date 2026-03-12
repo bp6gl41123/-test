@@ -817,6 +817,19 @@
     }
 
     /* ========== 電腦版（有滑鼠）強制鎖住日卡寬度，不受視窗縮放影響 ========== */
+    @media (pointer: fine) {
+        .daily-section {
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+        }
+        .daily-card-wrapper {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            min-width: 800px !important;
+        }
+    }
+
+    /* ========== 手機版（觸控）日卡全寬展開 ========== */
     @media (pointer: coarse) {
         .daily-card-wrapper {
             width: 100% !important;
@@ -824,13 +837,22 @@
             min-width: 0 !important;
         }
         #card-daily {
-            padding: 15px 16px !important;
+            padding: 15px 16px 60px 16px !important;
             width: 100% !important;
             box-sizing: border-box !important;
         }
         .daily-section {
             flex-direction: column !important;
             align-items: stretch !important;
+        }
+        .daily-card-wrapper .billing-toggle-wrapper {
+            position: absolute !important;
+            bottom: 10px !important;
+            right: 16px !important;
+            top: auto !important;
+            left: auto !important;
+            grid-column: auto !important;
+            grid-row: auto !important;
         }
     }
 
@@ -1410,7 +1432,7 @@
             e.preventDefault();
             _touchFired = true;
             switchBilling();
-            setTimeout(function(){ _touchFired = false; }, 500);
+            setTimeout(function(){ _touchFired = false; }, 300);
         }, { passive: false });
         toggle.addEventListener('click', function(e) {
             if (_touchFired) return;
