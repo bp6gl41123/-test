@@ -848,22 +848,24 @@
     /* ========== 手機版本 (<768px) - 日卡片改長方形，靠近toggle ========== */
     @media (max-width: 768px) {
         .daily-section {
-            flex-direction: row;
-            align-items: center;
+            flex-direction: column;
+            align-items: stretch;
             gap: 0;
-            margin-bottom: 30px;
-            justify-content: space-between;
+            margin-bottom: 50px;
+            justify-content: flex-start;
             height: auto;
             min-height: 120px;
             overflow: visible !important;
             position: relative !important;
         }
         .daily-card-wrapper {
-            width: 100%;
+            width: 100% !important;
+            max-width: 100% !important;
             height: auto;
             min-height: 120px;
             overflow: visible !important;
             position: relative !important;
+            flex: 1 1 100% !important;
         }
         .daily-card-wrapper .plan-card {
             aspect-ratio: auto;
