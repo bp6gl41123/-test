@@ -1423,7 +1423,7 @@
             e.preventDefault();
             _touchFired = true;
             switchBilling();
-            setTimeout(function(){ _touchFired = false; }, 500);
+            setTimeout(function(){ _touchFired = false; }, 300);
         }, { passive: false });
         toggle.addEventListener('click', function(e) {
             if (_touchFired) return;
