@@ -322,22 +322,23 @@
             position: relative; /* 這一行很重要，請確保你的 CSS 裡有這行 */
             /* ...其他原本的樣式保持不變... */
         }
- @media (max-width: 768px) {
-            .container { padding: 10px; }
-            .grid-container { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-            .expert-card { padding: 8px 3px; }
-            .name { font-size: 12px; }
-            .badge { font-size: 10px; }
-            .podium-container { gap: 8px; padding: 10px 5px 0 5px; }
-            .rank-1 { width: 140px; height: 180px; }
-            .rank-2 { width: 110px; height: 150px; }
-            .rank-3 { width: 110px; height: 140px; }
-            .rank-net { font-size: 18px; }
-            .rank-crown { font-size: 24px; }
-            .podium-card { padding: 15px 8px 30px 8px; }
-            .ranking-filter-bar { gap: 6px; flex-wrap: wrap; }
-            .r-btn { padding: 8px 12px; font-size: 13px; }
-         }
+@media (max-width: 768px) {
+            .container { padding: 10px !important; }
+            .grid-container { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
+            .expert-card { padding: 8px 3px !important; }
+            .name { font-size: 12px !important; }
+            .badge { font-size: 10px !important; }
+            .podium-container { gap: 6px !important; padding: 10px 4px 0 4px !important; }
+            .rank-1 { width: 120px !important; height: 170px !important; }
+            .rank-2 { width: 100px !important; height: 145px !important; }
+            .rank-3 { width: 100px !important; height: 135px !important; }
+            .rank-net { font-size: 16px !important; }
+            .rank-crown { font-size: 22px !important; }
+            .podium-card { padding: 12px 6px 25px 6px !important; }
+            .ranking-filter-bar { gap: 5px !important; flex-wrap: wrap !important; }
+            .r-btn { padding: 7px 10px !important; font-size: 12px !important; }
+            .rank-number { font-size: 11px !important; padding: 3px 10px !important; }
+        }
     </style> 
 </head>
 <body>
