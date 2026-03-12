@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>齊聚眾選 - 真實量化中控台</title>
+    
+<script src="data.js"></script>
+    <script>
+        // 🚨 核心對接修復：優先讀 localStorage 最新戰績，沒有才降級用靜態 defaultDB
+        // 與前端 core_engine.js 完全相同的資料載入邏輯，確保排名計算資料一致
+        var _lsDB = null;
+        try { _lsDB = JSON.parse(localStorage.getItem('DashboardDB_V83_Final')); } catch(e) {}
+        window.dataDB = _lsDB || (typeof defaultDB !== 'undefined' ? JSON.parse(JSON.stringify(defaultDB)) : {});
+    </script>
+    <script src="config.js"></script>
+    <script src="core_utils.js"></script>
+    <script src="core_quant.js"></script>
+
+    <script>
+        // 🔗 與前端 init() 100% 同款排序邏輯，建立 masterRankMap
+        // 使用 window.dataDB（已從 data.js 的 defaultDB 載入），不依賴 localStorage
+       window.buildMasterRankMap = function() {
+            // 💾 直接讀取前端存入的 MasterRankMap_Cache
+            // 前端 core_engine.js 的 init() 每次執行後都會寫入
+            // 這裡完全不重算，100% 引用前端排名結果
+            try {
+                var cached = JSON.parse(localStorage.getItem('MasterRankMap_Cache'));
+                if (cached && Object.keys(cached).length > 0) {
+                    window.masterRankMap = cached;
+                    return;
+                }
+            } catch(e) {}
+            // localStorage 無資料時（首次使用前台前），給空物件防止報錯
+            window.masterRankMap = {};
+        };
+
+    </script>
+    
+    <style>
+        body { font-family: 'Microsoft JhengHei', sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px; display: flex; justify-content: center; }
+        #login-screen { background: #1e293b; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 350px; border: 1px solid #334155;}
+        #login-screen h2 { color: #fbbf24; margin-top: 0; }
+        #login-screen input { width: 100%; padding: 12px; margin: 20px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; text-align: center; font-size: 18px; letter-spacing: 2px; box-sizing: border-box;}
+        #login-screen button { background: #10b981; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+
+#dashboard { display: none; width: 100%; max-width: 1920px; }
+
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 20px; margin-bottom: 30px; }
+        .dashboard-header h1 { margin: 0; color: #38bdf8; font-size: 24px; }
+        .status-badge { background: #064e3b; color: #34d399; padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; border: 1px solid #10b981;}
+        .match-card { background: #1e293b; border-radius: 12px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .match-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #f8fafc; display: flex; align-items: center; gap: 10px;}
+        .league-tag { background: #ef4444; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+        .league-tag.mlb { background: #3b82f6; }
+        .data-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 15px; background: #0f172a; border-radius: 8px; position: relative; border: 1px solid transparent; transition: 0.2s;}
+        .data-row:hover { border-color: #3b82f6; background: #172554; }
+        .team-info { display: flex; align-items: center; gap: 15px; width: 25%; }
+        .team-name { font-size: 17px; font-weight: bold; }
+        .vote-bar-container { flex: 1; margin: 0 20px; background: #334155; height: 12px; border-radius: 6px; overflow: hidden; }
+        .vote-bar { height: 100%; background: linear-gradient(90deg, #ef4444, #b91c1c); border-radius: 6px; }
+        .vote-bar.teamB { background: linear-gradient(90deg, #10b981, #047857); }
+        .stats-info { width: 40%; display: flex; justify-content: space-between; align-items: center; font-size: 15px;}
+        .vote-count { font-weight: bold; color: #cbd5e1; cursor: help; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px;}
+        .matrix-tag { font-weight: 900; padding: 6px 12px; border-radius: 6px; letter-spacing: 1px; font-size: 13px; text-align: center; min-width: 90px;}
+        .tag-danger { background: rgba(220, 38, 38, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+        .tag-normal { background: rgba(52, 211, 153, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+        .tooltip-box { visibility: hidden; opacity: 0; position: absolute; z-index: 100; top: 100%; left: 0; background: #0f172a; border: 1px solid #475569; box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-radius: 8px; padding: 15px; width: 260px; transition: 0.2s; margin-top: 10px; pointer-events: none;}
+        .vote-count:hover + .tooltip-box, .tooltip-box:hover { visibility: visible; opacity: 1; pointer-events: auto;}
+        .tooltip-title { font-size: 13px; color: #94a3b8; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold;}
+        .player-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.03);}
+        .player-god { color: #fbbf24; font-weight: bold; }
+        .player-trash { color: #94a3b8; }
+        .win-rate-high { color: #34d399; font-weight: bold;}
+
+.win-rate-low { color: #f87171; }
+
+        /* ── 雙欄賽事卡片 ── */
+#match-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 30px; }
+
+        .match-card { background: #1e293b; border-radius: 10px; padding: 16px 18px; border: 1px solid #334155; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+        .match-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .league-tag { background: #ef4444; color: white; padding: 2px 7px; border-radius: 4px; font-size: 11px; }
+        .league-tag.mlb { background: #3b82f6; }
+        .data-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 10px; background: #0f172a; border-radius: 6px; position: relative; border: 1px solid transparent; transition: 0.2s; }
+        .data-row:hover { border-color: #3b82f6; }
+        .team-info { width: 60px; flex-shrink: 0; }
+        .team-name { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .vote-bar-container { flex: 1; background: #334155; height: 8px; border-radius: 4px; overflow: hidden; }
+        .vote-bar { height: 100%; background: linear-gradient(90deg, #ef4444, #b91c1c); border-radius: 4px; }
+        .vote-bar.teamB { background: linear-gradient(90deg, #10b981, #047857); }
+        .stats-info { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .vote-count { font-weight: bold; color: #cbd5e1; cursor: help; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1px; font-size: 12px; white-space: nowrap; }
+        .matrix-tag { font-weight: 900; padding: 3px 8px; border-radius: 5px; font-size: 11px; text-align: center; white-space: nowrap; }
+        .tag-danger { background: rgba(220,38,38,0.2); color: #fca5a5; border: 1px solid #ef4444; }
+        .tag-normal { background: rgba(52,211,153,0.2); color: #6ee7b7; border: 1px solid #10b981; }
+        .tooltip-box { visibility: hidden; opacity: 0; position: absolute; z-index: 100; top: 100%; right: 0; left: auto; background: #0f172a; border: 1px solid #475569; box-shadow: 0 10px 25px rgba(0,0,0,0.8); border-radius: 8px; padding: 15px; width: 240px; transition: 0.2s; margin-top: 6px; pointer-events: none; }
+        .vote-count:hover + .tooltip-box, .tooltip-box:hover { visibility: visible; opacity: 1; pointer-events: auto; }
+        .tooltip-title { font-size: 12px; color: #94a3b8; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; }
+        .player-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; padding: 3px 6px; border-radius: 4px; background: rgba(255,255,255,0.03); }
+        .player-god { color: #fbbf24; font-weight: bold; }
+        .player-trash { color: #94a3b8; }
+        .win-rate-high { color: #34d399; font-weight: bold; }
+
+        /* ── 成績清單完整複刻（來自前台 index.html）── */
+        .pk-layout { display: flex; gap: 12px; justify-content: flex-start; width: 100%; flex-wrap: nowrap; margin-bottom: 30px; overflow-x: auto; padding: 15px 15px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+.pk-column { flex: 0 0 115px; border: 1px solid #334155; border-radius: 8px; padding: 10px; background: #1e293b; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: #f8fafc; }
+
+        .title-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px 18px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .section-title { font-weight: bold; margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; color: #94a3b8; }
+        .rank-badge { padding: 8px 18px; border-radius: 30px; font-size: 18px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; letter-spacing: 0.5px; }
+        .rank-1-badge { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+        .rank-2-badge { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+        .rank-3-badge { background: #fff7ed; color: #9a3412; border-color: #ffedd5; }
+        .rank-neg-badge { background: #fed7d7; color: #c53030; border-color: #feb2b2; }
+        .title-rank-1 { border-top: 4px solid #f59e0b; background: #1c1a0a; border-color: #92681a; }
+        .title-rank-2 { border-top: 4px solid #94a3b8; background: #0f172a; border-color: #334155; }
+        .title-rank-3 { border-top: 4px solid #ea580c; background: #1a0f0a; border-color: #7c3b1a; }
+        .title-rank-neg { border-top: 4px solid #dc3545; background: #1a0a0a; border-color: #7f1d1d; }
+        .title-unranked { border-top: 4px solid #475569; background: #0f172a; border-color: #334155; }
+        .expand-btn { width: 100%; padding: 10px; margin-top: 10px; background: #1e293b; border: 1px dashed #475569; border-radius: 6px; color: #64748b; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .expand-btn:hover { background: #172554; color: #38bdf8; border-color: #38bdf8; }
+        .summary-row { padding: 10px 15px; margin: 20px 0 10px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .summary-stats { font-size: 13px; }
+        .summary-pos { border: 2px solid #16a34a; background-color: #052e16; color: #4ade80; }
+        .summary-neg { border: 2px solid #dc3545; background-color: #450a0a; color: #f87171; }
+        .summary-neu { border: 2px solid #475569; background-color: #1e293b; color: #94a3b8; }
+        .record-row { display: flex; padding: 10px 8px; border-bottom: 1px dashed #334155; align-items: center; border-radius: 4px; transition: 0.2s; }
+        .ten-day-gap { margin-bottom: 30px !important; border-bottom: none !important; }
+        .bg-pos { background-color: #052e16 !important; }
+        .bg-neg { background-color: #450a0a !important; }
+        .bg-neu { background-color: transparent; }
+        .col-date { width: 60px; font-size: 14px; color: #94a3b8; font-weight: bold; }
+        .col-record { width: 80px; font-size: 14px; color: #cbd5e1; }
+        .score-wrapper { flex: 1; display: flex; position: relative; height: 20px; align-items: center; }
+        .score-pos { color: #4ade80; font-weight: bold; position: absolute; left: 10px; }
+        .score-neg { color: #f87171; font-weight: bold; position: absolute; left: 80px; }
+        .score-neu { color: #64748b; position: absolute; left: 45px; }
+        .pk-name-label { font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 12px; padding: 10px; background: #172554; color: #38bdf8; border-radius: 8px; border-left: 5px solid #38bdf8; }
+        .close-x { position: absolute; top: 15px; right: 15px; width: 22px; height: 22px; background: #475569; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; z-index: 100; transition: 0.2s; }
+        .close-x:hover { background: #ef4444; transform: scale(1.1); }
+        .table-header { display: flex; padding: 8px; background: #0f172a; border-radius: 4px; margin-bottom: 8px; font-weight: bold; font-size: 13px; color: #64748b; }
+        .table-header div:nth-child(1) { width: 60px; }
+        .table-header div:nth-child(2) { width: 80px; text-align: center; }
+
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h2>🛡️ 齊聚眾選 - 量化中控台</h2>
+        <input type="password" id="admin-pwd" placeholder="請輸入 1212G">
+        <button onclick="checkLogin()">登入系統</button>
+        <p id="error-msg" style="color: #ef4444; font-size: 13px; display: none; margin-top: 10px;">密碼錯誤。</p>
+    </div>
+
+    <div id="dashboard">
+        <div class="dashboard-header">
+            <h1>📡 核心量化觀測站 (完美對齊前台版)</h1>
+            <div class="status-badge" id="status-text">🟢 矩陣計算完成</div>
+        </div>
+        <div id="match-container"></div>
+<div id="quant_virtual_area"></div>
+        <div id="quant_whitelist_area"></div>
+    </div>
+
+<script>
+        function checkLogin() {
+            var pwd = document.getElementById('admin-pwd').value;
+            if (pwd === '1212G') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                window.isAdmin = true;
+                processRealData();
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        document.getElementById('admin-pwd').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') checkLogin();
+        });
+
+
+        function processRealData() {
+            // 檢查 window.dataDB 是否成功掛載
+            if (typeof todayPicks === 'undefined' || typeof todaySchedule === 'undefined' || typeof MatrixEngine === 'undefined' || typeof window.dataDB === 'undefined') {
+                document.getElementById('status-text').innerText = "🔴 系統連線失敗 (缺少核心物件)";
+                document.getElementById('status-text').style.background = "#7f1d1d";
+                return;
+            }
+
+// 🔗 核心修復：完整複製前端 core_engine.js 的資料合併 + 排名計算流程
+            // 第一步：把 dailyUpdates 合併進 dataDB（跟 core_engine.js 第 260-269 行完全一樣）
+            if (typeof dailyUpdates !== 'undefined') {
+                dailyUpdates.forEach(function(item) {
+                    var expert = item[0], sport = item[1], date = item[2], wl = item[3], net = item[4];
+                    if (!window.dataDB[expert]) window.dataDB[expert] = {};
+                    if (!window.dataDB[expert][sport]) window.dataDB[expert][sport] = [];
+                    var isDuplicate = window.dataDB[expert][sport].some(function(r) {
+                        return r[0] === date && r[1] === wl && r[2] === net;
+                    });
+                    if (!isDuplicate) window.dataDB[expert][sport].unshift([date, wl, net]);
+                });
+                var currentYear = new Date().getFullYear();
+                for (var exp in window.dataDB) {
+                    for (var sp in window.dataDB[exp]) {
+                        window.dataDB[exp][sp].sort(function(a, b) {
+                            var parseDate = function(dStr) {
+                                var d = new Date(currentYear + '/' + dStr);
+                                if (d.getMonth() === 11 && new Date().getMonth() <= 2) d.setFullYear(currentYear - 1);
+                                return d.getTime();
+                            };
+                            return parseDate(b[0]) - parseDate(a[0]);
+                        });
+                    }
+                }
+            }
+
+            // 第二步：針對 nba_team 算出與前端完全相同的排名，存入 window.adminRankMap
+            // 活躍判定 3 天、近 7 場勝率、活躍優先 -> 勝率優先 -> 淨值加權
+            (function() {
+                var db = window.dataDB;
+                var sportKey = 'nba_team';
+                var currentYear = new Date().getFullYear();
+
+                // 找系統最新日期
+                var maxTime = 0, systemLatest = '01/01';
+                for (var name in db) {
+                    var recs = db[name][sportKey];
+                    if (recs && recs.length > 0) {
+                        var d = new Date(currentYear + '/' + recs[0][0]);
+                        if (d.getMonth() === 11 && new Date().getMonth() <= 2) d.setFullYear(currentYear - 1);
+                        if (d.getTime() > maxTime) { maxTime = d.getTime(); systemLatest = recs[0][0]; }
+                    }
+                }
+
+                // 計算日差
+                var getDiff = function(dateStr) {
+                    if (!dateStr) return 999;
+                    var d1 = new Date(currentYear + '/' + systemLatest);
+                    var d2 = new Date(currentYear + '/' + dateStr);
+                    if (d1.getMonth() === 0  && d2.getMonth() === 11) d2.setFullYear(currentYear - 1);
+                    if (d1.getMonth() === 11 && d2.getMonth() === 0)  d1.setFullYear(currentYear - 1);
+                    return Math.floor(Math.abs(d1 - d2) / 86400000);
+                };
+
+                var list = [];
+                for (var n in db) {
+                    var records = db[n][sportKey] || [];
+                    if (records.length === 0) continue;
+                    var isActive = getDiff(records[0][0]) <= 3;
+                    var slice = records.slice(0, 7);
+                    var w = 0, l = 0, net = 0;
+                    slice.forEach(function(r) {
+                        var wm = r[1].match(/(\d+)勝/), lm = r[1].match(/(\d+)敗/);
+                        if (wm) w += parseInt(wm[1]);
+                        if (lm) l += parseInt(lm[1]);
+                        net += parseInt(r[2] || 0);
+                    });
+                    var winRate = (w + l) > 0 ? Math.round(w / (w + l) * 100) : 0;
+                    list.push({ name: n, winRate: winRate, net: net, isActive: isActive });
+                }
+
+                // 活躍優先 -> 勝率優先 -> 淨值加權（與 core_engine.js init() 完全相同）
+                list.sort(function(a, b) {
+                    if (a.isActive && !b.isActive) return -1;
+                    if (!a.isActive && b.isActive)  return 1;
+                    return (b.winRate - a.winRate) || (b.net - a.net);
+                });
+
+                window.adminRankMap = {};
+                list.forEach(function(p, i) {
+                    window.adminRankMap[p.name] = {
+                        rank: i + 1,
+                        rate: p.winRate,
+                        isGod: i < 3 && p.isActive
+                    };
+                });
+            })();
+            const matchResults = [];
+            const globalRanksCache = {}; 
+
+            for (let league in todaySchedule) {
+                todaySchedule[league].forEach(match => {
+                    const teamA = match[0]; 
+                    const teamB = match[1]; 
+                    
+                    let votersA = [];
+                    let votersB = [];
+
+                    todayPicks.forEach(pick => {
+                        const author = pick[0];
+                        const category = pick[1]; 
+                        const rawText = pick[2];
+
+                        const pickLeague = category.split('_')[0].toUpperCase(); 
+                        if (pickLeague !== league) return; 
+
+                        if (category.includes('total')) return; 
+
+                        // 呼叫大腦算排名 (已不需傳參數，大腦會自己去抓 window.dataDB)
+                        if (!globalRanksCache[category]) {
+                            globalRanksCache[category] = MatrixEngine.buildGlobalLeaderboard(category);
+                        }
+
+                        let playerStats = globalRanksCache[category][author];
+                        if (!playerStats) {
+                            playerStats = { winRate: 30, globalRank: 999, isGod: false }; 
+                        }
+
+                        const choices = rawText.split(/<br\s*\/?>/i);
+                        choices.forEach(choice => {
+                            const cleanName = MatrixEngine.cleanTeamName(choice);
+                            if (cleanName.includes(teamA)) {
+                                votersA.push({ name: author, winRate: playerStats.winRate, isGod: playerStats.isGod, globalRank: playerStats.globalRank });
+                            } else if (cleanName.includes(teamB)) {
+                                votersB.push({ name: author, winRate: playerStats.winRate, isGod: playerStats.isGod, globalRank: playerStats.globalRank });
+                            }
+                        });
+                    });
+
+                    votersA = votersA.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+                    votersB = votersB.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+
+                    if (votersA.length > 0 || votersB.length > 0) {
+                        const godsA = votersA.filter(v => v.isGod).map(v => v.name);
+                        const godsB = votersB.filter(v => v.isGod).map(v => v.name);
+                        const matrixResult = MatrixEngine.calculateMatrixTag(votersA.length, votersB.length, godsA, godsB);
+                        
+                        if(matrixResult) {
+                            matchResults.push({
+                                league: league, teamA: teamA, teamB: teamB,
+                                votersA: votersA, votersB: votersB, matrix: matrixResult
+                            });
+                        }
+                    }
+                });
+            }
+            renderDashboard(matchResults);
+window.renderVirtualArea();
+            window.renderWhitelistArea(); 
+
+        }
+
+function generateTooltipHTML(teamName, voters) {
+            if (voters.length === 0) return '';
+            
+            const sortedVoters = [...voters].sort((a, b) => a.globalRank - b.globalRank);
+            
+            let listHTML = sortedVoters.map((v) => {
+                let rankIcon = v.globalRank === 1 ? '🥇' : (v.globalRank === 2 ? '🥈' : (v.globalRank === 3 ? '🥉' : ''));
+                let rankText = v.globalRank <= 3 ? '' : `<small style="color:#64748b; font-size:11px; margin-left:4px;">(全站第${v.globalRank})</small>`;
+                let nameClass = v.isGod ? 'player-god' : 'player-trash';
+                let rateClass = v.winRate >= 60 ? 'win-rate-high' : 'win-rate-low';
+                
+                return `<div class="player-row">
+                            <span class="${nameClass}">${rankIcon} ${v.name} ${rankText}</span>
+                            <span class="${rateClass}">${v.winRate}%</span>
+                        </div>`;
+            }).join('');
+
+            return `<div class="tooltip-box"><div class="tooltip-title">🔍 押注【${teamName}】的籌碼結構</div>${listHTML}</div>`;
+        }
+
+       function renderDashboard(matches) {
+            const container = document.getElementById('match-container');
+            container.innerHTML = '';
+            if (matches.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column:1/-1;">今日無有效賽事。</p>';
+                return;
+            }
+            matches.forEach(data => {
+                const res = data.matrix;
+                const tagClassLeague = data.league === 'MLB' ? 'mlb' : '';
+                container.innerHTML += `
+                    <div class="match-card">
+                        <div class="match-title">
+                            <span class="league-tag ${tagClassLeague}">${data.league}</span>
+                            ${data.teamA} VS ${data.teamB}
+                        </div>
+                        <div class="data-row">
+                            <div class="team-info"><span class="team-name">${data.teamA}</span></div>
+                            <div class="vote-bar-container"><div class="vote-bar" style="width:${res.teamA.pct}%;"></div></div>
+                            <div class="stats-info">
+                                <div style="position:relative;">
+                                    <span class="vote-count">${res.teamA.pct}% (${data.votersA.length}票)</span>
+                                    ${generateTooltipHTML(data.teamA, data.votersA)}
+                                </div>
+                                <span class="matrix-tag ${res.teamA.isConflict ? 'tag-danger' : 'tag-normal'}">${res.teamA.tag}</span>
+                            </div>
+                        </div>
+                        <div class="data-row">
+                            <div class="team-info"><span class="team-name">${data.teamB}</span></div>
+                            <div class="vote-bar-container"><div class="vote-bar teamB" style="width:${res.teamB.pct}%;"></div></div>
+                            <div class="stats-info">
+                                <div style="position:relative;">
+                                    <span class="vote-count">${res.teamB.pct}% (${data.votersB.length}票)</span>
+                                    ${generateTooltipHTML(data.teamB, data.votersB)}
+                                </div>
+                                <span class="matrix-tag ${res.teamB.isConflict ? 'tag-danger' : 'tag-normal'}">${res.teamB.tag}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+    </script>
+
+<script src="core_quant_virtual.js"></script>
+
+<script>
+window.renderWhitelistArea = function() {
+    var area = document.getElementById('quant_whitelist_area');
+    if (!area) return;
+
+    var whitelist = [];
+    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+
+    var listHTML = whitelist.length === 0
+        ? '<p style="color:#475569; font-size:13px; padding:10px 0;">目前無特殊激活好手</p>'
+        : whitelist.map(function(name) {
+: whitelist.map(function(wlKey) {
+            var parts = wlKey.split('||');
+            var expertName = parts[0] || wlKey;
+            var sportKey = parts[1] || '';
+            var sportLabel = (typeof itemNames !== 'undefined' && sportKey && itemNames[sportKey]) ? itemNames[sportKey] : sportKey;
+            var displayText = sportLabel ? expertName + ' / ' + sportLabel : expertName;
+            return '<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#0f172a; border-radius:8px; border:1px solid #334155; margin-bottom:8px;">'
+                + '<span style="color:#f8fafc; font-size:14px; font-weight:bold;">⭐ ' + displayText + '</span>'
+                + '<button onclick="window.whitelistRemove(\'' + wlKey.replace(/'/g, "\\'") + '\')" style="background:#7f1d1d; color:#fca5a5; border:1px solid #ef4444; border-radius:6px; font-size:12px; font-weight:bold; padding:4px 10px; cursor:pointer;">移除</button>'
+                + '</div>';
+        }).join('');
+
+    area.innerHTML = '<div style="margin-top:30px; border-top:2px solid #334155; padding-top:30px;">'
+        + '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">'
+        + '<h2 style="margin:0; color:#f59e0b; font-size:18px;">⭐ 特殊激活白名單</h2>'
+        + '<button onclick="window.whitelistAdd()" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:white; border:none; padding:8px 18px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer;">➕ 新增激活好手</button>'
+        + '</div>'
+        + '<p style="color:#64748b; font-size:12px; margin-bottom:14px;">加入名單的好手不受10天門檻限制，直接進入排行榜計算。</p>'
+        + listHTML
+        + '</div>';
+};
+
+window.whitelistAdd = function() {
+    var name = prompt('請輸入要特殊激活的好手名稱（需與系統完全一致）：');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    var whitelist = [];
+    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    if (whitelist.includes(name)) { alert('「' + name + '」已在白名單中。'); return; }
+    whitelist.push(name);
+    localStorage.setItem('AdminWhitelist_Experts', JSON.stringify(whitelist));
+    window.renderWhitelistArea();
+};
+
+window.whitelistRemove = function(name) {
+    if (!confirm('確定移除「' + name + '」的特殊激活資格？')) return;
+    var whitelist = [];
+    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    whitelist = whitelist.filter(function(n) { return n !== name; });
+    localStorage.setItem('AdminWhitelist_Experts', JSON.stringify(whitelist));
+    window.renderWhitelistArea();
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.renderWhitelistArea();
+});
+</script>
+
+</body>
+</html>

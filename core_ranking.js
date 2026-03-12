@@ -1,0 +1,213 @@
+/* ============================================================== */
+/* ==== 【組件 D：戰力表現 - core_ranking.js】 ==== */
+/* ============================================================== */
+
+window.selectedExperts = [];  
+window.excludedExperts = [];  
+window.expandStates = {};
+window.manualSwapList = []; 
+
+window.toggleManualSwap = function(name) {
+    const idx = window.manualSwapList.indexOf(name);
+    if (idx > -1) window.manualSwapList.splice(idx, 1);
+    else window.manualSwapList.push(name);
+    window.renderDisplay(); 
+};
+
+window.handleCompare = function() { 
+    window.excludedExperts = []; window.expandStates = {}; 
+    if (window.selectedExperts.length === 0 && window.activeSportKey === "") return alert('請點選好手'); 
+    document.getElementById('details').style.display = 'block'; 
+    window.renderDisplay(); 
+    document.getElementById('details').scrollIntoView({ behavior: 'smooth' }); 
+};
+
+// 🎯 [核心新增] 智慧滾動偵測：自動判斷按鈕是否該往左滑動避開邊緣
+window.addEventListener('scroll', function() {
+    const detailsDiv = document.getElementById('details');
+    
+    // 若對比區塊不存在或尚未顯示，確保按鈕退回右側邊緣
+    if (!detailsDiv || detailsDiv.style.display === 'none') {
+        if (typeof window.setFloatingButtonsCompareMode === 'function') window.setFloatingButtonsCompareMode(false);
+        return;
+    }
+    
+    // 取得對比區塊距離螢幕頂部的相對位置
+    const rect = detailsDiv.getBoundingClientRect();
+    
+    // 判斷邏輯：當畫面往下滑，對比區塊進入螢幕可視範圍 (到達螢幕高度的 70% 處) 時，按鈕往左滑動
+    if (rect.top < window.innerHeight * 0.7) {
+        if (typeof window.setFloatingButtonsCompareMode === 'function') {
+            window.setFloatingButtonsCompareMode(true);
+        }
+    } else {
+        // 當畫面往上滑回上方主畫面時，按鈕退回最右側，繼續維持原本完美的重疊層次感
+        if (typeof window.setFloatingButtonsCompareMode === 'function') {
+            window.setFloatingButtonsCompareMode(false);
+        }
+    }
+});
+
+window.renderDisplay = function() {
+    const display = document.getElementById('displayArea'); const header = document.getElementById('singleHeader');
+    const layouts = display.querySelectorAll('.pk-layout'); const scrollMap = {}; layouts.forEach(l => { if(l.id) scrollMap[l.id] = l.scrollLeft; });
+    const mainScroll = display.scrollLeft; 
+    display.innerHTML = ''; display.className = ''; display.style.flexDirection = '';
+    header.style.display = 'none';
+    if (window.selectedExperts.length === 0 && window.activeSportKey !== "") window.renderRankMode(); else if (window.selectedExperts.length === 1) window.renderNormalMode(); else window.renderPKMode();
+    setTimeout(() => { const newLayouts = display.querySelectorAll('.pk-layout'); newLayouts.forEach(l => { if(l.id && scrollMap[l.id]) l.scrollLeft = scrollMap[l.id]; }); display.scrollLeft = mainScroll; }, 0);
+};
+
+window.toggleExpand = function(n) { window.expandStates[n] = !window.expandStates[n]; window.renderDisplay(); };
+
+window.renderPKMode = function() {
+    const display = document.getElementById('displayArea'); if (!display) return;
+    const key = window.activeSportKey || "nba_team"; display.className = 'pk-layout';
+    let htmlStr = ''; 
+    window.selectedExperts.forEach(n => {
+        try {
+            let dbData = (window.dataDB[n] && window.dataDB[n][key]) ? window.dataDB[n][key] : [];
+            const hasMore = dbData.length > 20; const showFull = window.expandStates[n];
+            const btnHtml = hasMore ? `<button class="expand-btn" onclick="window.toggleExpand('${n}')">${showFull ? '🔼 收起歷史' : '🔍 展開更多歷史'}</button>` : '';
+            htmlStr += `<div class="pk-column"><div class="close-x" onclick="window.toggleExpert('${n}', null);">×</div><div class="pk-name-label" style="display:flex; align-items:center; justify-content:center;">${n} ${window.getPickTooltipHtml(n)}</div>${window.getRankBanner(typeof itemNames !== 'undefined' && itemNames[key] ? itemNames[key] : '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:70px;text-align:center;">戰績</div><div style="flex:1;padding-left:5px;">反饋</div></div>${window.buildHTML(dbData, !showFull, n, key)}${btnHtml}</div>`;
+        } catch(e) { console.error("資料異常跳過:", n); }
+    });
+    display.innerHTML = htmlStr; 
+};
+
+window.renderRankMode = function() {
+    const display = document.getElementById('displayArea'); let allSorted = []; let systemLatestDate = window.getSystemLatestDate(window.activeSportKey);
+    // 🎯 特殊激活白名單
+    let qualifiedWhitelistRM = [];
+    try { qualifiedWhitelistRM = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+
+    for(let name in window.dataDB) {
+        if(window.excludedExperts.includes(name)) continue; let list = window.dataDB[name][window.activeSportKey] || []; if(list.length === 0) continue;
+        
+let diffDays = window.getDaysDiff(list[0][0], systemLatestDate); if (diffDays > 3) continue;
+        // 🎯 門檻激活：不重複天數 < 10 天不進入賽事排行
+let uniqueDatesRank = new Set(list.map(r => r[0]));
+        if (uniqueDatesRank.size < 10 && !qualifiedWhitelistRM.includes(name)) continue;
+
+        let w=0, l=0, n20=0; list.slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w+l) > 0 ? (w/(w+l)) : 0; allSorted.push({ name, w, l, net: n20, rate });
+    }
+    allSorted.sort((a,b) => b.rate - a.rate || b.net - a.net);
+    const isActuallyPositive = (item) => { const naturallyPositive = item.rate >= 0.5; const isSwapped = window.manualSwapList.includes(item.name); return isSwapped ? !naturallyPositive : naturallyPositive; };
+
+const top6 = allSorted.filter(item => isActuallyPositive(item)); 
+    const bottom6 = allSorted.filter(item => !isActuallyPositive(item)).sort((a,b) => a.rate - b.rate || a.net - b.net);
+    /* 🎯 專業化名詞與圖示升級：戰力紅/黑榜 ➔ 正向/反向指標，骷髏頭 ➔ 魔法杖 */
+    display.innerHTML = `<div class="rank-group-title" style="color:#16a34a; border-bottom:2px solid #bbf7d0;">🏆 ${itemNames[window.activeSportKey]} - 正向指標</div><div class="pk-layout" id="topLayout"></div><div class="rank-group-title" style="color:#dc3545; border-bottom:2px solid #fecaca;">🪄 ${itemNames[window.activeSportKey]} - 反向指標</div><div class="pk-layout" id="bottomLayout"></div>`;
+    top6.forEach((item, i) => document.getElementById('topLayout').innerHTML += window.renderRankCard(item, i, window.activeSportKey, false));
+
+    bottom6.forEach((item, i) => document.getElementById('bottomLayout').innerHTML += window.renderRankCard(item, i, window.activeSportKey, true));
+};
+
+window.renderRankCard = function(item, idx, key, isReverse) {
+    let cls = isReverse ? "title-rank-neg" : (idx===0 ? "title-rank-1" : (idx===1 ? "title-rank-2" : (idx===2 ? "title-rank-3" : "title-unranked")));
+    let bCls = isReverse ? "rank-neg-badge" : (idx===0 ? "rank-1-badge" : (idx===1 ? "rank-2-badge" : (idx===2 ? "rank-3-badge" : "")));
+    const showFull = window.expandStates[item.name]; const hasMore = window.dataDB[item.name][key] && window.dataDB[item.name][key].length > 20;
+    const btnHtml = hasMore ? `<button class="expand-btn" onclick="window.toggleExpand('${item.name}')">${showFull ? '🔼 收起' : '🔍 展開歷史'}</button>` : '';
+    const swapText = isReverse ? '暫居正向區' : '暫居反向區'; const swapColor = isReverse ? '#16a34a' : '#dc3545';
+const swapBtn = `<button onclick="event.stopPropagation(); window.toggleManualSwap('${item.name}')" style="cursor:pointer; font-size:13px; color:${swapColor}; border:1.5px solid ${swapColor}; padding:4.5px 12px; border-radius:4px; font-weight:900; white-space:nowrap; background:transparent; transition:0.2s; height:28px; line-height:1;">${swapText}</button>`;
+    
+// 🎯 新增的：收入麾下按鈕邏輯
+    let recruitKey = `${item.name}||${key}`;
+    let isRecruited = window.userRecruit && window.userRecruit.includes(recruitKey);
+    let recruitBtn = `<button class="recruit-btn ${isRecruited ? 'recruited' : ''}" onclick="event.stopPropagation(); if(window.toggleRecruit) window.toggleRecruit('${item.name}', this, '${key}')">${isRecruited ? '⭐ 已收錄' : '📌 收入麾下'}</button>`;
+
+    return `<div class="pk-column">${recruitBtn}<div class="close-x" onclick="window.excludeAndRedraw('${item.name}')">×</div><div class="pk-name-label" style="display:flex; align-items:center; justify-content:center; padding: 10px 5px;">${item.name} ${window.getPickTooltipHtml(item.name)}</div><div class="title-container ${cls}"><h4 class="section-title">勝率 ${(item.rate*100).toFixed(0)}%</h4><span class="rank-badge ${bCls}">${isReverse?'反向':''} NO.${idx+1} (${item.net>=0?'+'+item.net:item.net})</span></div>${window.buildHTML(window.dataDB[item.name][key] || [], !showFull, item.name, key, swapBtn)}${btnHtml}</div>`;
+};
+
+window.excludeAndRedraw = function(name) { window.excludedExperts.push(name); window.renderDisplay(); };
+
+window.renderNormalMode = function() {
+    const area = document.getElementById('displayArea'); const header = document.getElementById('singleHeader'); 
+    const key = window.activeSportKey || "nba_team"; const n = window.selectedExperts[0]; const base = key.split('_')[0];
+    header.style.display = 'flex';
+    document.getElementById('expertTitle').innerHTML = `${n} ${window.getPickTooltipHtml(n)} <span style="font-size: 16px; color:#94a3b8; font-weight:normal; margin-left:10px;">- 專家戰力履歷</span>`;
+    document.getElementById('topBadge').innerText = base.toUpperCase();
+    const records = window.dataDB[n][key] || []; let totalW = 0, totalL = 0, totalNet = 0;
+    records.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) totalW += parseInt(wm[1]); if(lm) totalL += parseInt(lm[1]); totalNet += parseInt(r[2] || 0); });
+    const totalRate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
+    const getRate = (num) => { let w = 0, l = 0; records.slice(0, num).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); }); return (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0; };
+    const radarHtml = `<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 30px; background: #1e293b; color: white; padding: 35px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);"><div style="border-right: 1px solid #475569; padding-right: 30px;"><div style="font-size: 20px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">🏆 全賽季實力總榜</div><div style="font-size: 56px; font-weight: 900; color: #fbbf24; line-height: 1;">${totalNet >= 0 ? '+' : ''}${totalNet} <span style="font-size: 26px; color: #fff;">注</span></div><div style="font-size: 26px; margin-top: 15px; font-weight: bold;">總勝率：<span style="color: #34d399;">${totalRate}%</span></div><div style="font-size: 16px; color: #94a3b8; margin-top: 8px;">(${totalW}勝 ${totalL}敗 / 歷史留存)</div></div><div style="display: flex; justify-content: space-around; align-items: center; text-align: center;"><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">3日熱度</div><div style="font-size: 34px; font-weight: 900; color: ${getRate(3)>=60?'#f87171':'#fff'}">${getRate(3)}%</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日動能</div><div style="font-size: 34px; font-weight: 900;">${getRate(7)}%</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日穩定度</div><div style="font-size: 34px; font-weight: 900;">${getRate(20)}%</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${getRate(30)}%</div></div></div></div>`;
+    const isSingleColumn = key.includes('_total') || key.includes('_ml') || key.includes('_reg') || key.includes('_spread') || key.includes('_btts') || key === 'nbl_team' || key === 'jp_team' || key === 'kbl_team';
+    area.className = 'data-layout'; area.style.flexDirection = 'column';
+    if (isSingleColumn) { area.innerHTML = `${radarHtml} <div class="record-column" style="max-width: 100%;">${window.getRankBanner(itemNames[key] || '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div>`; } 
+    else { let rightKey = base + '_total'; if (key === 'nhl_spread_ot') rightKey = 'nhl_total_ot'; area.innerHTML = `${radarHtml} <div style="display:flex; gap:20px;"><div class="record-column">${window.getRankBanner(itemNames[key] || '隊伍紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div><div class="record-column">${window.getRankBanner('大小紀錄', n, rightKey)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(window.dataDB[n][rightKey] || [], false, n, rightKey)}</div></div>`; }
+};
+
+window.getRankBanner = function(title, name, key) {
+    let list = []; let systemLatestDate = window.getSystemLatestDate(key);
+    // 🎯 特殊激活白名單
+    let qualifiedWhitelistRB = [];
+    try { qualifiedWhitelistRB = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+
+for(let n in window.dataDB) { if(window.dataDB[n][key] && window.dataDB[n][key].length > 0){ let diffDays = window.getDaysDiff(window.dataDB[n][key][0][0], systemLatestDate); if (diffDays > 3) continue;
+        // 🎯 門檻激活：不重複天數 < 10 天不進入 getRankBanner 排名
+let uniqueDatesRB = new Set(window.dataDB[n][key].map(r => r[0]));
+if (uniqueDatesRB.size < 10 && !qualifiedWhitelistRB.includes(n + '||' + key)) continue;
+
+        let w=0, l=0, n20=0; window.dataDB[n][key].slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w+l) > 0 ? (w/(w+l)) : 0; list.push({name: n, net: n20, rate: rate}); } }
+ 
+const target = list.find(r => r.name === name);
+    if (!target) {
+        const wlKey = (name + '||' + key).replace(/'/g, "\\'");
+        const activateBtn = (window.isAdmin === true)
+            ? `<span onclick="window.adminActivateExpert('${wlKey}')" style="cursor:pointer; background:#f59e0b; color:white; font-size:11px; font-weight:bold; padding:3px 10px; border-radius:6px; border:none;">⭐ 點擊激活</span>`
+            : `<span style="background:#f1f5f9; color:#94a3b8; font-size:12px; padding:3px 10px; border-radius:6px;">未激活榜單</span>`;
+        return `<div class="title-container title-unranked"><h4 class="section-title">${title}</h4>${activateBtn}</div>`;
+    }
+
+    let isReverse = target.rate < 0.5; let rankIdx = -1; let cls = "title-unranked"; let bCls = ""; let rankPrefix = "近況";
+    if (!isReverse) { let topList = list.filter(item => item.rate >= 0.5); topList.sort((a,b) => b.rate - a.rate || b.net - a.net); rankIdx = topList.findIndex(r => r.name === name); if(rankIdx === 0) { cls = "title-rank-1"; bCls = "rank-1-badge"; } else if(rankIdx === 1) { cls = "title-rank-2"; bCls = "rank-2-badge"; } else if(rankIdx === 2) { cls = "title-rank-3"; bCls = "rank-3-badge"; } } 
+    else { let bottomList = list.filter(item => item.rate < 0.5); bottomList.sort((a,b) => a.rate - b.rate || a.net - b.net); rankIdx = bottomList.findIndex(r => r.name === name); rankPrefix = "反向"; cls = "title-rank-neg"; bCls = "rank-neg-badge"; }
+    return `<div class="title-container ${cls}"><h4 class="section-title">${title}</h4><span class="rank-badge ${bCls}">${(rankIdx !== -1)?`${rankPrefix} NO.${rankIdx+1}`:'近況'} (${target.net>=0?'+'+target.net:target.net})</span></div>`;
+};
+
+
+window.buildHTML = function(list, limitTo20, expertName = null, sportKey = null, prefixBtn = '') {
+// 💡 歸類標記：強制鎖定 window.isAdmin 狀態
+const canEdit = (window.isAdmin === true);
+
+    let addBtnHtml = (expertName && sportKey && canEdit) ? 
+        `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div class="func-left">${prefixBtn}</div>
+            <button onclick="window.adminAddRecord('${expertName}', '${sportKey}')" style="background:#10b981; color:white; border:none; padding:5px 12px; border-radius:4px; font-size:13px; font-weight:bold; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.1);">➕ 新增戰績</button>
+        </div>` : (prefixBtn ? `<div style="margin-bottom:10px;">${prefixBtn}</div>` : '');
+
+
+    if(!list || list.length === 0) { let hint = ''; if (expertName && window.dataDB[expertName]) { let avail = []; for (let k in window.dataDB[expertName]) { if (window.dataDB[expertName][k].length > 0 && itemNames[k]) avail.push(itemNames[k]); } if (avail.length > 0) hint = `<div style="margin-top:10px;font-size:14px;color:#f59e0b;">💡 該好手主要預測：<b>${avail.join('、')}</b></div>`; } return `${addBtnHtml}<div style="padding:40px 20px;text-align:center;color:#94a3b8;background:#f8fafc;border-radius:8px;">目前項目無數據${hint}</div>`; }
+    let show = limitTo20 ? list.slice(0, 20) : list; let html = addBtnHtml;
+    for (let i = 0; i < show.length; i += 10) {
+        const chunk = show.slice(i, i + 10); let w=0, l=0, n=0; chunk.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n += parseInt(r[2] || 0); }); const rate = Math.round((w/(w+l))*100) || 0; let sCls = (rate>=55)?"summary-pos":(rate<=40?"summary-neg":"summary-neu");
+        html += `<div class="summary-row ${sCls}"><div class="summary-stats">${w}勝 ${l}敗 | 淨勝 ${n>=0?'+'+n:n} | ${rate}%</div></div>`;
+        chunk.forEach((r, idx) => { 
+            let val = parseInt(r[2] || 0); let bg = val > 0 ? "bg-pos" : (val < 0 ? "bg-neg" : "bg-neu"); 
+            let sH = val > 0 ? `<span class="score-pos">+${val}</span>` : (val < 0 ? `<span class="score-neg">${val}</span>` : `<span class="score-neu">0</span>`); 
+
+// 💡 歸類標記：修正語法，只有管理員能生成垃圾桶按鈕
+let delBtnHtml = (expertName && sportKey && canEdit) ? `<span onclick="window.adminDelRecord('${expertName}', '${sportKey}', '${r[0]}', '${r[1]}')" style="cursor:pointer; position:absolute; right:10px; font-size:14px; filter:grayscale(100%); transition:0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(100%)'" title="刪除此筆">🗑️</span>` : '';
+
+            html += `<div class="record-row ${bg} ${idx===chunk.length-1 && i+10<show.length?'ten-day-gap':''}"><div class="col-date">${r[0]}</div><div class="col-record">${r[1]}</div><div class="score-wrapper" style="display:flex; align-items:center; position:relative;">${sH}${delBtnHtml}</div></div>`; 
+        });
+    } return html;
+};
+
+window.adminActivateExpert = function(wlKey) {
+    var parts = wlKey.split('||');
+    var expertName = parts[0];
+    var sportKey = parts[1];
+    var sportLabel = (typeof itemNames !== 'undefined' && itemNames[sportKey]) ? itemNames[sportKey] : sportKey;
+    if (!confirm('激活「' + expertName + '」的【' + sportLabel + '】榜單資格？')) return;
+    var whitelist = [];
+    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    if (whitelist.includes(wlKey)) { alert('已在白名單中。'); return; }
+    whitelist.push(wlKey);
+    localStorage.setItem('AdminWhitelist_Experts', JSON.stringify(whitelist));
+    if (typeof window.renderWhitelistArea === 'function') window.renderWhitelistArea();
+    window.renderDisplay();
+    alert('✅ 已激活「' + expertName + '」/ ' + sportLabel);
+};
+
