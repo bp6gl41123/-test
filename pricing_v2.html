@@ -788,7 +788,7 @@
     .plan-card:nth-child(4) { animation-delay: 0.35s; }
 
     /* 響應式 */
-    @media (max-width: 1024px) {
+   @media (max-width: 1200px) {
         .daily-section {
             flex-direction: column;
             gap: 20px;
@@ -817,15 +817,20 @@
     }
 
     /* ========== 電腦版（有滑鼠）強制鎖住日卡寬度，不受視窗縮放影響 ========== */
-    @media (pointer: fine) {
-        .daily-section {
-            flex-direction: row !important;
-            justify-content: flex-start !important;
-        }
+    @media (pointer: coarse) {
         .daily-card-wrapper {
             width: 100% !important;
-            flex: 0 0 100% !important;
-            min-width: 800px !important;
+            flex: 1 1 100% !important;
+            min-width: 0 !important;
+        }
+        #card-daily {
+            padding: 15px 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .daily-section {
+            flex-direction: column !important;
+            align-items: stretch !important;
         }
     }
 
@@ -977,21 +982,6 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
-        /* 覆蓋日卡行內樣式 padding 80px */
-        #card-daily {
-            padding: 15px 16px 15px 16px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-        .daily-card-wrapper {
-            width: 100% !important;
-            flex: 1 1 100% !important;
-        }
-        .daily-section {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            margin-bottom: 50px !important;
-        }
         .plan-card {
             padding: 20px 16px 24px;
         }
@@ -1133,21 +1123,6 @@
         .plans-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-        }
-        /* 覆蓋日卡行內樣式 padding 80px */
-        #card-daily {
-            padding: 15px 16px 15px 16px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-        .daily-card-wrapper {
-            width: 100% !important;
-            flex: 1 1 100% !important;
-        }
-        .daily-section {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            margin-bottom: 50px !important;
         }
         .plan-card {
             padding: 16px 12px 20px;
