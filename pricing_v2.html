@@ -313,7 +313,7 @@
     .daily-card-wrapper .price-main {
         font-size: 26px;
         margin-bottom: 0;
-        text-align: left;
+        margin-left: 8px;
     }
 
     .daily-card-wrapper .price-unit {
@@ -832,6 +832,14 @@
     /* ========== 手機版（觸控）日卡全寬展開 ========== */
     @media (pointer: coarse) {
 
+            .mobile-daily-avg {
+            display: block !important;
+            font-size: 11px;
+            color: #f59e0b;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
         .toggle-switch {
             width: 90px !important;
             height: 48px !important;
@@ -898,6 +906,15 @@
         #card-daily {
             padding: 20px 20px 70px 20px !important;
         }
+
+        #weekly-daily,
+        #monthly-daily,
+        #annual-daily {
+            text-align: right !important;
+            width: 100% !important;
+            display: block !important;
+        }
+
     }
 
     /* Toggle 隱形擴大點擊區域（外觀完全不變） */
@@ -1069,7 +1086,7 @@
         .price-original {
             font-size: 11px;
             margin-top: 3px;
-            text-align: center !important;
+           
         }
         .cta-btn {
             padding: 10px 16px;
@@ -1229,6 +1246,33 @@
         }
         .plan-card.vvip { transform: none; }
     }
+        .mobile-daily-avg { display: none; }
+
+@media (max-width: 768px) {
+
+    #card-weekly .price-block > div:first-child,
+    #card-monthly .price-block > div:first-child,
+    #card-annual .price-block > div:first-child {
+        flex-wrap: wrap;
+
+}
+
+#weekly-daily,
+#monthly-daily,
+#annual-daily {
+    display: none !important;
+}
+
+    .mobile-daily-avg {
+        display: block !important;
+        flex-basis: 100%;
+        font-size: 12px;
+        color: var(--gold);
+        font-weight: 700;
+        margin-top: 2px;
+        margin-left: 78px;
+    }
+}
 </style>
 </head>
 <body>
@@ -1308,12 +1352,13 @@
             <div class="plan-tagline">一週穩定<br>略有折扣</div>
             <div class="promo-text" id="weekly-promo" style="opacity: 0; transition: opacity 0.5s ease-in-out; font-size: 16px; color: #10b981; font-weight: 900; margin: 12px 0 8px 0; text-align: center; letter-spacing: 1px; padding: 6px 12px; background: rgba(16, 185, 129, 0.15); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">買一週送一週</div>
             <div class="price-block">
-                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 0px;">
                     <div class="price-main" id="weekly-price" style="margin: 0;">$2,352</div>
                     <div style="font-size: 14px; color: var(--muted); align-self: center;">/ 週</div>
+                    <div class="mobile-daily-avg" id="weekly-mobile-avg">日均 $140</div>
                 </div>
-                <div style="text-align: right;">
-                    <div class="price-original" id="weekly-daily" style="margin: 0; white-space: nowrap;">日均 $336</div>
+                <div style="text-align: right; width: 100%;">
+                    <div class="price-original" id="weekly-daily" style="margin: 0; white-space: nowrap; text-align: right; width: 100%; display: block;">日均 $336</div>
                 </div>
                 <div class="price-annual-note" id="weekly-note">&nbsp;</div>
             </div>
@@ -1344,12 +1389,13 @@
             <div class="plan-tagline">主力計劃<br>最大折扣</div>
             <div class="promo-text" id="monthly-promo" style="opacity: 0; transition: opacity 0.5s ease-in-out; font-size: 16px; color: #f87171; font-weight: 900; margin: 12px 0 8px 0; text-align: center; letter-spacing: 1px; padding: 6px 12px; background: rgba(239, 68, 68, 0.15); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3);">買一月送一月</div>
             <div class="price-block">
-                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 0px;">
                     <div class="price-main" id="monthly-price" style="margin: 0;">$6,960</div>
                     <div style="font-size: 14px; color: var(--muted); align-self: center;">/ 月</div>
+                    <div class="mobile-daily-avg" id="monthly-mobile-avg">日均 $97</div>
                 </div>
-                <div style="text-align: right;">
-                    <div class="price-original" id="monthly-daily" style="margin: 0; white-space: nowrap;">日均 $232</div>
+                <div style="text-align: right; width: 100%;">
+                    <div class="price-original" id="monthly-daily" style="margin: 0; white-space: nowrap; text-align: right; width: 100%; display: block;">日均 $232</div>
                 </div>
                 <div class="price-annual-note" id="monthly-note">&nbsp;</div>
             </div>
@@ -1379,12 +1425,13 @@
             <div class="plan-tagline">終極計劃<br>全年無憂</div>
             <div class="promo-text" id="annual-promo" style="opacity: 0; transition: opacity 0.5s ease-in-out; font-size: 16px; color: #a78bfa; font-weight: 900; margin: 12px 0 8px 0; text-align: center; letter-spacing: 1px; padding: 6px 12px; background: rgba(167, 139, 250, 0.15); border-radius: 8px; border: 1px solid rgba(167, 139, 250, 0.3);">買一年送一年</div>
             <div class="price-block">
-                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: flex-start; gap: 8px; margin-bottom: 0px;">
                     <div class="price-main" id="annual-price" style="margin: 0;">$35,040</div>
                     <div style="font-size: 14px; color: var(--muted); align-self: center;">/ 年</div>
+                    <div class="mobile-daily-avg" id="annual-mobile-avg">日均 $40</div>
                 </div>
-                <div style="text-align: right;">
-                    <div class="price-original" id="annual-daily" style="margin: 0; white-space: nowrap;">日均 $96</div>
+                <div style="text-align: right; width: 100%;">
+                    <div class="price-original" id="annual-daily" style="margin: 0; white-space: nowrap; text-align: right; width: 100%; display: block;">日均 $96</div>
                 </div>
                 <div class="price-annual-note" id="annual-note">&nbsp;</div>
             </div>
@@ -1557,18 +1604,22 @@
         document.getElementById('daily-price').innerHTML = `$${data.daily.price} <span class="price-unit" style="font-size: 10px;">/ 天</span>`;
         document.getElementById('daily-daily').textContent = `日均 $${Math.round(data.daily.daily)}`;
         
+        
         // 周
         document.getElementById('weekly-price').textContent = `$${data.weekly.price.toLocaleString()}`;
         document.getElementById('weekly-daily').textContent = `日均 $${Math.round(data.weekly.daily)}`;
+        document.getElementById('weekly-mobile-avg').textContent = `日均 $${Math.round(data.weekly.daily)}`;
         
         // 月
         document.getElementById('monthly-price').textContent = `$${data.monthly.price.toLocaleString()}`;
         document.getElementById('monthly-daily').textContent = `日均 $${Math.round(data.monthly.daily)}`;
-        
+        document.getElementById('monthly-mobile-avg').textContent = `日均 $${Math.round(data.monthly.daily)}`;
+
         // 年
         document.getElementById('annual-price').textContent = `$${data.annual.price.toLocaleString()}`;
         document.getElementById('annual-daily').textContent = `日均 $${Math.round(data.annual.daily)}`;
-        
+        document.getElementById('annual-mobile-avg').textContent = `日均 $${Math.round(data.annual.daily)}`;
+
         // 元老（只在discount模式有）
         if (mode === 'discount') {
             document.getElementById('elder-price').textContent = `$${data.elder.price.toLocaleString()}`;
@@ -1890,6 +1941,8 @@
         <button onclick="window.parent.checkPasscode()" style="padding:10px 20px; background:linear-gradient(135deg,#38bdf8,#6366f1); color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:14px;">解鎖 🔓</button>
     </div>
     <p id="errorMsg" style="color:#ef4444; font-size:13px; margin-top:8px; display:none;">❌ 密鑰錯誤或已過期</p>
+
+
 </div>
 
 </body>
