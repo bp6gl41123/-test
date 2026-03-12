@@ -1740,6 +1740,27 @@
         }
     }
 </script>
+// iframe 內手機版：強制 toggle 到右下角
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.self !== window.top) {
+            var toggleWrapper = document.querySelector('.daily-card-wrapper .billing-toggle-wrapper');
+            var cardDaily = document.getElementById('card-daily');
+            if (toggleWrapper && cardDaily) {
+                cardDaily.style.position = 'relative';
+                cardDaily.style.paddingBottom = '60px';
+                cardDaily.style.display = 'block';
+                toggleWrapper.style.position = 'absolute';
+                toggleWrapper.style.bottom = '10px';
+                toggleWrapper.style.right = '16px';
+                toggleWrapper.style.top = 'auto';
+                toggleWrapper.style.left = 'auto';
+                toggleWrapper.style.gridColumn = 'auto';
+                toggleWrapper.style.gridRow = 'auto';
+            }
+        }
+    });
+
+</script>
 
 <!-- 後台管理面板 -->
 <div id="admin-panel" style="display: none; position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: #0d1825; border-left: 2px solid #38bdf8; overflow-y: auto; z-index: 9999; padding: 20px; font-family: 'Noto Sans TC', sans-serif;">
