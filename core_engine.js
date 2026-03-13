@@ -102,11 +102,6 @@ if (!document.getElementById('pickTooltipStyle')) {
             .podium-card:nth-child(1) { --ry: -80px !important; }
             .podium-card:nth-child(2) { --ry: 0px !important;   }
             .podium-card:nth-child(3) { --ry: 0px !important;   }
-
-            .rank-1 { width: 34vw !important; height: 190px !important; }
-            .rank-2 { width: 28vw !important; height: 160px !important; }
-            .rank-3 { width: 28vw !important; height: 150px !important; }
-        }
         }
 
         .pick-tooltip { 
