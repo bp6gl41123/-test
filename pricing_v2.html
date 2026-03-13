@@ -1885,6 +1885,31 @@
 
     </script>
 
+<script>
+(function() {
+    function scalePricing() {
+        var content = document.getElementById('pricing-wrapper');
+        if (!content) {
+            content = document.body;
+        }
+        if (window.innerWidth < 768) {
+            var scale = window.innerWidth / 980;
+            document.body.style.transformOrigin = 'top left';
+            document.body.style.transform = 'scale(' + scale + ')';
+            document.body.style.width = '980px';
+            document.body.style.height = Math.round(window.innerWidth / scale) + 'px';
+            document.documentElement.style.overflowX = 'hidden';
+        } else {
+            document.body.style.transform = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+        }
+    }
+    window.addEventListener('load', scalePricing);
+    window.addEventListener('resize', scalePricing);
+})();
+</script>
+
 </body>
 
 </html>
