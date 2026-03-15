@@ -2,7 +2,7 @@
 /* ==== 【組件 E：核心引擎 - core_engine.js】 ==== */
 /* ============================================================== */
 
-const DB_KEY = 'DashboardDB_V95_Final'; 
+const DB_KEY = 'DashboardDB_V96_Final'; 
 window.dataDB = JSON.parse(localStorage.getItem(DB_KEY));
 window.isNegativeMode = false; // 🪄 魔法反向開關
 
@@ -238,7 +238,7 @@ if (!document.getElementById('pickTooltipStyle')) {
 window.userPocket = JSON.parse(localStorage.getItem('UserPocketDB')) || [];
 window.activeSportKey = "";  
 /* 🎯 變更預設首頁過濾器：從 'all' (賽季總榜) 改為 7 (近7場)，提升即時戰力參考價值 */
-window.currentHomeFilter = 7;
+window.currentHomeFilter = 20;
 
 // 🎯 【修復內鬼】這裡已經同步更新為有 sportKey 的新版邏輯！不會再覆蓋丟失賽事標籤了。
 window.toggleUserPocket = function(expertName, btnElement, sportKey) {
@@ -285,7 +285,8 @@ window.init = function() {
     let qualifiedWhitelist = [];
     try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
 
-    let rankedList = [];
+    const filterThreshold = window.currentHomeFilter === 'all' ? 0 : window.currentHomeFilter;
+let rankedList = [];
 
     for (let name in window.dataDB) {
         let records = window.dataDB[name][targetSport] || []; 
@@ -295,7 +296,8 @@ window.init = function() {
         // 🎯 門檻激活：計算不重複預測天數，未滿10天不進入正式排行
         let uniqueDates = new Set(records.map(r => r[0]));
 
-let isQualified = uniqueDates.size >= 10 || qualifiedWhitelist.includes(name + '||' + targetSport);
+
+let isQualified = uniqueDates.size >= filterThreshold || qualifiedWhitelist.includes(name + '||' + targetSport);
 
         let sliceRec = window.currentHomeFilter === 'all' ? records : records.slice(0, window.currentHomeFilter);
         let net = sliceRec.reduce((sum, r) => sum + parseInt(r[2] || 0), 0);
@@ -362,7 +364,10 @@ let isQualified = uniqueDates.size >= 10 || qualifiedWhitelist.includes(name + '
                 card.style.animationDelay = window.isNegativeMode ? `${(i + 1) * 0.1}s` : '0s';
                 
                 // 🎯 UI 升級：顯示 勝率% (淨值)
-                card.innerHTML = `<div class="rank-number">RANK ${i + 1}</div><span class="rank-crown">${window.isNegativeMode ? '🪄' : (i===0?'👑':(i===1?'🥈':'🥉'))}</span><div class="name" style="font-size:20px; display:flex; align-items:center; justify-content:center;">${exp.name} ${window.getPickTooltipHtml(exp.name)}</div><span class="rank-net">${exp.winRate}% <span style="font-size:16px; color:#64748b; font-weight:bold;">(淨${exp.net >= 0 ? '+' : ''}${exp.net})</span></span><div style="font-size:12px; color:#64748b; margin-top:5px;">${itemNames[targetSport] || '紀錄'}</div>`;
+const totalDaysPodium = new Set((window.dataDB[exp.name][targetSport] || []).map(r => r[0])).size;
+const daysLabelPodium = window.currentHomeFilter === 'all' ? ` <span style="font-size:12px; color:#94a3b8;">(${totalDaysPodium}天)</span>` : '';
+
+                card.innerHTML = `<div class="rank-number">RANK ${i + 1}</div><span class="rank-crown">${window.isNegativeMode ? '🪄' : (i===0?'👑':(i===1?'🥈':'🥉'))}</span><div class="name" style="font-size:20px; display:flex; align-items:center; justify-content:center;">${exp.name} ${window.getPickTooltipHtml(exp.name)}</div><span class="rank-net">${exp.winRate}% <span style="font-size:16px; color:#64748b; font-weight:bold;">(淨${exp.net >= 0 ? '+' : ''}${exp.net})</span></span><div style="font-size:12px; color:#64748b; margin-top:5px;">${itemNames[targetSport] || '紀錄'}${daysLabelPodium}</div>`;
                 card.onclick = () => window.toggleExpert(exp.name, card); 
                 podiumArea.appendChild(card);
             }
@@ -380,14 +385,16 @@ let isQualified = uniqueDates.size >= 10 || qualifiedWhitelist.includes(name + '
             card.style.animationDelay = window.isNegativeMode ? `${(idx * 0.1) + 0.4}s` : '0s';
             
 if (exp.isActive && exp.isQualified) {
-                card.innerHTML = `<div style="font-size:11px; color:#94a3b8; margin-bottom:5px;">NO.${idx + 4}</div><div class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name} ${window.getPickTooltipHtml(exp.name)}</div><span class="badge" style="color:#1877f2;">勝率 ${exp.winRate}% (淨${exp.net >= 0 ? '+' : ''}${exp.net})</span>`;
-            } else if (exp.isActive && !exp.isQualified) {
-                card.classList.add('sleep-card');
-                card.innerHTML = `<div class="sleep-icon">📊</div><div class="sleep-text" style="font-size:11px; margin-bottom:5px;">資料累積中</div><span class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name}</span><span class="badge" style="color:#f59e0b;">已累積 ${new Set((window.dataDB[exp.name][targetSport] || []).map(r => r[0])).size}/10 天</span>`;
-            } else {
-                card.classList.add('sleep-card');
-                card.innerHTML = `<div class="sleep-icon">zZzZ</div><div class="sleep-text" style="font-size:11px; margin-bottom:5px;">無近期數據</div><span class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name}</span><span class="badge">💤 休眠中</span>`;
-            }
+    const totalDays = new Set((window.dataDB[exp.name][targetSport] || []).map(r => r[0])).size;
+    const daysLabel = window.currentHomeFilter === 'all' ? ` <span style="font-size:10px; color:#94a3b8;">(${totalDays}天)</span>` : '';
+    card.innerHTML = `<div style="font-size:11px; color:#94a3b8; margin-bottom:5px;">NO.${idx + 4}</div><div class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name} ${window.getPickTooltipHtml(exp.name)}</div><span class="badge" style="color:#1877f2;">勝率 ${exp.winRate}% (淨${exp.net >= 0 ? '+' : ''}${exp.net})${daysLabel}</span>`;
+} else if (exp.isActive && !exp.isQualified) {
+    card.classList.add('sleep-card');
+    card.innerHTML = `<div class="sleep-icon">📊</div><div class="sleep-text" style="font-size:11px; margin-bottom:5px;">資料累積中</div><span class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name}</span><span class="badge" style="color:#f59e0b;">已累積 ${new Set((window.dataDB[exp.name][targetSport] || []).map(r => r[0])).size}/${filterThreshold} 天</span>`;
+} else {
+    card.classList.add('sleep-card');
+    card.innerHTML = `<div class="sleep-icon">zZzZ</div><div class="sleep-text" style="font-size:11px; margin-bottom:5px;">無近期數據</div><span class="name" style="display:flex; align-items:center; justify-content:center;">${exp.name}</span><span class="badge">💤 休眠中</span>`;
+}
 
             card.onclick = () => window.toggleExpert(exp.name, card); 
             grid.appendChild(card);
@@ -409,25 +416,7 @@ if (exp.isActive && exp.isQualified) {
         `;
     }
 
-const tabs = document.getElementById('tabContainer');
-    if (tabs && tabs.innerHTML === '') {
-const categories = [ 
-            { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
-            { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
-            { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
-            { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },
-            { name: '🏒 冰球系列', items: [ { id: 'nhl_ml', label: '冰球獨贏(含加時)' }, { id: 'nhl_ml_reg', label: '冰球獨贏(不含加時)' }, { id: 'nhl_spread_ot', label: '冰球讓盤(含加時)' }, { id: 'nhl_spread_reg', label: '冰球讓盤(不含加時)' }, { id: 'nhl_total_ot', label: '冰球大小(含加時)' }, { id: 'nhl_total_reg', label: '冰球大小(不含加時)' }, { id: 'khl_team', label: '俄冰隊伍' }, { id: 'khl_total', label: '俄冰大小分' } ] },
 
-            { name: '🌏 亞洲/歐籃', items: [ { id: 'euro_team', label: '歐籃隊伍' }, { id: 'euro_total', label: '歐籃大小' }, { id: 'euro_1h', label: '歐籃上半' }, { id: 'nbl_team', label: '澳籃隊伍' }, { id: 'nbl_total', label: '澳籃大小' }, { id: 'jbl_team', label: '日籃隊伍' },{ id: 'jbl_total', label: '日籃大小' },{ id: 'kbl_team', label: '韓籃隊伍' }, { id: 'kbl_total', label: '韓籃大小' }, { id: 'cba_team', label: '中籃隊伍' }, { id: 'cba_total', label: '中籃大小' } ] }, 
-            { name: '🎮 電競系列', items: [ { id: 'lol_team', label: '電競隊伍' }, { id: 'lol_total', label: '電競大小' } ] }
-        ];
-        categories.forEach(cat => {
-            const wrapper = document.createElement('div'); wrapper.className = 'dropdown-wrapper';
-            wrapper.innerHTML = `<div class="category-btn">${cat.name}</div><div class="dropdown-content"></div>`;
-            const content = wrapper.querySelector('.dropdown-content'); cat.items.forEach(item => window.appendTab(item.id, item.label, content)); tabs.appendChild(wrapper);
-        });
-    }
-    if(typeof window.updateTabHighlights === 'function') window.updateTabHighlights();
 };
 
 window.appendTab = function(key, label, container) { const btn = document.createElement('label'); btn.className = `sport-tab`; btn.id = `l-${key}`; btn.innerHTML = label; btn.onclick = () => window.selectSport(key, btn); container.appendChild(btn); };
@@ -445,6 +434,30 @@ window.toggleExpert = function(n, el) {
 };
 
 window.init();
+
+
+const tabs = document.getElementById('tabContainer');
+    if (tabs) { 
+        tabs.innerHTML = '';
+        const categories = [
+         
+            { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
+            { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
+            { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
+            { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },
+            { name: '🏒 冰球系列', items: [ { id: 'nhl_ml', label: '冰球獨贏(含加時)' }, { id: 'nhl_ml_reg', label: '冰球獨贏(不含加時)' }, { id: 'nhl_spread_ot', label: '冰球讓盤(含加時)' }, { id: 'nhl_spread_reg', label: '冰球讓盤(不含加時)' }, { id: 'nhl_total_ot', label: '冰球大小(含加時)' }, { id: 'nhl_total_reg', label: '冰球大小(不含加時)' }, { id: 'khl_team', label: '俄冰隊伍' }, { id: 'khl_total', label: '俄冰大小分' } ] },
+
+            { name: '🌏 亞洲/歐籃', items: [ { id: 'euro_team', label: '歐籃隊伍' }, { id: 'euro_total', label: '歐籃大小' }, { id: 'euro_1h', label: '歐籃上半' }, { id: 'nbl_team', label: '澳籃隊伍' }, { id: 'nbl_total', label: '澳籃大小' }, { id: 'jbl_team', label: '日籃隊伍' },{ id: 'jbl_total', label: '日籃大小' },{ id: 'kbl_team', label: '韓籃隊伍' }, { id: 'kbl_total', label: '韓籃大小' }, { id: 'cba_team', label: '中籃隊伍' }, { id: 'cba_total', label: '中籃大小' } ] }, 
+            { name: '🎮 電競系列', items: [ { id: 'lol_team', label: '電競隊伍' }, { id: 'lol_total', label: '電競大小' } ] }
+        ];
+        categories.forEach(cat => {
+            const wrapper = document.createElement('div'); wrapper.className = 'dropdown-wrapper';
+            wrapper.innerHTML = `<div class="category-btn">${cat.name}</div><div class="dropdown-content"></div>`;
+            const content = wrapper.querySelector('.dropdown-content'); cat.items.forEach(item => window.appendTab(item.id, item.label, content)); tabs.appendChild(wrapper);
+        });
+    }
+    if(typeof window.updateTabHighlights === 'function') window.updateTabHighlights();
+
 
 
 /* ============================================================== */
