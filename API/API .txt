@@ -1,0 +1,6 @@
+Publishable key
+sb_publishable_qnwyH7wmTwsDKxzjNLcQ-A_L4dQS2jb
+
+
+API URL
+https://dhfdfirbyqnbwihkswmg.supabase.co
