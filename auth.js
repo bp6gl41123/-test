@@ -9,15 +9,70 @@ let hasLockedDown = false;    // 🔒 新增：確保鎖定咒語只會執行一
 const MAX_CLICKS = 1;         
 const FREE_DAYS_LIMIT = 0;    
 
-document.addEventListener('DOMContentLoaded', () => {
+// 🌟 【新增】雙參數雷達：網址參數解析與記憶
+// 🌟 【新增】雙參數雷達：網址參數解析與記憶 (含防禦型計次)
+async function trackReferrals() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    const authorCode = urlParams.get('author');
+
+    if (refCode) localStorage.setItem('qiJu_ref', refCode);
+    if (authorCode) localStorage.setItem('qiJu_author', authorCode);
+
+    // 🛡️ 防禦型點擊偵測：每人每天針對同一個推薦碼只發送一次 API
+    if (refCode) {
+        const today = new Date().toLocaleDateString('en-CA');
+        const clickKey = `click_sent_${refCode}_${today}`;
+        
+        if (!localStorage.getItem(clickKey)) {
+            try {
+                // 🚀 呼叫 Vercel 後端 API 增加點擊數
+                fetch('/api/track-click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refCode: refCode })
+                });
+                localStorage.setItem(clickKey, 'true'); 
+            } catch (e) {
+                console.error("點擊追蹤失敗", e);
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    trackReferrals();
+
     const savedKey = sessionStorage.getItem('verifiedKey');
+
     if (typeof config !== 'undefined' && savedKey) {
-        const isAdmin = savedKey === atob(config.adminCode);
-const isMember = (config.memberKeys || []).some(m => atob(m.key) === savedKey);
-if (isAdmin || isMember) {
-    window.isAdmin = isAdmin;
+        // ✅ 修正後的程式碼
+    if (savedKey === atob(config.adminCode) || savedKey) {
+            window.isAdmin = (savedKey === atob(config.adminCode));
             fullUnlockSystem(); 
             return; 
+        }
+    }
+
+    // 🚀 共存邏輯：背景自動驗證 V2 天次制金鑰 (永久記憶)
+    const savedKeyV2 = localStorage.getItem('verifiedKey_v2');
+    if (savedKeyV2) {
+        try {
+            const resV2 = await fetch('/api/verify-key-v2', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: savedKeyV2 })
+            });
+            const dataV2 = await resV2.json();
+            if (dataV2.valid) {
+                window.isAdmin = false;
+                fullUnlockSystem();
+                return; // 驗證成功，自動解鎖並結束
+            } else {
+                localStorage.removeItem('verifiedKey_v2'); // 失效則清除記憶
+            }
+        } catch(e) {
+            console.error('V2背景驗證失敗', e);
         }
     }
 
@@ -94,8 +149,28 @@ function triggerLockdown() {
     const authBox = document.querySelector('.auth-box');
     const mainContent = document.getElementById('mainContent');
     
-    if (authGate) {
-        authGate.style.display = 'flex';
+    if (authGate && authBox) {
+        const title = authBox.querySelector('h1');
+        if(title) {
+            title.innerHTML = "⚠️ 試用額度已滿";
+            title.style.color = "#ef4444"; 
+        }
+
+        const subtitle = authBox.querySelector('p');
+        if(subtitle) {
+            subtitle.innerHTML = `
+                <div style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    <span style="color: #fbbf24; font-weight: bold; font-size: 18px;">您的試用權限已到期！</span><br>
+                    感謝您對「齊聚眾選」的支持與愛用。<br><br>
+                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px; margin-top: 10px; text-align: left;">
+                        💡 <strong style="color: #fff;">歡迎贊助本企劃</strong>，即可索取 <strong style="color: #60a5fa;">30 日專屬金鑰</strong>！<br>
+                        詳情請內洽 <a href="${window.getDynamicLineUrl()}" target="_blank" style="color: #34d399; text-decoration: underline; font-weight: bold;">點選👉 私訊官方Line</a> 或直接私訊版大。
+                    </div>
+                </div>
+            `;
+        }
+
+        authGate.style.display = 'flex'; 
         authGate.classList.add('scatter-fly-in'); 
 
         // 🚫 【終極鎖死魔法 1】禁止滾動、禁止反白、背景點擊失效
@@ -123,33 +198,64 @@ function triggerLockdown() {
     }
 }
 
-function checkPasscode() {
+async function checkPasscode() {
     const userInput = document.getElementById('passcodeInput').value;
     const errorMsg = document.getElementById('errorMsg');
-    
+    if (!userInput) return;
+
+    // 管理員金鑰走原本邏輯
     try {
-        const ADMIN_KEY = atob(config.adminCode); 
+        const ADMIN_KEY = atob(config.adminCode);
+        if (userInput === ADMIN_KEY) {
+            window.isAdmin = true;
+            sessionStorage.setItem('verifiedKey', ADMIN_KEY);
+            fullUnlockSystem();
+            return;
+        }
+    } catch(e) {}
 
-if (userInput === ADMIN_KEY) {
-    window.isAdmin = true;
-    sessionStorage.setItem('verifiedKey', ADMIN_KEY);
-    fullUnlockSystem();
-    return;
-}
+    // 會員金鑰走 API 驗證
+    try {
+        // 🚀 共存智慧分流：以金鑰是否包含 "V2" (不分大小寫) 來決定走哪支 API
+        const isV2Key = userInput.toUpperCase().includes('V2');
+        const apiUrl = isV2Key ? '/api/verify-key-v2' : '/api/verify-key';
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: userInput })
+        });
 
-        const matched = (config.memberKeys || []).find(m => atob(m.key) === userInput);
-if (matched) {
-    if (matched.expiry && new Date().toLocaleDateString('en-CA') > matched.expiry) {
-        errorMsg.innerHTML = `⚠️ 金鑰已於 ${matched.expiry} 到期，請聯絡版大續約。`;
-        errorMsg.style.display = 'block';
-        return;
-    }
-    window.isAdmin = false;
-    sessionStorage.setItem('verifiedKey', userInput);
-    fullUnlockSystem();
+        const result = await response.json();
 
+        if (result.valid) {
+            if (isV2Key) {
+                // 天次制：存入永久記憶 localStorage
+                localStorage.setItem('verifiedKey_v2', userInput);
+            } else {
+                // 單次制：維持原本的暫時記憶 sessionStorage
+                sessionStorage.setItem('verifiedKey', userInput);
+            }
+            sessionStorage.setItem('verifiedPlan', result.plan);
+            sessionStorage.setItem('verifiedUser', result.user_name);
+            sessionStorage.setItem('expiresAt', result.expires_at);
+            
+            // 新制額外提示剩餘天數
+            if (result.remaining_days !== undefined) {
+                alert(`✅ 驗證成功！剩餘天數：${result.remaining_days} 天`);
+            }
+            
+            window.isAdmin = false;
+            fullUnlockSystem();
         } else {
             errorMsg.style.display = 'block';
+            if (result.reason === 'used') {
+                errorMsg.innerHTML = '❌ 此金鑰已被使用過';
+            } else if (result.reason === 'expired') {
+                errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約';
+            } else {
+                errorMsg.innerHTML = '❌ 密鑰錯誤或已過期';
+            }
             const authBox = document.querySelector('.auth-box');
             if (authBox) {
                 authBox.style.transform = 'translateX(10px)';
@@ -158,10 +264,10 @@ if (matched) {
             }
         }
     } catch (e) {
-        alert("系統密鑰配置錯誤，請聯絡開發端檢查 config.js");
+        errorMsg.style.display = 'block';
+        errorMsg.innerHTML = '❌ 系統錯誤，請稍後再試';
     }
 }
-
 function openDoorForVisitor() {
     const authGate = document.getElementById('authGate');
     const mainContent = document.getElementById('mainContent');
@@ -213,3 +319,28 @@ document.addEventListener('keypress', (e) => {
         checkPasscode();
     }
 });
+
+// 🌟 【新增】LINE 收網組裝機：動態產生帶有記憶參數的官方連結
+window.getDynamicLineUrl = function() {
+    const LINE_OFFICIAL_ID = "@yhd0256r"; 
+    const ref = localStorage.getItem('qiJu_ref');
+    const author = localStorage.getItem('qiJu_author');
+    
+    let message = "版大你好，我要買金鑰！";
+    if (author && ref && author !== ref) {
+        message += ` (原創碼：${author}，推廣碼：${ref})`;
+    } else if (ref || author) {
+        const singleCode = ref || author;
+        message += ` (推薦碼：${singleCode})`;
+    } else {
+        message += ` (無推薦人)`;
+    }
+
+    return `https://line.me/R/oaMessage/${LINE_OFFICIAL_ID}/?${encodeURIComponent(message)}`;
+};
+
+// 🌟 【新增】推廣者專用：產生雙軌分潤連結
+window.generateShareLink = function(authorCode, promoterCode) {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}?author=${authorCode}&ref=${promoterCode}`;
+};

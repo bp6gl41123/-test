@@ -12,21 +12,20 @@
 </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>齊聚眾選 - 戰績實時反饋儀表板 (每日密鑰版)</title>
+    <title>齊聚眾選 - 預測好手戰績即時反饋儀表板 </title>
 
 <meta property="og:title" content="齊聚眾選 一起來預測吧 !" />
-<meta property="og:description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢，尊爵黑金風儀表板。" />
+<meta property="og:description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢。" />
 <meta property="og:image" content="https://fu6rm4.vercel.app/og-image.png.jpg" />
 <meta property="og:url" content="https://fu6rm4.vercel.app/" />
 <meta property="og:type" content="website" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢，尊爵黑金風儀表板。" />
+<meta name="description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢。" />
     
     <style>
 /* ==================================================== */
@@ -114,12 +113,11 @@
             background: transparent; border: none; box-shadow: none; padding: 0; position: static;
         }
 
-        /* 改成 */
         @media (max-width: 768px) {
-       .main-header-signboard { margin-top: 50px; padding: 16px 26px; border-radius: 45px; }
-       .main-header-signboard .signboard-title { font-size: 32px; flex-wrap: wrap; justify-content: center; }
-       .main-header-signboard .version-badge { font-size: 14px; }
-       }
+            .main-header-signboard { margin-top: 25px; padding: 12px 20px; border-radius: 30px; }
+            .main-header-signboard .signboard-title { font-size: 22px; flex-wrap: wrap; justify-content: center; }
+            .main-header-signboard .version-badge { font-size: 12px; }
+        }
 
 /* ==================================================== */
         /* 1. 密鑰解鎖畫面的專屬樣式 (新增 - 半透明效果)      */
@@ -238,7 +236,7 @@
         .btn-back { background: #64748b; color: white; border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
         .btn-back:hover { background: #475569; }
         
-        .bar-chart-area { margin-top: 30px; border-left: 4px solid #cbd5e1; padding-left: 20px; min-height: unset; }
+        .bar-chart-area { margin-top: 30px; border-left: 4px solid #cbd5e1; padding-left: 20px; min-height: 400px; }
         .bar-row { display: flex; align-items: center; margin-bottom: 18px; animation: fadeInRight 0.5s ease forwards; opacity: 0; }
         .bar-name { width: 360px; font-weight: 900; font-size: 16px; color: #1e293b; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; }
         .bar-wrapper { flex: 1; height: 38px; background: #f1f5f9; border-radius: 6px; overflow: hidden; position: relative; }
@@ -325,21 +323,18 @@
         }
 
     </style> 
-
-</style>
-<script>
-(function() {
-    if (window.innerWidth < 980) {
-        document.documentElement.style.visibility = 'hidden';
-    }
-})();
-</script>
-
 </head>
 <body>
 
-    <div id="authGate" style="display:none; position:fixed; inset:0; z-index:9999;">
-        <iframe id="pricingFrame" src="pricing_v2.html?v=1" style="width:100%; height:100%; border:none; overflow-y:auto;" allow="popups"></iframe>
+    <div id="authGate">
+
+        <div class="auth-box">
+            <h1 style="color:#60a5fa; margin-top:0;">🏆 齊聚眾選 - 戰務系統</h1>
+            <p style="color:#cbd5e1; margin-bottom: 25px;">請輸入今日專屬通行密鑰</p>
+            <input type="password" id="passcodeInput" class="auth-input" placeholder="輸入今日密鑰">
+            <button class="auth-btn" onclick="checkPasscode()">解鎖看板 🔓</button>
+            <p id="errorMsg" style="color:#ef4444; font-size:14px; margin-top:15px; display:none;">❌ 密鑰錯誤或已過期</p>
+        </div>
     </div>
 
 <div id="mainContent">
@@ -354,9 +349,9 @@
             
 <div class="ranking-filter-bar">
                 <button class="r-btn" onclick="changeHomeRanking('all', this)">賽季總榜</button>
-                <button class="r-btn" onclick="changeHomeRanking(30, this)">近 30 場</button>
-                <button class="r-btn active" onclick="changeHomeRanking(20, this)">近 20 場</button>
-                <button class="r-btn" onclick="changeHomeRanking(7, this)">近 7 場</button>         
+                <button class="r-btn" onclick="changeHomeRanking(30, this)">近 30 場</button> 
+                <button class="r-btn active" onclick="changeHomeRanking(20, this)">近 20 場</button>        
+                <button class="r-btn" onclick="changeHomeRanking(7, this)">近 7 場</button>
                 <button class="r-btn" onclick="changeHomeRanking(3, this)">近 3 場 (爆發)</button>
             </div>
 
@@ -395,62 +390,19 @@
             </div>
         </div>
     </div>
-    <script src="config.js?v=1.0.70"></script>
-    <script src="data.js?v=1.0.22"></script>
-    <script src="auth.js?v=1.0.15"></script>
-    <script src="core_admin.js?v=1.0.22"></script>
-    <script src="core_backup.js?v=1.0.14"></script>
-    <script src="core_settle.js?v=1.0.10"></script>
-    <script src="core_pocket.js?v=1.0.19"></script>
-    <script src="core_utils.js?v=1.0.10"></script>
-    <script src="core_tooltips.js?v=1.0.13"></script>
-    <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.16"></script>
-    <script src="core_recruit.js?v=1.0.20"></script>
-    <script src="core_engine.js?v=1.0.67"></script>
-
-<script>
-(function() {
-    function scalePage() {
-        var content = document.getElementById('mainContent');
-        if (!content) return;
-        var screenWidth = window.innerWidth;
-        
-        if (screenWidth < 1024) { // 💡 門檻提高到 1024
-            var scale = screenWidth / 980;
-            content.style.transformOrigin = 'top left';
-            content.style.transform = 'scale(' + scale + ')';
-            content.style.width = '980px';
-            // 💡 修正高度計算錯誤 (原本寫成了 width)
-            content.style.height = Math.round(window.innerHeight / scale) + 'px';
-            document.body.style.overflowX = 'hidden';
-            document.documentElement.style.overflowX = 'hidden';
-        } else {
-            // 電腦版還原
-            content.style.transform = '';
-            content.style.width = '';
-            content.style.height = '';
-            document.body.style.overflowX = 'auto';
-            document.documentElement.style.overflowX = 'auto';
-        }
-        document.documentElement.style.visibility = 'visible';
-    }
-    window.addEventListener('load', scalePage);
-    window.addEventListener('resize', scalePage);
-    // 💡 關鍵：加入翻轉監聽
-    window.addEventListener('orientationchange', function() {
-        setTimeout(scalePage, 200);
-    });
-})();
-</script>
-
-<script>
-(function() {
-    if (window.innerWidth < 1024) { // 💡 門檻提高到 1024
-        document.documentElement.style.visibility = 'hidden';
-    }
-})();
-</script>
+    <script src="config.js?v=1.0.93"></script>
+    <script src="data.js?v=1.0.32"></script>
+    <script src="auth.js?v=1.0.24"></script>
+    <script src="core_admin.js?v=1.0.30"></script>
+    <script src="core_backup.js?v=1.0.13"></script>
+    <script src="core_settle.js?v=1.0.9"></script>
+    <script src="core_pocket.js?v=1.0.18"></script>
+    <script src="core_utils.js?v=1.0.9"></script>
+    <script src="core_tooltips.js?v=1.0.12"></script>
+    <script src="core_trend.js?v=1.0.9"></script>
+    <script src="core_ranking.js?v=1.0.15"></script>
+    <script src="core_recruit.js?v=1.0.19"></script>
+    <script src="core_engine.js?v=1.0.71"></script>
 
 </body>
 </html>
