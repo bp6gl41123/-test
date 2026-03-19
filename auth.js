@@ -7,7 +7,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    // 🔒 新增：確保鎖定咒語只會執行一次
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;    
+const FREE_DAYS_LIMIT = 17;    
 
 // 🌟 【新增】雙參數雷達：網址參數解析與記憶
 // 🌟 【新增】雙參數雷達：網址參數解析與記憶 (含防禦型計次)
@@ -43,9 +43,15 @@ async function trackReferrals() {
 document.addEventListener('DOMContentLoaded', async () => {
     trackReferrals();
 
+    // 🕵️ 管理員專屬後門：只要網址包含 ?test=lock，就延遲 0.5 秒強制上鎖！
+    if (window.location.search.includes('test=lock')) {
+        setTimeout(triggerLockdown, 500);
+    }
+
     const savedKey = sessionStorage.getItem('verifiedKey');
 
     if (typeof config !== 'undefined' && savedKey) {
+
         // ✅ 修正後的程式碼
     if (savedKey === atob(config.adminCode) || savedKey) {
             window.isAdmin = (savedKey === atob(config.adminCode));
