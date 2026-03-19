@@ -146,32 +146,11 @@ function triggerLockdown() {
     hasLockedDown = true; // 標記為已死亡狀態
 
     const authGate = document.getElementById('authGate');
-    const authBox = document.querySelector('.auth-box');
     const mainContent = document.getElementById('mainContent');
     
-    if (authGate && authBox) {
-        const title = authBox.querySelector('h1');
-        if(title) {
-            title.innerHTML = "⚠️ 試用額度已滿";
-            title.style.color = "#ef4444"; 
-        }
-
-        const subtitle = authBox.querySelector('p');
-        if(subtitle) {
-            subtitle.innerHTML = `
-                <div style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
-                    <span style="color: #fbbf24; font-weight: bold; font-size: 18px;">您的試用權限已到期！</span><br>
-                    感謝您對「齊聚眾選」的支持與愛用。<br><br>
-                    <div style="background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 10px; margin-top: 10px; text-align: left;">
-                        💡 <strong style="color: #fff;">歡迎贊助本企劃</strong>，即可索取 <strong style="color: #60a5fa;">30 日專屬金鑰</strong>！<br>
-                        詳情請內洽 <a href="${window.getDynamicLineUrl()}" target="_blank" style="color: #34d399; text-decoration: underline; font-weight: bold;">點選👉 私訊官方Line</a> 或直接私訊版大。
-                    </div>
-                </div>
-            `;
-        }
-
-        authGate.style.display = 'flex'; 
-        authGate.classList.add('scatter-fly-in'); 
+    if (authGate) {
+        authGate.style.display = 'block'; 
+        authGate.classList.add('scatter-fly-in');  
 
         // 🚫 【終極鎖死魔法 1】禁止滾動、禁止反白、背景點擊失效
         document.body.style.overflow = 'hidden'; 
@@ -199,9 +178,23 @@ function triggerLockdown() {
 }
 
 async function checkPasscode() {
-    const userInput = document.getElementById('passcodeInput').value;
-    const errorMsg = document.getElementById('errorMsg');
+    let userInput = '';
+    let errorMsg = null;
+    
+    const iframe = document.querySelector('#authGate iframe');
+    if (iframe && iframe.contentWindow) {
+        const iframeDoc = iframe.contentWindow.document;
+        const inputEl = iframeDoc.getElementById('passcodeInput');
+        if (inputEl) userInput = inputEl.value;
+        errorMsg = iframeDoc.getElementById('errorMsg');
+    } else {
+        const inputEl = document.getElementById('passcodeInput');
+        if (inputEl) userInput = inputEl.value;
+        errorMsg = document.getElementById('errorMsg');
+    }
+    
     if (!userInput) return;
+
 
     // 管理員金鑰走原本邏輯
     try {
@@ -248,24 +241,20 @@ async function checkPasscode() {
             window.isAdmin = false;
             fullUnlockSystem();
         } else {
-            errorMsg.style.display = 'block';
+            if (errorMsg) errorMsg.style.display = 'block';
             if (result.reason === 'used') {
-                errorMsg.innerHTML = '❌ 此金鑰已被使用過';
+                if (errorMsg) errorMsg.innerHTML = '❌ 此金鑰已被使用過';
             } else if (result.reason === 'expired') {
-                errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約';
+                if (errorMsg) errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約';
             } else {
-                errorMsg.innerHTML = '❌ 密鑰錯誤或已過期';
-            }
-            const authBox = document.querySelector('.auth-box');
-            if (authBox) {
-                authBox.style.transform = 'translateX(10px)';
-                setTimeout(() => authBox.style.transform = 'translateX(-10px)', 100);
-                setTimeout(() => authBox.style.transform = 'translateX(0)', 200);
+                if (errorMsg) errorMsg.innerHTML = '❌ 密鑰錯誤或已過期';
             }
         }
     } catch (e) {
-        errorMsg.style.display = 'block';
-        errorMsg.innerHTML = '❌ 系統錯誤，請稍後再試';
+        if (errorMsg) {
+            errorMsg.style.display = 'block';
+            errorMsg.innerHTML = '❌ 系統錯誤，請稍後再試';
+        }
     }
 }
 function openDoorForVisitor() {
