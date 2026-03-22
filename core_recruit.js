@@ -105,11 +105,59 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
 .recruit-btn.recruited { 
     background: linear-gradient(135deg, #10b981, #059669); 
 }
+            @media (max-width: 1023px) {
+                .recruit-modal-content { border-radius: 12px !important; }
+                .recruit-modal-header { padding: 10px 14px !important; }
+                .recruit-modal-header h3 { font-size: 11px !important; letter-spacing: 0 !important; }
+                .recruit-modal-header div { font-size: 20px !important; }
+                .recruit-modal-content > div { padding: 5px 14px !important; font-size: 6px !important; }
+                .recruit-item { padding: 8px 14px !important; }
+                .recruit-item-name { font-size: 10px !important; }
+                .recruit-sport-tag { font-size: 6px !important; padding: 2px 5px !important; }
+                .recruit-remove-btn { font-size: 6px !important; padding: 3px 8px !important; }
+                .recruit-modal-footer { padding: 10px !important; }
+                .recruit-modal-footer button { padding: 6px 14px !important; font-size: 7px !important; }
+            }
         `; document.head.appendChild(style);
     }
 
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-recruit-btn';
-    floatBtn.onclick = () => window.openRecruitModal();
+
+    // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
+    let recruitExpanded = false;
+    floatBtn.addEventListener('click', function() {
+        if (window.innerWidth < 1024) {
+            if (!recruitExpanded) {
+                recruitExpanded = true;
+                floatBtn.style.left = '0px';
+            } else {
+                recruitExpanded = false;
+                window.openRecruitModal();
+            }
+        } else {
+            window.openRecruitModal();
+        }
+    });
+    document.addEventListener('click', function(e) {
+        if (recruitExpanded && !floatBtn.contains(e.target)) {
+            recruitExpanded = false;
+        }
+    });
+
+    // 從左邊往右滑展開
+    let recruitTouchStartX = 0;
+    document.addEventListener('touchstart', function(e) {
+        recruitTouchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    document.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - recruitTouchStartX;
+        const startedNearLeft = recruitTouchStartX < 30;
+        if (startedNearLeft && dx > 30 && !recruitExpanded) {
+            recruitExpanded = true;
+            floatBtn.style.left = '0px';
+        }
+    }, { passive: true });
+
     document.body.appendChild(floatBtn);
 
     const overlay = document.createElement('div'); overlay.className = 'recruit-modal-overlay';
@@ -132,11 +180,15 @@ window.updateRecruitWidget = () => {
         if (window.userRecruit.length > 0) { 
             floatBtn.style.display = 'flex'; 
             /* 🎯 字體再次放大：將圖示升級至 24px，文字升級至 19px 極粗體 */
+const isMobile = window.innerWidth < 1024;
+const scale = isMobile ? window.innerWidth / 980 : 1;
+const emojiSize = Math.round(20 * scale) + 'px';
+const textSize = Math.round(16 * scale) + 'px';
 floatBtn.innerHTML = `
-                <span style="font-size:20px;">🏯</span>
-                <span style="font-size:16px; margin-top:2px; letter-spacing:1px; font-weight:900;">麾下</span>
-                <span style="font-size:16px; letter-spacing:1px; font-weight:900;">名單</span>
-                <span class="recruit-badge">${window.userRecruit.length}</span>
+                <span style="font-size:${emojiSize};">🏯</span>
+                <span style="font-size:${textSize}; margin-top:2px; letter-spacing:1px; font-weight:900;">麾下</span>
+                <span style="font-size:${textSize}; letter-spacing:1px; font-weight:900;">名單</span>
+                <span class="recruit-badge" style="font-size:${Math.round(14*scale)}px; padding:${Math.round(3*scale)}px ${Math.round(10*scale)}px; top:${Math.round(-5*scale)}px;">${window.userRecruit.length}</span>
             `;
         } else { 
             floatBtn.style.display = 'none'; 
@@ -241,4 +293,30 @@ window.openRecruitModal = () => {
     };
 
     window.updateRecruitWidget();
+
+    // 手機版縮放同步
+    function syncRecruitBtnScale() {
+        if (window.innerWidth < 1024) {
+            const scale = window.innerWidth / 980;
+            const w = Math.round(75 * scale);
+            floatBtn.style.width = w + 'px';
+            floatBtn.style.height = Math.round(270 * scale) + 'px';
+            floatBtn.style.left = '-' + Math.round(w - 8) + 'px';
+            floatBtn.style.borderRadius = '0 45px 45px 0';
+            floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
+            floatBtn.style.fontSize = Math.round(33*scale) + 'px';
+            floatBtn.style.transform = '';
+        } else {
+            floatBtn.style.width = '';
+            floatBtn.style.height = '';
+            floatBtn.style.left = '';
+            floatBtn.style.borderRadius = '';
+            floatBtn.style.padding = '';
+            floatBtn.style.fontSize = '';
+            floatBtn.style.transform = '';
+        }
+    }
+    window.addEventListener('resize', syncRecruitBtnScale);
+    syncRecruitBtnScale();
+
 })();
