@@ -478,15 +478,22 @@
             ⬅️ 關閉戰情室 (返回主控制台)
         </button>
         
-        <h1 style="text-align:center; color:#f8fafc; margin-bottom: 10px; font-size: 36px; font-weight: 900; letter-spacing: 2px;">📈 專家實力與動能縱向對比總表</h1>
+        <h1 style="text-align:center; color:#f8fafc; margin-bottom: 15px; font-size: 36px; font-weight: 900; letter-spacing: 2px;">📈 專家實力與動能縱向對比總表</h1>
+        
+        <div class="ranking-filter-bar" style="margin-bottom: 25px; display: flex; justify-content: center; gap: 10px;">
+            <button class="r-btn" onclick="renderMomentumRadar(30, this)">近 30 場</button>
+            <button class="r-btn active" onclick="renderMomentumRadar(20, this)">近 20 場</button>
+            <button class="r-btn" onclick="renderMomentumRadar(7, this)">近 7 場</button>
+            <button class="r-btn" onclick="renderMomentumRadar(3, this)">近 3 場 (爆發)</button>
+        </div>
+
         <p style="text-align:center; color:#94a3b8; font-weight:bold; margin-bottom: 40px; font-size: 16px;">
-            左側為全賽季結算實力，右側為近 <span style="color:#10b981">30</span> / <span style="color:#38bdf8">20</span> / <span style="color:#a855f7">7</span> / <span style="color:#fbbf24">3</span> 日真實動能發射軌跡 (從 0% 拔地而起)
+            左側為所選區間之結算實力，右側為近 <span style="color:#10b981">30</span> / <span style="color:#38bdf8">20</span> / <span style="color:#a855f7">7</span> / <span style="color:#fbbf24">3</span> 日真實動能發射軌跡 (從實際天數拔地而起)
         </p>
 
         <div id="momentumRadarList" style="display: flex; flex-direction: column; gap: 30px;">
-            </div>
+        </div>
     </div>
 </div>
-
 </body>
 </html>
