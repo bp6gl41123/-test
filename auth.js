@@ -7,7 +7,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    // 🔒 新增：確保鎖定咒語只會執行一次
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;    
+const FREE_DAYS_LIMIT = 99;    
 
 // 🌟 【新增】雙參數雷達：網址參數解析與記憶
 // 🌟 【新增】雙參數雷達：網址參數解析與記憶 (含防禦型計次)
