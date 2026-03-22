@@ -235,7 +235,7 @@ window.adminActivateExpert = function(wlKey) {
 
 
 /* ========================================================================= */
-/* 🚀 專家動能實力總表 (Project Momentum) - 100% 鏡像對齊主頁邏輯
+/* 🚀 專家動能實力總表 (Project Momentum) - 導入主頁沉澱與冷凍邏輯
 /* ========================================================================= */
 
 // 1. 開關大門函數
@@ -244,7 +244,17 @@ window.openMomentumRadar = function() {
     const radarPage = document.getElementById('momentumRadarPage');
     radarPage.style.display = 'block';
     radarPage.scrollTo(0, 0);
-    renderMomentumRadar(20); // 預設載入 20 場，與主畫面同步
+    
+    // 開門時自動抓取主頁當前天數
+    let defaultTimeframe = 20;
+    const mainActiveBtn = document.querySelector('#mainContent .ranking-filter-bar .r-btn.active');
+    if(mainActiveBtn) {
+        if(mainActiveBtn.innerText.includes('30')) defaultTimeframe = 30;
+        else if(mainActiveBtn.innerText.includes('7')) defaultTimeframe = 7;
+        else if(mainActiveBtn.innerText.includes('3')) defaultTimeframe = 3;
+        else if(mainActiveBtn.innerText.includes('總榜')) defaultTimeframe = 'all';
+    }
+    renderMomentumRadar(defaultTimeframe); 
 };
 
 window.closeMomentumRadar = function() {
@@ -252,13 +262,13 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 真實數據轉換器 (判斷真實天數，沒有的天數不畫假線)
+// 2. 真實數據轉換器
 function generateDailyTrack(maxDays, actualLen, targetRate, isStraightLine) {
     let data = [];
-    let startDay = Math.min(maxDays, actualLen); // 取得實際起飛點
+    let startDay = Math.min(maxDays, actualLen);
     if (startDay <= 0) return data;
 
-    data.push({ x: startDay, y: 0 }); // 拔地而起
+    data.push({ x: startDay, y: 0 });
 
     if (isStraightLine || startDay <= 3) {
         data.push({ x: 0, y: targetRate });
@@ -278,9 +288,8 @@ function generateDailyTrack(maxDays, actualLen, targetRate, isStraightLine) {
     return data;
 }
 
-// 3. 畫面渲染主邏輯 (帶入 timeframe 區間參數，完美對齊主頁)
+// 3. 畫面渲染主邏輯
 window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
-    // 處理上方切換按鈕的藍色 Active 樣式
     if (btnElement) {
         const btns = btnElement.parentElement.querySelectorAll('.r-btn');
         btns.forEach(b => b.classList.remove('active'));
@@ -291,7 +300,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             const btns = filterBar.querySelectorAll('.r-btn');
             btns.forEach(b => {
                 b.classList.remove('active');
-                if(b.innerText.includes(timeframe.toString())) b.classList.add('active');
+                let txt = timeframe === 'all' ? '總榜' : timeframe.toString();
+                if(b.innerText.includes(txt)) b.classList.add('active');
             });
         }
     }
@@ -306,74 +316,105 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     let qualifiedWhitelist = [];
     try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
 
-    // 🎯 完美對齊主頁：讀取資料並套用一模一樣的過濾門檻
-    let expertsData = Object.keys(window.dataDB).map(name => {
-        const records = window.dataDB[name][key] || [];
-        if(records.length === 0) return null;
+    let timeframeNum = timeframe === 'all' ? 0 : parseInt(timeframe);
+    let allSorted = [];
 
-        // 🛡️ 門檻一：休眠超過 3 天不排
-        if(window.getDaysDiff) {
-            let diffDays = window.getDaysDiff(records[0][0], systemLatestDate);
-            if (diffDays > 3) return null; 
+    for (let name in window.dataDB) {
+        let records = window.dataDB[name][key] || [];
+        if (records.length === 0) continue;
+
+        // ==========================================
+        // 🎯 主頁邏輯對齊：判斷「活躍度」與「滿場次」
+        // ==========================================
+        // 1. 休眠判斷：3 天內有無出手
+        let diffDays = window.getDaysDiff ? window.getDaysDiff(records[0][0], systemLatestDate) : 0;
+        let isRecent = diffDays <= 3;
+
+        // 2. 滿場判斷：實際紀錄數是否 >= 按鈕要求的天數
+        let hasEnoughGames = timeframe === 'all' ? true : records.length >= timeframeNum;
+        if (qualifiedWhitelist.includes(name) || qualifiedWhitelist.includes(name + '||' + key)) {
+            hasEnoughGames = true; // 白名單免疫場次不足
         }
 
-        // 🛡️ 門檻二：嚴守 10 天獨立資歷 (白名單除外)，與外面主畫面 100% 同步
-        let uniqueDates = new Set(records.map(r => r[0]));
-        if (uniqueDates.size < 10 && !qualifiedWhitelist.includes(name) && !qualifiedWhitelist.includes(name+'||'+key)) return null; 
+        // 💡 只有近期活躍，且滿標準場次的人，才是真正的 TopTier
+        let isTopTier = isRecent && hasEnoughGames;
 
-        // 📊 計算各區間勝率
-        const getRate = (days) => {
-            let w=0, l=0, net=0;
+        // 結算當前勝率與淨值
+        let sliceRec = timeframe === 'all' ? records : records.slice(0, timeframeNum);
+        let net = sliceRec.reduce((sum, r) => sum + parseInt(r[2] || 0), 0);
+
+        let w = 0, l = 0;
+        sliceRec.forEach(r => {
+            const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
+            if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]);
+        });
+        let winRate = (w + l) > 0 ? (w / (w + l)) : 0;
+
+        // 計算四線用的各區間勝率
+        const getLineRate = (days) => {
+            let tw=0, tl=0;
             records.slice(0, days).forEach(r => {
-                const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); 
-                if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); 
-                net += parseInt(r[2] || 0); 
+                const m1 = r[1].match(/(\d+)勝/); const m2 = r[1].match(/(\d+)敗/);
+                if(m1) tw += parseInt(m1[1]); if(m2) tl += parseInt(m2[1]);
             });
-            return { rate: Math.round((w/(w+l))*100) || 0, net: net, floatRate: (w+l)>0?(w/(w+l)):0 };
+            return (tw+tl)>0 ? Math.round((tw/(tw+tl))*100) : 0;
         };
 
-        const s30 = getRate(30), s20 = getRate(20), s7 = getRate(7), s3 = getRate(3);
-        const currentStats = getRate(timeframe); // 抓取按鈕「當前指定區間」的數據做為排序基礎
+        allSorted.push({
+            name, net, winRate, recordsLen: records.length,
+            isTopTier, // 存入沉澱狀態標記
+            r30: getLineRate(30), r20: getLineRate(20), r7: getLineRate(7), r3: getLineRate(3)
+        });
+    }
 
-        return { 
-            name, recordsLen: records.length, 
-            r30: s30.rate, r20: s20.rate, r7: s7.rate, r3: s3.rate,
-            sortRate: currentStats.floatRate, sortNet: currentStats.net
-        };
-    }).filter(e => e !== null);
+    // ==========================================
+    // 🎯 終極沉澱排序引擎
+    // ==========================================
+    allSorted.sort((a, b) => {
+        // 1. 沒滿場次/休眠的人，無條件沉降到底部
+        if (a.isTopTier && !b.isTopTier) return -1;
+        if (!a.isTopTier && b.isTopTier) return 1;
+        // 2. 大家都在同一個階層時，勝率優先 -> 淨值加權 (100% 同步主頁)
+        return b.winRate - a.winRate || b.net - a.net;
+    });
 
-    // 🎯 完美對齊主頁排序：【優先比勝率 ➔ 平手比淨值】，名次絕對同步！
-    expertsData.sort((a, b) => b.sortRate - a.sortRate || b.sortNet - a.sortNet);
-    
-    // 只取正向榜 (勝率 >= 0.5)
-    const topList = expertsData.filter(e => e.sortRate >= 0.5);
+    const topList = allSorted.filter(item => item.winRate >= 0.5);
 
     if(topList.length === 0) {
         listContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之正向好手</div>';
         return;
     }
 
-    // 渲染畫面
     topList.forEach((exp, index) => {
-        const rank = index + 1;
+        // 前三名只頒發給真正達標的 TopTier
         let cardBorder = '#334155'; let rankBg = '#475569'; let rankColor = '#fff'; let glow = '';
-        if(rank === 1) { cardBorder = '#fbbf24'; rankBg = '#fbbf24'; rankColor = '#000'; glow = 'box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);'; }
-        else if(rank === 2) { cardBorder = '#94a3b8'; rankBg = '#94a3b8'; rankColor = '#000'; glow = 'box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);'; }
-        else if(rank === 3) { cardBorder = '#ea580c'; rankBg = '#ea580c'; rankColor = '#fff'; glow = 'box-shadow: 0 0 15px rgba(234, 88, 12, 0.2);'; }
+        let rankStr = `NO.${index + 1}`;
+        
+        if (exp.isTopTier) {
+            if(index === 0) { cardBorder = '#fbbf24'; rankBg = '#fbbf24'; rankColor = '#000'; glow = 'box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);'; rankStr = 'RANK 1'; }
+            else if(index === 1) { cardBorder = '#94a3b8'; rankBg = '#94a3b8'; rankColor = '#000'; glow = 'box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);'; rankStr = 'RANK 2'; }
+            else if(index === 2) { cardBorder = '#ea580c'; rankBg = '#ea580c'; rankColor = '#fff'; glow = 'box-shadow: 0 0 15px rgba(234, 88, 12, 0.2);'; rankStr = 'RANK 3'; }
+        } else {
+            // ❄️ 沉澱者外觀：失去光澤
+            cardBorder = '#475569'; rankBg = '#334155'; rankColor = '#94a3b8';
+        }
 
         const rowDiv = document.createElement('div');
-        rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow}`;
-        const safeId = `radarChart_${rank}_${exp.name.replace(/\s+/g, '')}`;
+        // ❄️ 沉澱者特效：加入半透明與灰階，並顯示 ❄️ 沉澱中 標籤
+        let opacityStyle = exp.isTopTier ? 'opacity: 1;' : 'opacity: 0.65; filter: grayscale(20%);';
+        let sleepBadge = !exp.isTopTier ? `<div style="position: absolute; top: -12px; right: 15px; background: #475569; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-weight: 900; font-size: 12px; border: 1px solid #64748b; letter-spacing: 1px;">❄️ 沉澱中</div>` : '';
 
-        // 顯示當前選定區間的 % 數與注數
+        rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative;`;
+        
         rowDiv.innerHTML = `
+            ${sleepBadge}
             <div style="width: 200px; background: #0f172a; border-radius: 15px; padding: 20px 10px; text-align: center; position: relative; border: 1px solid #334155; display:flex; flex-direction:column; justify-content:center;">
-                <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: ${rankBg}; color: ${rankColor}; padding: 4px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; letter-spacing: 1px;">RANK ${rank}</div>
-                ${rank === 1 ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
+                <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: ${rankBg}; color: ${rankColor}; padding: 4px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; letter-spacing: 1px; white-space: nowrap;">${rankStr}</div>
+                ${index === 0 && exp.isTopTier ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
                 <div style="font-size: 18px; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${exp.name}</div>
                 <div style="font-size: 12px; color: #94a3b8; margin-bottom: 15px; background: rgba(255,255,255,0.05); display:inline-block; padding:2px 8px; border-radius:5px; margin-left:auto; margin-right:auto;">${badgeName}</div>
-                <div style="font-size: 38px; font-weight: 900; color: #38bdf8; line-height: 1;">${Math.round(exp.sortRate*100)}%</div>
-                <div style="color: ${exp.sortNet >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">${exp.sortNet >= 0 ? '+' : ''}${exp.sortNet} 注</div>
+                <div style="font-size: 38px; font-weight: 900; color: #38bdf8; line-height: 1;">${Math.round(exp.winRate*100)}%</div>
+                <div style="color: ${exp.net >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">${exp.net >= 0 ? '+' : ''}${exp.net} 注</div>
             </div>
             <div style="flex: 1; position: relative; height: 220px; width: 100%;">
                 <canvas id="${safeId}"></canvas>
@@ -383,8 +424,6 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
 
         setTimeout(() => {
             const ctx = document.getElementById(safeId).getContext('2d');
-            
-            // 💡 保留視覺升級：對應天數的線條高亮，其餘變暗
             const c30 = timeframe === 30 ? '#10b981' : 'rgba(16, 185, 129, 0.2)';
             const c20 = timeframe === 20 ? '#38bdf8' : 'rgba(56, 189, 248, 0.2)';
             const c7  = timeframe === 7  ? '#a855f7' : 'rgba(168, 85, 247, 0.2)';
@@ -396,8 +435,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     datasets: [
                         { label: '30日指標', data: generateDailyTrack(30, exp.recordsLen, exp.r30, false), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
                         { label: '20日指標', data: generateDailyTrack(20, exp.recordsLen, exp.r20, false), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
-                        { label: '7日維持度', data: generateDailyTrack(7, exp.recordsLen, exp.r7, false), borderColor: c7,  borderWidth: timeframe===7?4:1.5, pointRadius: timeframe===7?2:0, tension: 0.2 },
-                        { label: '3日近況',   data: generateDailyTrack(3, exp.recordsLen, exp.r3, true),  borderColor: c3,  borderWidth: timeframe===3?5:1.5, pointRadius: 0, pointHitRadius: 10, tension: 0 }
+                        { label: '7日維持度', data: generateDailyTrack(7, exp.recordsLen, exp.r7, false),  borderColor: c7,  borderWidth: timeframe===7?4:1.5, pointRadius: timeframe===7?2:0, tension: 0.2 },
+                        { label: '3日近況',   data: generateDailyTrack(3, exp.recordsLen, exp.r3, true),   borderColor: c3,  borderWidth: timeframe===3?5:1.5, pointRadius: 0, pointHitRadius: 10, tension: 0 }
                     ]
                 },
                 options: {
