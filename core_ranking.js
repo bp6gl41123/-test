@@ -391,7 +391,11 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         }
     });
 
+    // 🚨 找回消失的心臟代碼：這行絕對不能少！過濾並產生 displayList 陣列！
+    const displayList = window.isNegativeMode ? allSorted.filter(item => item.winRate < 50) : allSorted.filter(item => item.winRate >= 50);
+
     // 🎯 核心升級：加入全域「正在觀測賽事」標誌
+
     const sportBadgeHtml = `
         <div style="display: flex; justify-content: center; margin-bottom: 25px; margin-top: 10px;">
             <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 25px; border-radius: 30px; font-size: 16px; font-weight: 900; letter-spacing: 2px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);">
@@ -457,63 +461,65 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             const c7  = '#a855f7';
             const c3  = '#fbbf24';
 
-// 🎯 新增：結算該專家的「生涯總勝率」與「總留存場次」
+
+// 🎯 結算專家生涯真實總預測數與勝率
             let cW = 0, cL = 0;
             let expertRecords = window.dataDB[exp.name][key] || [];
-            let totalMatches = expertRecords.length;
             expertRecords.forEach(r => {
                 const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
                 if(wm) cW += parseInt(wm[1]); if(lm) cL += parseInt(lm[1]);
             });
-            let careerRate = (cW + cL) > 0 ? Math.round((cW / (cW + cL)) * 100) : 0;
+            // 🚨 修正 3：真實總預測數 (勝+敗)，讓數據邏輯 100% 嚴謹
+            let trueTotalMatches = cW + cL;
+            let careerRate = trueTotalMatches > 0 ? Math.round((cW / trueTotalMatches) * 100) : 0;
 
-            // 🎯 新增：Chart.js 自定義雷射浮標外掛 (Custom Plugin)
+            // 🎯 終極版雷射浮標外掛 (防裁切 + 相容舊手機)
             const careerLevelPlugin = {
                 id: 'careerLevel',
                 afterDraw: (chart) => {
                     const ctx = chart.ctx;
                     const yAxis = chart.scales.y;
                     const chartArea = chart.chartArea;
-                    // 精準取得生涯勝率對應的 Y 軸高度
                     const yPos = yAxis.getPixelForValue(careerRate);
 
                     ctx.save();
                     
-                    // 1. 畫一條橫跨圖表的雷射虛線
                     ctx.beginPath();
-                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; // 螢光粉紅半透明
+                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; 
                     ctx.lineWidth = 1.5;
                     ctx.setLineDash([5, 5]);
                     ctx.moveTo(chartArea.left, yPos);
                     ctx.lineTo(chartArea.right, yPos);
                     ctx.stroke();
 
-                    // 2. 畫左側的浮標標籤 (移至大後方，字體與色塊加大)
-                    const text = `生涯 ${careerRate}% (${totalMatches}場)`;
-                    ctx.font = 'bold 14px sans-serif'; // 👈 字體加大到 14px
+                    const text = `生涯 ${careerRate}% (${trueTotalMatches}場)`;
+                    ctx.font = 'bold 14px sans-serif'; 
                     const textWidth = ctx.measureText(text).width;
-                    const paddingX = 12, boxHeight = 26; // 👈 內邊距與高度加大，看起來更大氣
+                    const paddingX = 12, boxHeight = 26; 
                     const boxWidth = textWidth + paddingX * 2;
                     
-                    // 👈 核心修改：讓標籤浮貼在圖表最左側 (chartArea.left)
                     const boxX = chartArea.left; 
-                    const boxY = yPos - boxHeight / 2;
+                    let boxY = yPos - boxHeight / 2;
 
-                    ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; // 螢光粉紅
+                    // 🚨 修正 2：防裁切保護！如果 100% 碰到天花板、或 0% 碰到地板，強制內縮
+                    if (boxY < chartArea.top) boxY = chartArea.top + 2;
+                    if (boxY + boxHeight > chartArea.bottom) boxY = chartArea.bottom - boxHeight - 2;
+
+                    ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; 
                     ctx.beginPath();
-                    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 4);
+                    // 🚨 修正 1：捨棄舊版 iPhone 會當機的 roundRect，改用絕對安全的 rect
+                    ctx.rect(boxX, boxY, boxWidth, boxHeight);
                     ctx.fill();
 
-                    ctx.fillStyle = '#ffffff'; // 純白文字
+                    ctx.fillStyle = '#ffffff'; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText(text, boxX + boxWidth / 2, yPos);
+                    // 文字的 Y 軸座標必須跟著受保護的 boxY 居中對齊
+                    ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
                     
                     ctx.restore();
                 }
             };
-
-
             new Chart(ctx, {
                 type: 'line',
                 plugins: [careerLevelPlugin], // 👈 啟動剛寫好的生涯雷射浮標外掛！
