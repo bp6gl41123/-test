@@ -262,8 +262,7 @@ window.closeMomentumRadar = function() {
 };
 
 
-
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對真實高度版)
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 終極動能竄出版)
 function generateAuthenticTrack(maxMatches, records) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -272,9 +271,11 @@ function generateAuthenticTrack(maxMatches, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 💡 刪除假起點！不再從 0% 竄出，讓第一顆點直接顯示真實高度
+    // 🚀 關鍵 1：絕對出發點！強制從按鈕刻度 (maxMatches) 的底部 0% 出發
+    // 這就是你要求的「從 20 日的點出發」
+    data.push({ x: maxMatches, y: 0 });
 
-    // 時序反轉：從最舊的那一場開始，一步步推到最新的一場
+    // 時序反轉：從最舊的那一場開始推算
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
@@ -284,22 +285,18 @@ function generateAuthenticTrack(maxMatches, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 計算累積到這場為止的「真實勝率」
+        // 🚀 關鍵 2：真實累積勝率結算
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 座標推進：例如 20 場，第一筆精準落在 X=20，最後一筆落在 X=1
-        let xPos = actualLen - index; 
+        // 🚀 關鍵 3：尋找真實節點！
+        // 如果是 20 場，第一節點就是 X=19，線就會從 (20,0) 斜射向 (19,真實勝率)！
+        let xPos = actualLen - index - 1; 
         data.push({ x: xPos, y: rate });
     });
 
-    // 終點撞牆：把最新一場的勝率延伸到 X = 0 (右側牆壁)，讓線條完美貼合
-    if (data.length > 0) {
-        let finalRate = data[data.length - 1].y;
-        data.push({ x: 0, y: finalRate });
-    }
-
     return data;
 }
+
 
 // 畫面渲染主邏輯
 window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
@@ -474,7 +471,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                             bodyFont: { weight: 'bold' }, 
                             callbacks: { 
                                 label: function(c) { 
-                                    // 乾淨俐落的數字，不加任何奇怪的攔截
+                                    // 🛡️ 終極防呆：攔截第 0 個點！不讓用戶看到底部的 0%
+                                    if (c.dataIndex === 0) return null; 
                                     return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; 
                                 } 
                             } 
