@@ -475,7 +475,14 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 <div style="font-size: 18px; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${exp.name}</div>
                 <div style="font-size: 12px; color: #94a3b8; margin-bottom: 15px; background: rgba(255,255,255,0.05); display:inline-block; padding:2px 8px; border-radius:5px; margin-left:auto; margin-right:auto;">${badgeName}</div>
                 <div style="font-size: 38px; font-weight: 900; color: ${window.isNegativeMode ? '#f87171' : '#38bdf8'}; line-height: 1;">${exp.winRate}%</div>
-                <div style="color: ${exp.net >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">${exp.net >= 0 ? '+' : ''}${exp.net} 注</div>
+
+                <div style="color: ${exp.net >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">
+                    ${exp.net >= 0 ? '+' : ''}${exp.net} 注 
+                    <span style="font-size: 12px; color: #94a3b8; font-weight: normal; margin-left: 4px;">
+                        ${timeframe === 'all' ? '(總榜)' : '(近' + timeframe + '場)'}
+                    </span>
+                </div>
+
             </div>
             <div style="flex: 1; position: relative; height: 220px; width: 100%;">
                 <canvas id="${safeId}"></canvas>
