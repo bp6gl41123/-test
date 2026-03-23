@@ -391,13 +391,22 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         }
     });
 
-    // 戰情室專屬：如果是正向動能，只挑 50% 以上；反轉魔法，挑 50% 以下
-    const displayList = window.isNegativeMode ? allSorted.filter(item => item.winRate < 50) : allSorted.filter(item => item.winRate >= 50);
+    // 🎯 核心升級：加入全域「正在觀測賽事」標誌
+    const sportBadgeHtml = `
+        <div style="display: flex; justify-content: center; margin-bottom: 25px; margin-top: 10px;">
+            <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 25px; border-radius: 30px; font-size: 16px; font-weight: 900; letter-spacing: 2px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);">
+                📌 當前觀測項目：${badgeName}
+            </div>
+        </div>
+    `;
 
     if(displayList.length === 0) {
-        listContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之好手</div>';
+        listContainer.innerHTML = sportBadgeHtml + '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之好手</div>';
         return;
     }
+
+    // 先把賽事標誌印出來，再接著畫專家卡片
+    listContainer.innerHTML = sportBadgeHtml;
 
     // 渲染畫面
     displayList.forEach((exp, index) => {
