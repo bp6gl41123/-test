@@ -450,8 +450,15 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)' } },
-                    scales: { x: { display: false }, y: { position: 'right', min: 0, max: 100, ticks: { color: '#fbbf24', callback: v => v + '%' } } }
+                    plugins: { 
+                        legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
+                    },
+                    // 🚨 就是這裡！補回了 type: 'linear'，圖表引擎瞬間復活！
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今天數 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
+                        y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
                 }
             });
         }, 150);
