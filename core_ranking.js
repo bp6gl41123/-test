@@ -261,7 +261,9 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對場次推進版)
+
+
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對場次推進版，無假起點)
 function generateAuthenticTrack(maxMatches, records) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -270,10 +272,9 @@ function generateAuthenticTrack(maxMatches, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 1. 起點：強制從最左邊 (X = 實際場次數) 的底部 (Y = 0) 竄出！
-    data.push({ x: actualLen, y: 0 });
+    // 💡 刪除假起點！不再從 0% 竄出，讓第一顆點直接顯示真實高度
 
-    // 2. 時序反轉：從最舊的那一場開始，一步步推到最新的一場
+    // 時序反轉：從最舊的那一場開始，一步步推到最新的一場
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
@@ -283,14 +284,19 @@ function generateAuthenticTrack(maxMatches, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 3. 沿用前台公式：計算累積到這場為止的「真實勝率」
+        // 計算累積到這場為止的「真實勝率」
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 4. 座標推進：不看日期，只看「場次」！
-        // 如果 actualLen 是 20，第一場就是 X=19，最後一場就是 X=0
-        let xPos = actualLen - index - 1; 
+        // 座標推進：第一筆是 X = actualLen，最後一筆是 X = 1
+        let xPos = actualLen - index; 
         data.push({ x: xPos, y: rate });
     });
+
+    // 終點撞牆：把最新一場的勝率延伸到 X = 0 (右側牆壁)，讓線條完美貼合
+    if (data.length > 0) {
+        let finalRate = data[data.length - 1].y;
+        data.push({ x: 0, y: finalRate });
+    }
 
     return data;
 }
