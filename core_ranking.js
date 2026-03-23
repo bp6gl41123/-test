@@ -479,15 +479,15 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     ctx.lineTo(chartArea.right, yPos);
                     ctx.stroke();
 
-                    // 2. 畫右側的浮標標籤 (螢光粉紅背景 + 白字)
+                    // 2. 畫左側的浮標標籤 (移至大後方，字體與色塊加大)
                     const text = `生涯 ${careerRate}% (${totalMatches}場)`;
-                    ctx.font = 'bold 12px sans-serif';
+                    ctx.font = 'bold 14px sans-serif'; // 👈 字體加大到 14px
                     const textWidth = ctx.measureText(text).width;
-                    const paddingX = 8, boxHeight = 22;
+                    const paddingX = 12, boxHeight = 26; // 👈 內邊距與高度加大，看起來更大氣
                     const boxWidth = textWidth + paddingX * 2;
                     
-                    // 讓標籤浮貼在圖表最右側，剛好靠著 Y 軸牆壁
-                    const boxX = chartArea.right - boxWidth;
+                    // 👈 核心修改：讓標籤浮貼在圖表最左側 (chartArea.left)
+                    const boxX = chartArea.left; 
                     const boxY = yPos - boxHeight / 2;
 
                     ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; // 螢光粉紅
