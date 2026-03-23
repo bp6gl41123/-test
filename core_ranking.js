@@ -261,7 +261,7 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法)
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對同步版)
 function generateAuthenticTrack(maxDays, records) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -270,7 +270,10 @@ function generateAuthenticTrack(maxDays, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 將時間反轉：從最舊的那天開始，一步步算到今天
+    // 1. 起點：強制從最左邊 (X = actualLen) 的底下 (Y = 0) 竄出
+    data.push({ x: actualLen, y: 0 });
+
+    // 2. 時光倒流：從最舊的那天開始，一步步算到今天
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
@@ -280,19 +283,14 @@ function generateAuthenticTrack(maxDays, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 計算累積到該天的真實勝率
+        // 3. 沿用前台公式：計算累積到該天的真實勝率
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 畫出當天座標 (X軸從 actualLen 遞減到 1)
-        let xPos = actualLen - index; 
+        // 4. 座標推進：例如 20 場紀錄，X 軸會依序落在 19, 18, 17... 直到 0 (今天)
+        let xPos = actualLen - index - 1; 
         data.push({ x: xPos, y: rate });
     });
 
-    // 終點撞牆：把今天的最終勝率延伸對齊到右側牆壁 (X=0)
-    if (data.length > 0) {
-        let finalRate = data[data.length - 1].y;
-        data.push({ x: 0, y: finalRate });
-    }
     return data;
 }
 
