@@ -261,7 +261,7 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 完美時間對位版)
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 鎖定刻度版)
 function generateAuthenticTrack(maxDays, records, systemLatestDate) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -269,15 +269,12 @@ function generateAuthenticTrack(maxDays, records, systemLatestDate) {
     let sliceRec = records.slice(0, maxDays);
     if (sliceRec.length === 0) return data;
 
+    // 1. 絕對起點：強制從你按鈕指定的天數刻度 (maxDays) 底部竄出！
+    data.push({ x: maxDays, y: 0 });
+
     // 時光倒流：從最舊的那天開始，一步步算到今天
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
-
-    // 計算最舊那一天的「真實距今天數」
-    let firstDayDiff = window.getDaysDiff ? window.getDaysDiff(reversed[0][0], systemLatestDate) : sliceRec.length;
-    
-    // 1. 起點：強制從最舊的那天底下 (Y = 0) 竄出
-    data.push({ x: firstDayDiff, y: 0 });
 
     reversed.forEach((r) => {
         const wm = r[1].match(/(\d+)勝/);
