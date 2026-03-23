@@ -234,26 +234,25 @@ window.adminActivateExpert = function(wlKey) {
 };
 
 
+
+
 /* ========================================================================= */
-/* 🚀 專家動能實力總表 (Project Momentum) - 導入主頁沉澱與冷凍邏輯
+/* 🚀 專家動能實力總表 (Project Momentum) - 100% 繼承 core_engine 大腦
 /* ========================================================================= */
 
-// 1. 開關大門函數
 window.openMomentumRadar = function() {
-    document.getElementById('mainContent').style.display = 'none';
+    const mainContent = document.getElementById('mainContent');
     const radarPage = document.getElementById('momentumRadarPage');
+    if (!radarPage) {
+        alert("找不到戰情室畫面，請確認 index.html 已經更新！");
+        return;
+    }
+    mainContent.style.display = 'none';
     radarPage.style.display = 'block';
     radarPage.scrollTo(0, 0);
     
-    // 開門時自動抓取主頁當前天數
-    let defaultTimeframe = 20;
-    const mainActiveBtn = document.querySelector('#mainContent .ranking-filter-bar .r-btn.active');
-    if(mainActiveBtn) {
-        if(mainActiveBtn.innerText.includes('30')) defaultTimeframe = 30;
-        else if(mainActiveBtn.innerText.includes('7')) defaultTimeframe = 7;
-        else if(mainActiveBtn.innerText.includes('3')) defaultTimeframe = 3;
-        else if(mainActiveBtn.innerText.includes('總榜')) defaultTimeframe = 'all';
-    }
+    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
+    let defaultTimeframe = window.currentHomeFilter || 20;
     renderMomentumRadar(defaultTimeframe); 
 };
 
@@ -262,7 +261,7 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 真實數據轉換器
+// 真實數據轉換器
 function generateDailyTrack(maxDays, actualLen, targetRate, isStraightLine) {
     let data = [];
     let startDay = Math.min(maxDays, actualLen);
@@ -288,7 +287,7 @@ function generateDailyTrack(maxDays, actualLen, targetRate, isStraightLine) {
     return data;
 }
 
-// 3. 畫面渲染主邏輯
+// 畫面渲染主邏輯
 window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     if (btnElement) {
         const btns = btnElement.parentElement.querySelectorAll('.r-btn');
@@ -316,31 +315,26 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     let qualifiedWhitelist = [];
     try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
 
-    let timeframeNum = timeframe === 'all' ? 0 : parseInt(timeframe);
+    let filterThreshold = timeframe === 'all' ? 0 : parseInt(timeframe);
     let allSorted = [];
 
+    // ==========================================
+    // 🎯 核心移植：從 core_engine.js 提取的過濾邏輯
+    // ==========================================
     for (let name in window.dataDB) {
         let records = window.dataDB[name][key] || [];
         if (records.length === 0) continue;
 
-        // ==========================================
-        // 🎯 主頁邏輯對齊：判斷「活躍度」與「滿場次」
-        // ==========================================
-        // 1. 休眠判斷：3 天內有無出手
+        // 1. 休眠判斷
         let diffDays = window.getDaysDiff ? window.getDaysDiff(records[0][0], systemLatestDate) : 0;
-        let isRecent = diffDays <= 3;
+        let isActive = diffDays <= 3;
 
-        // 2. 滿場判斷：實際紀錄數是否 >= 按鈕要求的天數
-        let hasEnoughGames = timeframe === 'all' ? true : records.length >= timeframeNum;
-        if (qualifiedWhitelist.includes(name) || qualifiedWhitelist.includes(name + '||' + key)) {
-            hasEnoughGames = true; // 白名單免疫場次不足
-        }
+        // 2. 門檻激活判斷
+        let uniqueDates = new Set(records.map(r => r[0]));
+        let isQualified = uniqueDates.size >= filterThreshold || qualifiedWhitelist.includes(name + '||' + key);
 
-        // 💡 只有近期活躍，且滿標準場次的人，才是真正的 TopTier
-        let isTopTier = isRecent && hasEnoughGames;
-
-        // 結算當前勝率與淨值
-        let sliceRec = timeframe === 'all' ? records : records.slice(0, timeframeNum);
+        // 3. 結算當前勝率與淨值
+        let sliceRec = timeframe === 'all' ? records : records.slice(0, filterThreshold);
         let net = sliceRec.reduce((sum, r) => sum + parseInt(r[2] || 0), 0);
 
         let w = 0, l = 0;
@@ -348,9 +342,9 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
             if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]);
         });
-        let winRate = (w + l) > 0 ? (w / (w + l)) : 0;
+        let winRate = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
 
-        // 計算四線用的各區間勝率
+        // 4. 四線圖表專用勝率
         const getLineRate = (days) => {
             let tw=0, tl=0;
             records.slice(0, days).forEach(r => {
@@ -362,58 +356,72 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
 
         allSorted.push({
             name, net, winRate, recordsLen: records.length,
-            isTopTier, // 存入沉澱狀態標記
+            isActive, isQualified, // ⬅️ 關鍵標記存入
             r30: getLineRate(30), r20: getLineRate(20), r7: getLineRate(7), r3: getLineRate(3)
         });
     }
 
     // ==========================================
-    // 🎯 終極沉澱排序引擎
+    // 🎯 核心移植：從 core_engine.js 提取的排序引擎
     // ==========================================
     allSorted.sort((a, b) => {
-        // 1. 沒滿場次/休眠的人，無條件沉降到底部
-        if (a.isTopTier && !b.isTopTier) return -1;
-        if (!a.isTopTier && b.isTopTier) return 1;
-        // 2. 大家都在同一個階層時，勝率優先 -> 淨值加權 (100% 同步主頁)
-        return b.winRate - a.winRate || b.net - a.net;
+        const aRank = a.isActive && a.isQualified;
+        const bRank = b.isActive && b.isQualified;
+        
+        // 沉澱機制發動：沒達標/休眠的人強制往下沉！
+        if (aRank && !bRank) return -1;
+        if (!aRank && bRank) return 1;
+        if (a.isActive && !b.isActive) return -1;
+        if (!a.isActive && b.isActive) return 1;
+        
+        // 勝率與淨值比較 (支援正反向模式)
+        if (window.isNegativeMode) {
+            return a.winRate - b.winRate || a.net - b.net;
+        } else {
+            return b.winRate - a.winRate || b.net - a.net;
+        }
     });
 
-    const topList = allSorted.filter(item => item.winRate >= 0.5);
+    // 戰情室專屬：如果是正向動能，只挑 50% 以上；反轉魔法，挑 50% 以下
+    const displayList = window.isNegativeMode ? allSorted.filter(item => item.winRate < 50) : allSorted.filter(item => item.winRate >= 50);
 
-    if(topList.length === 0) {
-        listContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之正向好手</div>';
+    if(displayList.length === 0) {
+        listContainer.innerHTML = '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之好手</div>';
         return;
     }
 
-    topList.forEach((exp, index) => {
-        // 前三名只頒發給真正達標的 TopTier
+    // 渲染畫面
+    displayList.forEach((exp, index) => {
+        const isTopTier = exp.isActive && exp.isQualified;
         let cardBorder = '#334155'; let rankBg = '#475569'; let rankColor = '#fff'; let glow = '';
         let rankStr = `NO.${index + 1}`;
         
-        if (exp.isTopTier) {
+        if (isTopTier) {
             if(index === 0) { cardBorder = '#fbbf24'; rankBg = '#fbbf24'; rankColor = '#000'; glow = 'box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);'; rankStr = 'RANK 1'; }
             else if(index === 1) { cardBorder = '#94a3b8'; rankBg = '#94a3b8'; rankColor = '#000'; glow = 'box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);'; rankStr = 'RANK 2'; }
             else if(index === 2) { cardBorder = '#ea580c'; rankBg = '#ea580c'; rankColor = '#fff'; glow = 'box-shadow: 0 0 15px rgba(234, 88, 12, 0.2);'; rankStr = 'RANK 3'; }
         } else {
-            // ❄️ 沉澱者外觀：失去光澤
+            // ❄️ 沉澱者外觀
             cardBorder = '#475569'; rankBg = '#334155'; rankColor = '#94a3b8';
         }
 
         const rowDiv = document.createElement('div');
-        // ❄️ 沉澱者特效：加入半透明與灰階，並顯示 ❄️ 沉澱中 標籤
-        let opacityStyle = exp.isTopTier ? 'opacity: 1;' : 'opacity: 0.65; filter: grayscale(20%);';
-        let sleepBadge = !exp.isTopTier ? `<div style="position: absolute; top: -12px; right: 15px; background: #475569; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-weight: 900; font-size: 12px; border: 1px solid #64748b; letter-spacing: 1px;">❄️ 沉澱中</div>` : '';
+        // ❄️ 沉澱者特效
+        let opacityStyle = isTopTier ? 'opacity: 1;' : 'opacity: 0.65; filter: grayscale(30%);';
+        let sleepBadge = !isTopTier ? `<div style="position: absolute; top: -12px; right: 15px; background: #475569; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-weight: 900; font-size: 12px; border: 1px solid #64748b; letter-spacing: 1px; z-index: 5;">❄️ 沉澱中</div>` : '';
 
         rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative;`;
         
+        const safeId = `radarChart_${rankStr.replace(/\s/g,'')}_${exp.name.replace(/\s+/g, '')}`;
+
         rowDiv.innerHTML = `
             ${sleepBadge}
             <div style="width: 200px; background: #0f172a; border-radius: 15px; padding: 20px 10px; text-align: center; position: relative; border: 1px solid #334155; display:flex; flex-direction:column; justify-content:center;">
                 <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: ${rankBg}; color: ${rankColor}; padding: 4px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; letter-spacing: 1px; white-space: nowrap;">${rankStr}</div>
-                ${index === 0 && exp.isTopTier ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
+                ${index === 0 && isTopTier ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
                 <div style="font-size: 18px; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${exp.name}</div>
                 <div style="font-size: 12px; color: #94a3b8; margin-bottom: 15px; background: rgba(255,255,255,0.05); display:inline-block; padding:2px 8px; border-radius:5px; margin-left:auto; margin-right:auto;">${badgeName}</div>
-                <div style="font-size: 38px; font-weight: 900; color: #38bdf8; line-height: 1;">${Math.round(exp.winRate*100)}%</div>
+                <div style="font-size: 38px; font-weight: 900; color: ${window.isNegativeMode ? '#f87171' : '#38bdf8'}; line-height: 1;">${exp.winRate}%</div>
                 <div style="color: ${exp.net >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">${exp.net >= 0 ? '+' : ''}${exp.net} 注</div>
             </div>
             <div style="flex: 1; position: relative; height: 220px; width: 100%;">
@@ -442,14 +450,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { 
-                        legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
-                    },
-                    scales: {
-                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今天數 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
-                        y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
+                    plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)' } },
+                    scales: { x: { display: false }, y: { position: 'right', min: 0, max: 100, ticks: { color: '#fbbf24', callback: v => v + '%' } } }
                 }
             });
         }, 150);
