@@ -448,10 +448,13 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    scales: {
-                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
-                        y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
+                    // ✅ 這裡必須放 datasets，裡面呼叫 generateAuthenticTrack 來畫線
+                    datasets: [
+                        { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
+                        { label: '20場指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
+                        { label: '7場維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
+                        { label: '3場近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: timeframe===3?2:0, pointHitRadius: 10, tension: 0.2 }
+                    ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
@@ -460,9 +463,9 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                         legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
                         tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
                     },
-                    // 🚨 就是這裡！補回了 type: 'linear'，圖表引擎瞬間復活！
+                    // ✅ scales 必須放在 options 裡面。X軸文字已更新為「距今場次」
                     scales: {
-                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今天數 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
+                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
                         y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                     }
                 }
