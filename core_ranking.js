@@ -394,12 +394,43 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     // 🚨 找回消失的心臟代碼：這行絕對不能少！過濾並產生 displayList 陣列！
     const displayList = window.isNegativeMode ? allSorted.filter(item => item.winRate < 50) : allSorted.filter(item => item.winRate >= 50);
 
-    // 🎯 核心升級：加入全域「正在觀測賽事」標誌
+// 🎯 終極升級：戰情室內建無縫下拉選單 (移植自主頁核心)
+    // 1. 定義選單結構 (與主頁 100% 同步)
+    const categories = [
+        { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
+        { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
+        { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
+        { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },
+        { name: '🏒 冰球系列', items: [ { id: 'nhl_ml', label: '冰球獨贏(含加時)' }, { id: 'nhl_ml_reg', label: '冰球獨贏(不含加時)' }, { id: 'nhl_spread_ot', label: '冰球讓盤(含加時)' }, { id: 'nhl_spread_reg', label: '冰球讓盤(不含加時)' }, { id: 'nhl_total_ot', label: '冰球大小(含加時)' }, { id: 'nhl_total_reg', label: '冰球大小(不含加時)' }, { id: 'khl_team', label: '俄冰隊伍' }, { id: 'khl_total', label: '俄冰大小分' } ] },
+        { name: '🌏 亞洲/歐籃', items: [ { id: 'euro_team', label: '歐籃隊伍' }, { id: 'euro_total', label: '歐籃大小' }, { id: 'euro_1h', label: '歐籃上半' }, { id: 'nbl_team', label: '澳籃隊伍' }, { id: 'nbl_total', label: '澳籃大小' }, { id: 'jbl_team', label: '日籃隊伍' },{ id: 'jbl_total', label: '日籃大小' },{ id: 'kbl_team', label: '韓籃隊伍' }, { id: 'kbl_total', label: '韓籃大小' }, { id: 'cba_team', label: '中籃隊伍' }, { id: 'cba_total', label: '中籃大小' } ] }, 
+        { name: '🎮 電競系列', items: [ { id: 'lol_team', label: '電競隊伍' }, { id: 'lol_total', label: '電競大小' } ] }
+    ];
+
+    // 2. 生成 HTML 結構 (暗黑科技風的 hover 展開選單)
+    let menuHtml = '';
+    categories.forEach(cat => {
+        let subItems = '';
+        cat.items.forEach(item => {
+            let activeCls = (item.id === key) ? 'color:#fbbf24; font-weight:900;' : 'color:#cbd5e1;';
+            subItems += `<div onclick="window.activeSportKey='${item.id}'; window.renderMomentumRadar('${timeframe}');" style="padding:10px 15px; cursor:pointer; border-bottom:1px solid #334155; transition:0.2s; ${activeCls}" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">${item.label}</div>`;
+        });
+        menuHtml += `
+            <div style="position:relative; display:inline-block; margin: 0 5px;" onmouseover="this.querySelector('.sub-menu').style.display='block'" onmouseout="this.querySelector('.sub-menu').style.display='none'">
+                <div style="background:#1e293b; color:#94a3b8; border:1px solid #475569; padding:8px 18px; border-radius:20px; font-size:14px; font-weight:bold; cursor:pointer; transition:0.2s;" onmouseover="this.style.borderColor='#38bdf8'; this.style.color='#38bdf8';" onmouseout="this.style.borderColor='#475569'; this.style.color='#94a3b8';">${cat.name} ▾</div>
+                <div class="sub-menu" style="display:none; position:absolute; top:100%; left:50%; transform:translateX(-50%); background:#0f172a; border:1px solid #38bdf8; border-radius:8px; min-width:160px; z-index:9999; box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:5px 0; margin-top:5px;">
+                    ${subItems}
+                </div>
+            </div>
+        `;
+    });
 
     const sportBadgeHtml = `
-        <div style="display: flex; justify-content: center; margin-bottom: 25px; margin-top: 10px;">
-            <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 25px; border-radius: 30px; font-size: 16px; font-weight: 900; letter-spacing: 2px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);">
-                📌 當前觀測項目：${badgeName}
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; margin-top: 10px; z-index: 500; position: relative;">
+            <div style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 30px; border-radius: 30px; font-size: 18px; font-weight: 900; letter-spacing: 2px; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); margin-bottom: 15px;">
+                📌 當前觀測：${badgeName}
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+                ${menuHtml}
             </div>
         </div>
     `;
@@ -409,7 +440,7 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         return;
     }
 
-    // 先把賽事標誌印出來，再接著畫專家卡片
+    // 印出標誌與選單
     listContainer.innerHTML = sportBadgeHtml;
 
     // 渲染畫面
