@@ -271,11 +271,10 @@ function generateAuthenticTrack(maxMatches, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 🚀 關鍵 1：絕對出發點！強制從按鈕刻度 (maxMatches) 的底部 0% 出發
-    // 這就是你要求的「從 20 日的點出發」
-    data.push({ x: maxMatches, y: 0 });
+    // 1. 隱形起點：從實際場次數「+1」的地方底部竄出 (例如 20 場就從 21 竄出)
+    data.push({ x: actualLen + 1, y: 0 });
 
-    // 時序反轉：從最舊的那一場開始推算
+    // 2. 時序反轉：從最舊的那一場開始，推到最新的一場
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
@@ -285,12 +284,11 @@ function generateAuthenticTrack(maxMatches, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 🚀 關鍵 2：真實累積勝率結算
+        // 3. 沿用前台公式：計算累積到這場為止的「真實勝率」
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 🚀 關鍵 3：尋找真實節點！
-        // 如果是 20 場，第一節點就是 X=19，線就會從 (20,0) 斜射向 (19,真實勝率)！
-        let xPos = actualLen - index - 1; 
+        // 4. 座標推進：例如 20 場，第一節點就是 X=20，最後的牆壁剛好是 X=1
+        let xPos = actualLen - index; 
         data.push({ x: xPos, y: rate });
     });
 
