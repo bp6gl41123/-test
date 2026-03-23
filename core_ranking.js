@@ -538,7 +538,10 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     // 🚨 修正核心：改為 nearest 與 axis: 'x'，絕對精準對齊游標位置！不再抓錯資料！
                     interaction: { mode: 'nearest', axis: 'x', intersect: false },
                     plugins: { 
-                        legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
+
+                        // 🎯 視覺升級：將圖例移至正中央 (center)，並加上 padding (20) 讓四個按鈕均勻散開不擁擠
+                        legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20, padding: 20 } },
+
                         tooltip: { 
                             backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                             titleColor: '#94a3b8', 
