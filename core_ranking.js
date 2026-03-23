@@ -442,19 +442,21 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
 
         setTimeout(() => {
             const ctx = document.getElementById(safeId).getContext('2d');
-            const c30 = timeframe === 30 ? '#10b981' : 'rgba(16, 185, 129, 0.2)';
-            const c20 = timeframe === 20 ? '#38bdf8' : 'rgba(56, 189, 248, 0.2)';
-            const c7  = timeframe === 7  ? '#a855f7' : 'rgba(168, 85, 247, 0.2)';
-            const c3  = timeframe === 3  ? '#fbbf24' : 'rgba(251, 191, 36, 0.2)';
+            // 💡 拔除淡化特效，讓四種顏色的線永遠保持 100% 飽和度
+            const c30 = '#10b981';
+            const c20 = '#38bdf8';
+            const c7  = '#a855f7';
+            const c3  = '#fbbf24';
 
             new Chart(ctx, {
                 type: 'line',
                 data: {
+                    // 💡 不再根據 timeframe 改變粗細，讓四條線同時清晰呈現
                     datasets: [
-                        { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
-                        { label: '20場指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
-                        { label: '7場維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
-                        { label: '3場近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: timeframe===3?2:0, pointHitRadius: 10, tension: 0.2 }
+                        { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: 2.5, pointRadius: 1, tension: 0.2 },
+                        { label: '20場指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: 2.5, pointRadius: 1, tension: 0.2 },
+                        { label: '7場維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: 3,   pointRadius: 2, tension: 0.2 },
+                        { label: '3場近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: 4,   pointRadius: 3, pointHitRadius: 10, tension: 0.2 }
                     ]
                 },
                 options: {
