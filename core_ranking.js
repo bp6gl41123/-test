@@ -448,9 +448,68 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             const c7  = '#a855f7';
             const c3  = '#fbbf24';
 
+// 🎯 新增：結算該專家的「生涯總勝率」與「總留存場次」
+            let cW = 0, cL = 0;
+            let expertRecords = window.dataDB[exp.name][key] || [];
+            let totalMatches = expertRecords.length;
+            expertRecords.forEach(r => {
+                const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
+                if(wm) cW += parseInt(wm[1]); if(lm) cL += parseInt(lm[1]);
+            });
+            let careerRate = (cW + cL) > 0 ? Math.round((cW / (cW + cL)) * 100) : 0;
+
+            // 🎯 新增：Chart.js 自定義雷射浮標外掛 (Custom Plugin)
+            const careerLevelPlugin = {
+                id: 'careerLevel',
+                afterDraw: (chart) => {
+                    const ctx = chart.ctx;
+                    const yAxis = chart.scales.y;
+                    const chartArea = chart.chartArea;
+                    // 精準取得生涯勝率對應的 Y 軸高度
+                    const yPos = yAxis.getPixelForValue(careerRate);
+
+                    ctx.save();
+                    
+                    // 1. 畫一條橫跨圖表的雷射虛線
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; // 螢光粉紅半透明
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([5, 5]);
+                    ctx.moveTo(chartArea.left, yPos);
+                    ctx.lineTo(chartArea.right, yPos);
+                    ctx.stroke();
+
+                    // 2. 畫右側的浮標標籤 (螢光粉紅背景 + 白字)
+                    const text = `生涯 ${careerRate}% (${totalMatches}場)`;
+                    ctx.font = 'bold 12px sans-serif';
+                    const textWidth = ctx.measureText(text).width;
+                    const paddingX = 8, boxHeight = 22;
+                    const boxWidth = textWidth + paddingX * 2;
+                    
+                    // 讓標籤浮貼在圖表最右側，剛好靠著 Y 軸牆壁
+                    const boxX = chartArea.right - boxWidth;
+                    const boxY = yPos - boxHeight / 2;
+
+                    ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; // 螢光粉紅
+                    ctx.beginPath();
+                    ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 4);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff'; // 純白文字
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text, boxX + boxWidth / 2, yPos);
+                    
+                    ctx.restore();
+                }
+            };
+
+
             new Chart(ctx, {
                 type: 'line',
+                plugins: [careerLevelPlugin], // 👈 啟動剛寫好的生涯雷射浮標外掛！
                 data: {
+
                     // 💡 不再根據 timeframe 改變粗細，讓四條線同時清晰呈現
                     datasets: [
                         { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: 2.5, pointRadius: 1, tension: 0.2 },
