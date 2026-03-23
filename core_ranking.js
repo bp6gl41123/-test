@@ -478,9 +478,30 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                             } 
                         }
                     },
+                    // 🚨 終極修正：X 軸 1~31 完整顯示，並強制每個節點對齊刻度！
                     scales: {
-                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
-                        y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        x: { 
+                            type: 'linear', 
+                            position: 'bottom', 
+                            reverse: true, 
+                            min: 1, 
+                            max: 31, 
+                            title: { display: true, text: '距今場次', color: '#475569' }, 
+                            ticks: { 
+                                stepSize: 1,       // 👈 關鍵 1：每 1 單位就畫一個刻度
+                                autoSkip: false,   // 👈 關鍵 2：強制顯示所有數字，不允許系統自動隱藏
+                                color: '#64748b' 
+                            }, 
+                            grid: { color: 'rgba(255,255,255,0.02)' } 
+                        },
+                        y: { 
+                            position: 'right', 
+                            min: 0, 
+                            max: 100, 
+                            title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, 
+                            ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, 
+                            grid: { color: 'rgba(255,255,255,0.05)' } 
+                        }
                     }
                 }
             });
