@@ -151,10 +151,19 @@ window.renderNormalMode = function() {
     // 📊 預先結算四個區間的包裹數據
     const s30 = getStats(30), s20 = getStats(20), s7 = getStats(7), s3 = getStats(3);
 
-    // 🏆 終極版 radarHtml：右側加入圖表畫布，改為上圖下數字的垂直排版
+    // 📱 手機版相容性偵測 (Responsive Web Design)
+    const isMobile = window.innerWidth < 1024;
+    // 如果是手機，改為上下 1 欄 (1fr)，否則維持左右並排 (1fr 1.8fr)
+    const gridLayout = isMobile ? 'grid-template-columns: 1fr; gap: 15px;' : 'grid-template-columns: 1fr 1.8fr; gap: 25px;';
+    // 如果是手機，分隔線從右邊改到底部
+    const dividerStyle = isMobile ? 'border-bottom: 1px solid #475569; padding-bottom: 20px; margin-bottom: 10px;' : 'border-right: 1px solid #475569; padding-right: 30px;';
+    // 手機版允許底下 4 個小標籤換行 (變成 2x2 排列)
+    const statsFlex = isMobile ? 'flex-wrap: wrap; gap: 15px;' : '';
+
+    // 🏆 終極版 radarHtml：具備手機偵測的變形排版
     const radarHtml = `
-    <div style="display: grid; grid-template-columns: 1fr 1.8fr; gap: 25px; margin-bottom: 30px; background: #1e293b; color: white; padding: 35px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);">
-        <div style="border-right: 1px solid #475569; padding-right: 30px;">
+    <div style="display: grid; ${gridLayout} margin-bottom: 30px; background: #1e293b; color: white; padding: 35px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);">
+        <div style="${dividerStyle}">
             <div style="display: inline-block; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; box-shadow: 0 0 10px rgba(56,189,248,0.2);">📌 目前項目：${itemNames[key] || key}</div>
             <div style="font-size: 20px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">🏆 全賽季實力總榜</div>
             <div style="font-size: 56px; font-weight: 900; color: #fbbf24; line-height: 1;">${totalNet >= 0 ? '+' : ''}${totalNet} <span style="font-size: 26px; color: #fff;">注</span></div>
@@ -165,7 +174,7 @@ window.renderNormalMode = function() {
             <div style="position: relative; height: 200px; width: 100%; margin-bottom: 25px;">
                 <canvas id="normalModeChart"></canvas>
             </div>
-            <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; border-top: 1px dashed #475569; padding-top: 20px;">
+            <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; border-top: 1px dashed #475569; padding-top: 20px; ${statsFlex}">
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日指標</div><div style="font-size: 34px; font-weight: 900;">${s20.rate}%</div><div style="font-size: 16px; color: ${s20.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s20.net >= 0 ? '+' : ''}${s20.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日維持度</div><div style="font-size: 34px; font-weight: 900;">${s7.rate}%</div><div style="font-size: 16px; color: ${s7.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s7.net >= 0 ? '+' : ''}${s7.net} 注</div></div>
