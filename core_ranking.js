@@ -261,36 +261,47 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對同步版)
-function generateAuthenticTrack(maxDays, records) {
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 完美時間對位版)
+function generateAuthenticTrack(maxDays, records, systemLatestDate) {
     let data = [];
     if (!records || records.length === 0) return data;
 
     let sliceRec = records.slice(0, maxDays);
-    let actualLen = sliceRec.length;
-    if (actualLen === 0) return data;
+    if (sliceRec.length === 0) return data;
 
-    // 1. 起點：強制從最左邊 (X = actualLen) 的底下 (Y = 0) 竄出
-    data.push({ x: actualLen, y: 0 });
-
-    // 2. 時光倒流：從最舊的那天開始，一步步算到今天
+    // 時光倒流：從最舊的那天開始，一步步算到今天
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
-    reversed.forEach((r, index) => {
+    // 計算最舊那一天的「真實距今天數」
+    let firstDayDiff = window.getDaysDiff ? window.getDaysDiff(reversed[0][0], systemLatestDate) : sliceRec.length;
+    
+    // 1. 起點：強制從最舊的那天底下 (Y = 0) 竄出
+    data.push({ x: firstDayDiff, y: 0 });
+
+    reversed.forEach((r) => {
         const wm = r[1].match(/(\d+)勝/);
         const lm = r[1].match(/(\d+)敗/);
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 3. 沿用前台公式：計算累積到該天的真實勝率
+        // 2. 沿用前台公式：計算累積到該天的真實勝率
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 4. 座標推進：例如 20 場紀錄，X 軸會依序落在 19, 18, 17... 直到 0 (今天)
-        let xPos = actualLen - index - 1; 
-        data.push({ x: xPos, y: rate });
+        // 3. 計算這筆紀錄發生在「幾天前」，這就是 X 軸的精準座標！
+        let currentDayDiff = window.getDaysDiff ? window.getDaysDiff(r[0], systemLatestDate) : 0;
+        if (currentDayDiff < 0) currentDayDiff = 0;
+
+        data.push({ x: currentDayDiff, y: rate });
     });
 
+    // 4. 終點撞牆：如果最後一筆紀錄不是今天 (x > 0)，就拉平延伸到牆壁 (x = 0)
+    if (data.length > 0) {
+        let lastY = data[data.length - 1].y;
+        if (data[data.length - 1].x > 0) {
+            data.push({ x: 0, y: lastY });
+        }
+    }
     return data;
 }
 
@@ -448,10 +459,10 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 type: 'line',
                 data: {
                     datasets: [
-                        { label: '30日指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
-                        { label: '20日指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
-                        { label: '7日維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
-                        { label: '3日近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: 0, pointHitRadius: 10, tension: 0 }
+                        { label: '30日指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
+                        { label: '20日指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
+                        { label: '7日維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
+                        { label: '3日近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: timeframe===3?2:0, pointHitRadius: 10, tension: 0.2 }
                     ]
                 },
                 options: {
