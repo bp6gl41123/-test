@@ -261,44 +261,37 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 鎖定刻度版)
-function generateAuthenticTrack(maxDays, records, systemLatestDate) {
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對場次推進版)
+function generateAuthenticTrack(maxMatches, records) {
     let data = [];
     if (!records || records.length === 0) return data;
 
-    let sliceRec = records.slice(0, maxDays);
-    if (sliceRec.length === 0) return data;
+    let sliceRec = records.slice(0, maxMatches);
+    let actualLen = sliceRec.length;
+    if (actualLen === 0) return data;
 
-    // 1. 絕對起點：強制從你按鈕指定的天數刻度 (maxDays) 底部竄出！
-    data.push({ x: maxDays, y: 0 });
+    // 1. 起點：強制從最左邊 (X = 實際場次數) 的底部 (Y = 0) 竄出！
+    data.push({ x: actualLen, y: 0 });
 
-    // 時光倒流：從最舊的那天開始，一步步算到今天
+    // 2. 時序反轉：從最舊的那一場開始，一步步推到最新的一場
     let reversed = sliceRec.slice().reverse();
     let totalW = 0, totalL = 0;
 
-    reversed.forEach((r) => {
+    reversed.forEach((r, index) => {
         const wm = r[1].match(/(\d+)勝/);
         const lm = r[1].match(/(\d+)敗/);
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 2. 沿用前台公式：計算累積到該天的真實勝率
+        // 3. 沿用前台公式：計算累積到這場為止的「真實勝率」
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 3. 計算這筆紀錄發生在「幾天前」，這就是 X 軸的精準座標！
-        let currentDayDiff = window.getDaysDiff ? window.getDaysDiff(r[0], systemLatestDate) : 0;
-        if (currentDayDiff < 0) currentDayDiff = 0;
-
-        data.push({ x: currentDayDiff, y: rate });
+        // 4. 座標推進：不看日期，只看「場次」！
+        // 如果 actualLen 是 20，第一場就是 X=19，最後一場就是 X=0
+        let xPos = actualLen - index - 1; 
+        data.push({ x: xPos, y: rate });
     });
 
-    // 4. 終點撞牆：如果最後一筆紀錄不是今天 (x > 0)，就拉平延伸到牆壁 (x = 0)
-    if (data.length > 0) {
-        let lastY = data[data.length - 1].y;
-        if (data[data.length - 1].x > 0) {
-            data.push({ x: 0, y: lastY });
-        }
-    }
     return data;
 }
 
@@ -455,12 +448,10 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    datasets: [
-                        { label: '30日指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
-                        { label: '20日指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
-                        { label: '7日維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
-                        { label: '3日近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || [], systemLatestDate), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: timeframe===3?2:0, pointHitRadius: 10, tension: 0.2 }
-                    ]
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
+                        y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
