@@ -263,7 +263,7 @@ window.closeMomentumRadar = function() {
 
 
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對場次推進版，無假起點)
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 底部竄出版)
 function generateAuthenticTrack(maxMatches, records) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -272,7 +272,8 @@ function generateAuthenticTrack(maxMatches, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 💡 刪除假起點！不再從 0% 竄出，讓第一顆點直接顯示真實高度
+    // 🎯 只加了這一行：強制從按鈕指定的最大場次刻度 (例如 20) 底部竄出
+    data.push({ x: maxMatches, y: 0 });
 
     // 時序反轉：從最舊的那一場開始，一步步推到最新的一場
     let reversed = sliceRec.slice().reverse();
@@ -284,18 +285,17 @@ function generateAuthenticTrack(maxMatches, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 計算累積到這場為止的「真實勝率」
+        // 計算真實累積勝率 (完全沒動)
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 座標推進：第一筆是 X = actualLen，最後一筆是 X = 1
-        let xPos = actualLen - index; 
+        // 座標推進 (完全沒動)
+        let xPos = actualLen - index - 1; 
         data.push({ x: xPos, y: rate });
     });
 
-    // 終點撞牆：把最新一場的勝率延伸到 X = 0 (右側牆壁)，讓線條完美貼合
-    if (data.length > 0) {
-        let finalRate = data[data.length - 1].y;
-        data.push({ x: 0, y: finalRate });
+    // 終點撞牆 (完全沒動)
+    if (data.length > 0 && data[data.length - 1].x > 0) {
+        data.push({ x: 0, y: data[data.length - 1].y });
     }
 
     return data;
@@ -467,7 +467,18 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     interaction: { mode: 'index', intersect: false },
                     plugins: { 
                         legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
+                        tooltip: { 
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                            titleColor: '#94a3b8', 
+                            bodyFont: { weight: 'bold' }, 
+                            callbacks: { 
+                                label: function(c) { 
+                                    // 🎯 只加了這行攔截器：如果滑鼠碰到第 0 個點(竄出點)，就隱藏不顯示！
+                                    if (c.dataIndex === 0) return null; 
+                                    return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; 
+                                } 
+                            } 
+                        }
                     },
                     // ✅ scales 必須放在 options 裡面。X軸文字已更新為「距今場次」
                     scales: {
