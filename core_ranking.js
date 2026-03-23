@@ -263,7 +263,7 @@ window.closeMomentumRadar = function() {
 
 
 
-// 2. 數據轉換器 (真實累積勝率走勢演算法 - 底部竄出版)
+// 2. 數據轉換器 (真實累積勝率走勢演算法 - 絕對真實高度版)
 function generateAuthenticTrack(maxMatches, records) {
     let data = [];
     if (!records || records.length === 0) return data;
@@ -272,8 +272,7 @@ function generateAuthenticTrack(maxMatches, records) {
     let actualLen = sliceRec.length;
     if (actualLen === 0) return data;
 
-    // 🎯 只加了這一行：強制從按鈕指定的最大場次刻度 (例如 20) 底部竄出
-    data.push({ x: maxMatches, y: 0 });
+    // 💡 刪除假起點！不再從 0% 竄出，讓第一顆點直接顯示真實高度
 
     // 時序反轉：從最舊的那一場開始，一步步推到最新的一場
     let reversed = sliceRec.slice().reverse();
@@ -285,17 +284,18 @@ function generateAuthenticTrack(maxMatches, records) {
         if(wm) totalW += parseInt(wm[1]);
         if(lm) totalL += parseInt(lm[1]);
 
-        // 計算真實累積勝率 (完全沒動)
+        // 計算累積到這場為止的「真實勝率」
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
         
-        // 座標推進 (完全沒動)
-        let xPos = actualLen - index - 1; 
+        // 座標推進：例如 20 場，第一筆精準落在 X=20，最後一筆落在 X=1
+        let xPos = actualLen - index; 
         data.push({ x: xPos, y: rate });
     });
 
-    // 終點撞牆 (完全沒動)
-    if (data.length > 0 && data[data.length - 1].x > 0) {
-        data.push({ x: 0, y: data[data.length - 1].y });
+    // 終點撞牆：把最新一場的勝率延伸到 X = 0 (右側牆壁)，讓線條完美貼合
+    if (data.length > 0) {
+        let finalRate = data[data.length - 1].y;
+        data.push({ x: 0, y: finalRate });
     }
 
     return data;
@@ -444,6 +444,7 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         `;
         listContainer.appendChild(rowDiv);
 
+
         setTimeout(() => {
             const ctx = document.getElementById(safeId).getContext('2d');
             const c30 = timeframe === 30 ? '#10b981' : 'rgba(16, 185, 129, 0.2)';
@@ -454,7 +455,6 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    // ✅ 這裡必須放 datasets，裡面呼叫 generateAuthenticTrack 來畫線
                     datasets: [
                         { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
                         { label: '20場指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
@@ -464,7 +464,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
+                    // 🚨 修正核心：改為 nearest 與 axis: 'x'，絕對精準對齊游標位置！不再抓錯資料！
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
                     plugins: { 
                         legend: { position: 'top', align: 'end', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20 } },
                         tooltip: { 
@@ -473,20 +474,19 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                             bodyFont: { weight: 'bold' }, 
                             callbacks: { 
                                 label: function(c) { 
-                                    // 🎯 只加了這行攔截器：如果滑鼠碰到第 0 個點(竄出點)，就隱藏不顯示！
-                                    if (c.dataIndex === 0) return null; 
+                                    // 乾淨俐落的數字，不加任何奇怪的攔截
                                     return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; 
                                 } 
                             } 
                         }
                     },
-                    // ✅ scales 必須放在 options 裡面。X軸文字已更新為「距今場次」
                     scales: {
-                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次 (底部起飛)', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
+                        x: { type: 'linear', position: 'bottom', reverse: true, min: 0, max: 30, title: { display: true, text: '距今場次', color: '#475569' }, ticks: { stepSize: 5, color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.02)' } },
                         y: { position: 'right', min: 0, max: 100, title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                     }
                 }
             });
         }, 150);
+
     });
 };
