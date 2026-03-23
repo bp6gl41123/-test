@@ -261,28 +261,37 @@ window.closeMomentumRadar = function() {
     document.getElementById('mainContent').style.display = 'block';
 };
 
-// 真實數據轉換器
-function generateDailyTrack(maxDays, actualLen, targetRate, isStraightLine) {
+// 2. 數據轉換器 (真實累積勝率走勢演算法)
+function generateAuthenticTrack(maxDays, records) {
     let data = [];
-    let startDay = Math.min(maxDays, actualLen);
-    if (startDay <= 0) return data;
+    if (!records || records.length === 0) return data;
 
-    data.push({ x: startDay, y: 0 });
+    let sliceRec = records.slice(0, maxDays);
+    let actualLen = sliceRec.length;
+    if (actualLen === 0) return data;
 
-    if (isStraightLine || startDay <= 3) {
-        data.push({ x: 0, y: targetRate });
-    } else {
-        let currentY = 0;
-        for (let day = startDay - 1; day > 0; day--) {
-            let progress = (startDay - day) / startDay;
-            let baseValue = targetRate * progress;
-            let noise = (Math.random() - 0.5) * 16; 
-            currentY = baseValue + noise;
-            if (currentY < 0) currentY = 0;
-            if (currentY > 100) currentY = 100;
-            data.push({ x: day, y: currentY });
-        }
-        data.push({ x: 0, y: targetRate });
+    // 將時間反轉：從最舊的那天開始，一步步算到今天
+    let reversed = sliceRec.slice().reverse();
+    let totalW = 0, totalL = 0;
+
+    reversed.forEach((r, index) => {
+        const wm = r[1].match(/(\d+)勝/);
+        const lm = r[1].match(/(\d+)敗/);
+        if(wm) totalW += parseInt(wm[1]);
+        if(lm) totalL += parseInt(lm[1]);
+
+        // 計算累積到該天的真實勝率
+        let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
+        
+        // 畫出當天座標 (X軸從 actualLen 遞減到 1)
+        let xPos = actualLen - index; 
+        data.push({ x: xPos, y: rate });
+    });
+
+    // 終點撞牆：把今天的最終勝率延伸對齊到右側牆壁 (X=0)
+    if (data.length > 0) {
+        let finalRate = data[data.length - 1].y;
+        data.push({ x: 0, y: finalRate });
     }
     return data;
 }
@@ -441,10 +450,10 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 type: 'line',
                 data: {
                     datasets: [
-                        { label: '30日指標', data: generateDailyTrack(30, exp.recordsLen, exp.r30, false), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
-                        { label: '20日指標', data: generateDailyTrack(20, exp.recordsLen, exp.r20, false), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
-                        { label: '7日維持度', data: generateDailyTrack(7, exp.recordsLen, exp.r7, false),  borderColor: c7,  borderWidth: timeframe===7?4:1.5, pointRadius: timeframe===7?2:0, tension: 0.2 },
-                        { label: '3日近況',   data: generateDailyTrack(3, exp.recordsLen, exp.r3, true),   borderColor: c3,  borderWidth: timeframe===3?5:1.5, pointRadius: 0, pointHitRadius: 10, tension: 0 }
+                        { label: '30日指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: timeframe===30?3:1.5, pointRadius: timeframe===30?1:0, tension: 0.2 },
+                        { label: '20日指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: timeframe===20?3.5:1.5, pointRadius: timeframe===20?1:0, tension: 0.2 },
+                        { label: '7日維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: timeframe===7?4:1.5,  pointRadius: timeframe===7?2:0,  tension: 0.2 },
+                        { label: '3日近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: timeframe===3?5:1.5,  pointRadius: 0, pointHitRadius: 10, tension: 0 }
                     ]
                 },
                 options: {
