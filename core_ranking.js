@@ -396,6 +396,8 @@ window.openMomentumRadar = function() {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
+    // 🚨 LINE 專殺：切換前先把主頁面滾回頂部，強制網址列歸位，消滅 innerHeight 過渡態
+    window.scrollTo(0, 0);
 mainContent.style.display = 'none';
     radarPage.style.display = 'block';
 
@@ -406,7 +408,7 @@ mainContent.style.display = 'none';
         radarPage.style.transform = 'scale(' + scale + ')';
         radarPage.style.width = '980px';
         // 🚨 不再用 innerHeight 算固定高度！改用 100vh/scale 讓瀏覽器自適應
-        radarPage.style.height = (100 / scale) + 'vh';
+        radarPage.style.height = Math.round(window.innerHeight / scale) + 'px';
         // 強制 repaint：讀取 offsetHeight 觸發瀏覽器同步回流
         void radarPage.offsetHeight;
     }
