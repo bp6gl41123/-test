@@ -416,10 +416,15 @@ window.openMomentumRadar = function() {
             radarPage.style.visibility = 'visible';
         }, 100);
     } else {
-        // 🖥️ 電腦版：直接顯示，不做 scale，不做延遲
+        // 🖥️ 電腦版：強制清除 scale，確保全屏顯示
+        radarPage.style.transform = 'none';
+        radarPage.style.width = '100%';
+        radarPage.style.height = '100%';
         radarPage.style.display = 'block';
         radarPage.scrollTo(0, 0);
-    }     
+    }
+    // 🚨 鎖定旗標：防止 scalePage 在戰情室開啟期間覆蓋設定
+    window._radarLocked = true;    
 
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
@@ -427,6 +432,8 @@ window.openMomentumRadar = function() {
 };
 
 window.closeMomentumRadar = function() {
+    // 🚨 解除鎖定旗標，讓 scalePage 恢復正常運作
+    window._radarLocked = false;
     var radarPage = document.getElementById('momentumRadarPage');
     radarPage.style.display = 'none';
     radarPage.style.transform = 'none';
