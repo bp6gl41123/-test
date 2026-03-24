@@ -400,10 +400,10 @@ window.openMomentumRadar = function() {
     radarPage.style.display = 'block';
     radarPage.scrollTo(0, 0);
 
-    // 🚨 核心防呆新增：打開瞬間，延遲 0.1 秒強迫喚醒 index.html 的縮放引擎！防止 LINE 縮在左上角
-    if (typeof window.scalePage === 'function') {
-        setTimeout(window.scalePage, 100);
-    }
+    // 🚨 核心防呆升級：加入 function() { window.scalePage(true); } 強制更新高度，填滿底部白邊！
+    if (typeof window.scalePage === 'function') {
+        setTimeout(function() { window.scalePage(true); }, 100);
+    }
     
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
@@ -414,10 +414,10 @@ window.closeMomentumRadar = function() {
     document.getElementById('momentumRadarPage').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
-    // 🚨 核心防呆新增：關閉時也喚醒一次，確保主頁完美歸位
-    if (typeof window.scalePage === 'function') {
-        setTimeout(window.scalePage, 100);
-    }
+    // 🚨 核心防呆升級：關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
+    if (typeof window.scalePage === 'function') {
+        setTimeout(function() { window.scalePage(true); }, 100);
+    }
 };
 
 

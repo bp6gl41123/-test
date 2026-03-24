@@ -423,40 +423,44 @@
     <script src="core_utils.js?v=1.0.10"></script>
     <script src="core_tooltips.js?v=1.0.13"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.125"></script>
+    <script src="core_ranking.js?v=1.0.126"></script>
     <script src="core_recruit.js?v=1.0.81"></script>
     <script src="core_engine.js?v=1.0.81"></script>
 
 <script>
 (function() {
-    var lastWidth = 0; // 🚨 防呆記憶體：記住上一次的螢幕寬度
+    var lastWidth = 0;  // 寬度記憶體
+    var lastHeight = 0; // 🚨 新增：高度記憶體
 
-    window.scalePage = function() {
+    // 🚨 新增 force 參數，允許核心程式強制它重算
+    window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
         var radar = document.getElementById('momentumRadarPage');
         var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight; // 抓取最新高度
 
-        // 🚨 終極防風暴鎖：如果現在的寬度跟上次一樣（代表只是上下滑動或雙指縮放），直接拒絕重新計算！保護排版不崩潰！
-        if (lastWidth === screenWidth) return; 
-        lastWidth = screenWidth; // 更新記憶體
+        // 🚨 升級版防風暴鎖：同時監測寬度與高度。除非被 force 強制執行，否則長寬都沒變才拒絕計算！
+        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
+        lastWidth = screenWidth;
+        lastHeight = screenHeight;
 
         if (screenWidth < 1024) { 
             var scale = screenWidth / 980;
             
-            // 1. 縮放主頁
             if (content) {
                 content.style.transformOrigin = 'top left';
                 content.style.transform = 'scale(' + scale + ')';
                 content.style.width = '980px';
-                content.style.height = Math.round(window.innerHeight / scale) + 'px';
+                // 🚨 計算高度時改用精準的 screenHeight，確保填滿畫面
+                content.style.height = Math.round(screenHeight / scale) + 'px';
             }
             
-            // 2. 縮放戰情室
             if (radar) {
                 radar.style.transformOrigin = 'top left';
                 radar.style.transform = 'scale(' + scale + ')';
                 radar.style.width = '980px';
-                radar.style.height = Math.round(window.innerHeight / scale) + 'px';
+                // 🚨 同步更新戰情室的精準高度
+                radar.style.height = Math.round(screenHeight / scale) + 'px';
             }
             
             document.body.style.overflowX = 'hidden';
@@ -471,63 +475,11 @@
         document.documentElement.style.visibility = 'visible';
     }
     
-    window.addEventListener('load', window.scalePage);
+    // 網頁載入時強制執行一次
+    window.addEventListener('load', function() { window.scalePage(true); });
     window.addEventListener('resize', window.scalePage);
     window.addEventListener('orientationchange', function() {
-        lastWidth = 0; // 💡 旋轉手機時，強制重置記憶體，允許重新計算
-        setTimeout(window.scalePage, 200);
-    });
-})();
-</script>
-<script>
-(function() {
-    var lastWidth = 0; // 🚨 防呆記憶體：記住上一次的螢幕寬度
-
-    window.scalePage = function() {
-        var content = document.getElementById('mainContent');
-        var radar = document.getElementById('momentumRadarPage');
-        var screenWidth = window.innerWidth;
-
-        // 🚨 終極防風暴鎖：如果現在的寬度跟上次一樣（代表只是上下滑動或雙指縮放），直接拒絕重新計算！保護排版不崩潰！
-        if (lastWidth === screenWidth) return; 
-        lastWidth = screenWidth; // 更新記憶體
-
-        if (screenWidth < 1024) { 
-            var scale = screenWidth / 980;
-            
-            // 1. 縮放主頁
-            if (content) {
-                content.style.transformOrigin = 'top left';
-                content.style.transform = 'scale(' + scale + ')';
-                content.style.width = '980px';
-                content.style.height = Math.round(window.innerHeight / scale) + 'px';
-            }
-            
-            // 2. 縮放戰情室
-            if (radar) {
-                radar.style.transformOrigin = 'top left';
-                radar.style.transform = 'scale(' + scale + ')';
-                radar.style.width = '980px';
-                radar.style.height = Math.round(window.innerHeight / scale) + 'px';
-            }
-            
-            document.body.style.overflowX = 'hidden';
-            document.documentElement.style.overflowX = 'hidden';
-        } else {
-            // 電腦版還原
-            if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
-            if (radar) { radar.style.transform = ''; radar.style.width = ''; radar.style.height = ''; }
-            document.body.style.overflowX = 'auto';
-            document.documentElement.style.overflowX = 'auto';
-        }
-        document.documentElement.style.visibility = 'visible';
-    }
-    
-    window.addEventListener('load', window.scalePage);
-    window.addEventListener('resize', window.scalePage);
-    window.addEventListener('orientationchange', function() {
-        lastWidth = 0; // 💡 旋轉手機時，強制重置記憶體，允許重新計算
-        setTimeout(window.scalePage, 200);
+        setTimeout(function() { window.scalePage(true); }, 200);
     });
 })();
 </script>
