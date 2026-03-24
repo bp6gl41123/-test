@@ -423,7 +423,7 @@
     <script src="core_utils.js?v=1.0.10"></script>
     <script src="core_tooltips.js?v=1.0.13"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.126"></script>
+    <script src="core_ranking.js?v=1.0.127"></script>
     <script src="core_recruit.js?v=1.0.81"></script>
     <script src="core_engine.js?v=1.0.81"></script>
 
@@ -453,12 +453,12 @@
                 content.style.width = '980px';
                 content.style.height = Math.round(screenHeight / scale) + 'px';
             }
-            if (radar) {
-                radar.style.transformOrigin = 'top left';
-                radar.style.transform = 'scale(' + scale + ')';
-                radar.style.width = '980px';
-                radar.style.height = Math.round(screenHeight / scale) + 'px';
-            }
+            if (radar && radar.style.display !== 'none') {
+    radar.style.transformOrigin = 'top left';
+    radar.style.transform = 'scale(' + scale + ')';
+    radar.style.width = '980px';
+    radar.style.height = Math.round(screenHeight / scale) + 'px';
+}
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
         } else {

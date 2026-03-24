@@ -400,10 +400,11 @@ window.openMomentumRadar = function() {
     radarPage.style.display = 'block';
     radarPage.scrollTo(0, 0);
 
-    // 🚨 核心防呆升級：加入 function() { window.scalePage(true); } 強制更新高度，填滿底部白邊！
-    if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 100);
-    }
+    // 🚨 核心防呆升級：LINE 瀏覽器需要更長的 reflow 時間，雙重保險確保縮放正確
+if (typeof window.scalePage === 'function') {
+    setTimeout(function() { window.scalePage(true); }, 50);
+    setTimeout(function() { window.scalePage(true); }, 300);
+}
     
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
