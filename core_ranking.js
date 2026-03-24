@@ -396,30 +396,23 @@ window.openMomentumRadar = function() {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
-    // 🚨 LINE 專殺：切換前先把主頁面滾回頂部，強制網址列歸位，消滅 innerHeight 過渡態
+    // 🚨 LINE WebView 終極方案：先隱形 → 滾回頂部 → 等穩定 → 算 scale → 才顯示
+    // 第一步：滾回頂部，讓 LINE 網址列歸位
     window.scrollTo(0, 0);
-mainContent.style.display = 'none';
+    mainContent.style.display = 'none';
+
+    // 第二步：戰情室先上場但完全透明，用戶看不見
     radarPage.style.display = 'block';
+    radarPage.style.visibility = 'hidden';
 
-    // 🚨 LINE WebView 終極方案：用 screen.width 取代 innerWidth，不受網址列動畫影響
-    if (window.innerWidth < 1024) {
-        var safeWidth = window.screen.width || window.innerWidth;
-        var scale = safeWidth / 980;
-        radarPage.style.transformOrigin = 'top left';
-        radarPage.style.transform = 'scale(' + scale + ')';
-        radarPage.style.width = '980px';
-        radarPage.style.height = Math.round(safeWidth / scale / scale) + 'px';
-        void radarPage.offsetHeight;
-    }
-
-    radarPage.scrollTo(0, 0);
-
-    // 多波延遲修正：等 LINE 網址列動畫結束後，用 scalePage 精準校正
-    if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 100);
-        setTimeout(function() { window.scalePage(true); }, 400);
-        setTimeout(function() { window.scalePage(true); }, 800);
-    }
+    // 第三步：延遲 350ms，等 LINE 網址列動畫 100% 結束後，才真正算 scale 並顯示
+    setTimeout(function() {
+        if (typeof window.scalePage === 'function') {
+            window.scalePage(true);
+        }
+        radarPage.scrollTo(0, 0);
+        radarPage.style.visibility = 'visible';
+    }, 350);     
 
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
