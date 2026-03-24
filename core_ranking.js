@@ -570,7 +570,8 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         let opacityStyle = isTopTier ? 'opacity: 1;' : 'opacity: 0.65; filter: grayscale(30%);';
         let sleepBadge = !isTopTier ? `<div style="position: absolute; top: -12px; right: 15px; background: #475569; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-weight: 900; font-size: 12px; border: 1px solid #64748b; letter-spacing: 1px; z-index: 5;">❄️ 沉澱中</div>` : '';
 
-        rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative;`;
+        // 🚨 LINE 瀏覽器終極防護：強制鎖定卡片寬度為電腦版尺寸，確保圖表永遠不被擠壓，完美交由外部引擎等比例縮小！
+        rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative; min-width: 880px; box-sizing: border-box;`;
         
         const safeId = `radarChart_${rankStr.replace(/\s/g,'')}_${exp.name.replace(/\s+/g, '')}`;
 
