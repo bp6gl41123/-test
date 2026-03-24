@@ -424,7 +424,7 @@
     <script src="core_utils.js?v=1.0.10"></script>
     <script src="core_tooltips.js?v=1.0.13"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.120"></script>
+    <script src="core_ranking.js?v=1.0.121"></script>
     <script src="core_recruit.js?v=1.0.81"></script>
     <script src="core_engine.js?v=1.0.81"></script>
 
@@ -435,25 +435,47 @@
         if (!content) return;
         var screenWidth = window.innerWidth;
         
-        if (screenWidth < 1024) { // 💡 門檻提高到 1024
+        var radar = document.getElementById('momentumRadarPage'); // 👈 新增：把戰情室也抓進來
+        
+        if (screenWidth < 1024) { 
             var scale = screenWidth / 980;
-            content.style.transformOrigin = 'top left';
-            content.style.transform = 'scale(' + scale + ')';
-            content.style.width = '980px';
-            // 💡 修正高度計算錯誤 (原本寫成了 width)
-            content.style.height = Math.round(window.innerHeight / scale) + 'px';
+            
+            // 1. 縮放主頁
+            if (content) {
+                content.style.transformOrigin = 'top left';
+                content.style.transform = 'scale(' + scale + ')';
+                content.style.width = '980px';
+                content.style.height = Math.round(window.innerHeight / scale) + 'px';
+            }
+            
+            // 2. 縮放戰情室 (新增這段，完美同步)
+            if (radar) {
+                radar.style.transformOrigin = 'top left';
+                radar.style.transform = 'scale(' + scale + ')';
+                radar.style.width = '980px';
+                radar.style.height = Math.round(window.innerHeight / scale) + 'px';
+            }
+            
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
         } else {
             // 電腦版還原
-            content.style.transform = '';
-            content.style.width = '';
-            content.style.height = '';
+            if (content) {
+                content.style.transform = '';
+                content.style.width = '';
+                content.style.height = '';
+            }
+            if (radar) {
+                radar.style.transform = '';
+                radar.style.width = '';
+                radar.style.height = '';
+            }
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
         document.documentElement.style.visibility = 'visible';
     }
+
     window.addEventListener('load', scalePage);
     window.addEventListener('resize', scalePage);
     // 💡 關鍵：加入翻轉監聽
