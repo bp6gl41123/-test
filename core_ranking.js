@@ -396,15 +396,27 @@ window.openMomentumRadar = function() {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
-    mainContent.style.display = 'none';
-    radarPage.style.display = 'block';
-    radarPage.scrollTo(0, 0);
+mainContent.style.display = 'none';
+    radarPage.style.display = 'block';
 
-    // 🚨 核心防呆升級：LINE 瀏覽器需要更長的 reflow 時間，雙重保險確保縮放正確
-if (typeof window.scalePage === 'function') {
-    setTimeout(function() { window.scalePage(true); }, 50);
-    setTimeout(function() { window.scalePage(true); }, 300);
-}
+    // 🚨 LINE WebView 專殺：display 切換後，先同步設定 transform，再強制 repaint
+    if (typeof window.scalePage === 'function' && window.innerWidth < 1024) {
+        var scale = window.innerWidth / 980;
+        radarPage.style.transformOrigin = 'top left';
+        radarPage.style.transform = 'scale(' + scale + ')';
+        radarPage.style.width = '980px';
+        radarPage.style.height = Math.round(window.innerHeight / scale) + 'px';
+        // 強制 repaint：讀取 offsetHeight 觸發瀏覽器同步回流
+        void radarPage.offsetHeight;
+    }
+
+    radarPage.scrollTo(0, 0);
+
+    // 雙重保險：延遲再跑一次 scalePage 處理邊界情況
+    if (typeof window.scalePage === 'function') {
+        setTimeout(function() { window.scalePage(true); }, 50);
+        setTimeout(function() { window.scalePage(true); }, 300);
+    }
     
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
