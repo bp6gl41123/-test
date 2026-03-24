@@ -401,13 +401,25 @@ window.openMomentumRadar = function() {
 mainContent.style.display = 'none';
     radarPage.style.display = 'block';
 
-    // 🚨 LINE WebView 終極方案：戰情室完全脫離 scale 縮放體系，用原生寬度渲染
-    // position:fixed 的全屏覆蓋層不需要 transform:scale，直接讓瀏覽器原生渲染即可
-    radarPage.style.transform = 'none';
-    radarPage.style.width = '100%';
-    radarPage.style.height = '100%';
+    // 🚨 LINE WebView 終極方案：用 screen.width 取代 innerWidth，不受網址列動畫影響
+    if (window.innerWidth < 1024) {
+        var safeWidth = window.screen.width || window.innerWidth;
+        var scale = safeWidth / 980;
+        radarPage.style.transformOrigin = 'top left';
+        radarPage.style.transform = 'scale(' + scale + ')';
+        radarPage.style.width = '980px';
+        radarPage.style.height = Math.round(safeWidth / scale / scale) + 'px';
+        void radarPage.offsetHeight;
+    }
 
     radarPage.scrollTo(0, 0);
+
+    // 多波延遲修正：等 LINE 網址列動畫結束後，用 scalePage 精準校正
+    if (typeof window.scalePage === 'function') {
+        setTimeout(function() { window.scalePage(true); }, 100);
+        setTimeout(function() { window.scalePage(true); }, 400);
+        setTimeout(function() { window.scalePage(true); }, 800);
+    }
 
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
@@ -417,7 +429,6 @@ mainContent.style.display = 'none';
 window.closeMomentumRadar = function() {
     var radarPage = document.getElementById('momentumRadarPage');
     radarPage.style.display = 'none';
-    // 🚨 清除戰情室的獨立渲染樣式，避免殘留
     radarPage.style.transform = '';
     radarPage.style.width = '';
     radarPage.style.height = '';
