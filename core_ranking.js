@@ -429,9 +429,9 @@ window.openMomentumRadar = function() {
 window.closeMomentumRadar = function() {
     var radarPage = document.getElementById('momentumRadarPage');
     radarPage.style.display = 'none';
-    radarPage.style.transform = '';
-    radarPage.style.width = '';
-    radarPage.style.height = '';
+    radarPage.style.transform = 'none';
+    radarPage.style.width = '100%';
+    radarPage.style.height = '100%';
     document.getElementById('mainContent').style.display = 'block';
 
     // 🚨 核心防呆升級：關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
