@@ -10,6 +10,7 @@ window.filterPickText = function(rawText, sportKey) {
 
     if (sportKey !== "") {
         const itemNames = {
+            "nba_main": "NBA主推", "mlb_main": "MLB主推",
             "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分",
             "mlb_ml": "MLB 獨贏(正常)", "mlb_runline": "MLB 讓分盤", "mlb_total": "MLB 大小分", "mlb_ml_high": "MLB 高賠獨贏",
             "nhl_ml": "冰球獨贏(含加時)", "nhl_ml_reg": "冰球獨贏(不含加時)", "nhl_spread_ot": "冰球讓盤(含加時)", "nhl_spread_reg": "冰球讓盤(不含加時)",

@@ -2,7 +2,7 @@
 /* ==== 【組件 E：核心引擎 - core_engine.js】 ==== */
 /* ============================================================== */
 
-const DB_KEY = 'DashboardDB_V96_Final'; 
+const DB_KEY = 'DashboardDB_V109_Final'; 
 window.dataDB = JSON.parse(localStorage.getItem(DB_KEY));
 window.isNegativeMode = false; // 🪄 魔法反向開關
 
@@ -25,7 +25,7 @@ if (!document.getElementById('pickTooltipStyle')) {
 
 .pick-icon { font-size: 16px; padding: 4px 8px !important; border: 2px solid #fff !important; box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important; background: #fffbeb; border-radius: 20px; cursor: pointer; transition: 0.2s; min-width: 34px; min-height: 34px; display: inline-flex !important; align-items: center; justify-content: center; }
 
-        @media (pointer: coarse) { .pick-icon { font-size: 14px !important; min-width: 28px !important; min-height: 28px !important; padding: 3px 5px !important; } }
+        @media (pointer: coarse) { .pick-icon { font-size: 14px !important; min-width: 30px !important; min-height: 30px !important; padding: 3px 6px !important; } }
 
         /* 🎯 核心升級三：名字優雅省略化 (單行超出自動變...，絕對防禦破版) */
         .expert-card .name { 
@@ -42,8 +42,8 @@ if (!document.getElementById('pickTooltipStyle')) {
         @media (max-width: 768px) {
             /* 手機版泡泡框稍微再縮小一點，更貼合邊緣 */
           .pick-tooltip-container { top: -6px !important; right: -6px !important; }
-          .pick-icon { font-size: 10px !important; padding: 1px 4px !important; min-width: 22px !important; min-height: 22px !important; }
-            
+          .pick-icon { font-size: 14px !important; padding: 3px 6px !important; min-width: 30px !important; min-height: 30px !important; }
+    
             /* 對策二：高度鎖死。強制卡片統一高度，並將內容垂直置中 */
             .expert-card, body.mode-neg .expert-card { 
                 height: 125px !important; 
@@ -441,7 +441,8 @@ const tabs = document.getElementById('tabContainer');
         tabs.innerHTML = '';
         const categories = [
          
-            { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
+            { name: '👑 眾選主推', items: [ { id: 'nba_main', label: '🏀 NBA主推' }, { id: 'mlb_main', label: '⚾ MLB主推' } ] },
+    { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
             { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
             { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
             { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },

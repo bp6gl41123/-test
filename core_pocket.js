@@ -172,6 +172,7 @@ window.openPocketModal = () => {
             listArea.innerHTML = '<div style="padding: 100px 20px; text-align: center; color: #94a3b8; font-weight:bold; font-size:20px;">您的專屬寶庫目前空空如也！<br><small style="font-weight:normal;">快去排行榜點擊「➕ 收錄寶庫」吧！</small></div>'; 
         } else {
             const itemNames = {
+                "nba_main": "🏀 NBA主推", "mlb_main": "⚾ MLB主推",
                 "npb_runline": "日棒讓分", "npb_ml": "日棒獨贏", "npb_total": "日棒大小", "npb_1h_runline": "日棒上半讓分", "npb_1h_ml": "日棒上半獨贏", "npb_1h_total": "日棒上半大小",
                 "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分",
                 "mlb_ml": "MLB 獨贏", "mlb_runline": "MLB 讓分盤", "mlb_total": "MLB 大小分", "mlb_ml_high": "MLB 高賠獨贏",
