@@ -408,7 +408,6 @@ mainContent.style.display = 'none';
     radarPage.style.height = '100%';
 
     radarPage.scrollTo(0, 0);
-};
 
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
