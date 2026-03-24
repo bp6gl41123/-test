@@ -14,7 +14,12 @@ const SYSTEM_DAILY_KEY = atob(config.adminCode);
 
 const itemNames = {
 
+    // 👑 眾選主推專區
+    "nba_main": "🏀 NBA主推",
+    "mlb_main": "⚾ MLB主推",
+
     // 🎯 新增 NPB 日棒專區 (6 細項)
+
     "npb_runline": "日棒讓分",
     "npb_ml": "日棒獨贏",
     "npb_total": "日棒大小",
