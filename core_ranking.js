@@ -396,30 +396,30 @@ window.openMomentumRadar = function() {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
-    // 🚨 LINE WebView 終極方案：不信任 innerWidth，用 screen.width 強制算 scale
+    // 🚨 LINE WebView 終極方案：用 screen.width 判斷，手機版與電腦版走不同路徑
     window.scrollTo(0, 0);
     mainContent.style.display = 'none';
 
-    // 戰情室先上場但完全透明
-    radarPage.style.display = 'block';
-    radarPage.style.visibility = 'hidden';
-
-    // 🚨 核心：用 screen.width 直接算 scale，繞過 LINE 的 innerWidth 污染問題
     var safeWidth = window.screen.width || window.innerWidth;
     if (safeWidth < 1024) {
+        // 📱 手機版：先隱形 → 用 screen.width 算 scale → 延遲才顯示
+        radarPage.style.display = 'block';
+        radarPage.style.visibility = 'hidden';
         var scale = safeWidth / 980;
         var safeHeight = window.screen.height || window.innerHeight;
         radarPage.style.transformOrigin = 'top left';
         radarPage.style.transform = 'scale(' + scale + ')';
         radarPage.style.width = '980px';
         radarPage.style.height = Math.round(safeHeight / scale) + 'px';
-    }
-
-    // 延遲讓 LINE 渲染穩定後才顯示
-    setTimeout(function() {
+        setTimeout(function() {
+            radarPage.scrollTo(0, 0);
+            radarPage.style.visibility = 'visible';
+        }, 100);
+    } else {
+        // 🖥️ 電腦版：直接顯示，不做 scale，不做延遲
+        radarPage.style.display = 'block';
         radarPage.scrollTo(0, 0);
-        radarPage.style.visibility = 'visible';
-    }, 100);     
+    }     
 
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
