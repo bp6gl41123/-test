@@ -429,55 +429,49 @@
 
 <script>
 (function() {
-    var lastWidth = 0;  // 寬度記憶體
-    var lastHeight = 0; // 🚨 新增：高度記憶體
+    var lastWidth = 0;
+    var lastHeight = 0;
 
-    // 🚨 新增 force 參數，允許核心程式強制它重算
+    // 🛡️ 究極縮放引擎：支援 force 強制執行與雙重長寬監控
     window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
         var radar = document.getElementById('momentumRadarPage');
         var screenWidth = window.innerWidth;
-        var screenHeight = window.innerHeight; // 抓取最新高度
+        var screenHeight = window.innerHeight;
 
-        // 🚨 升級版防風暴鎖：同時監測寬度與高度。除非被 force 強制執行，否則長寬都沒變才拒絕計算！
-        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
+        // 🚨 邏輯核心：除非 force 為 true，否則長寬都沒變就拒絕重算，防止風暴
+        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return;
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
-        if (screenWidth < 1024) { 
+        if (screenWidth < 1024) {
             var scale = screenWidth / 980;
             
             if (content) {
                 content.style.transformOrigin = 'top left';
                 content.style.transform = 'scale(' + scale + ')';
                 content.style.width = '980px';
-                // 🚨 計算高度時改用精準的 screenHeight，確保填滿畫面
                 content.style.height = Math.round(screenHeight / scale) + 'px';
             }
-            
             if (radar) {
                 radar.style.transformOrigin = 'top left';
                 radar.style.transform = 'scale(' + scale + ')';
                 radar.style.width = '980px';
-                // 🚨 同步更新戰情室的精準高度
                 radar.style.height = Math.round(screenHeight / scale) + 'px';
             }
-            
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
         } else {
-            // 電腦版還原
             if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
             if (radar) { radar.style.transform = ''; radar.style.width = ''; radar.style.height = ''; }
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
         document.documentElement.style.visibility = 'visible';
-    }
+    };
     
-    // 網頁載入時強制執行一次
     window.addEventListener('load', function() { window.scalePage(true); });
-    window.addEventListener('resize', window.scalePage);
+    window.addEventListener('resize', function() { window.scalePage(); });
     window.addEventListener('orientationchange', function() {
         setTimeout(function() { window.scalePage(true); }, 200);
     });
