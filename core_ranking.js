@@ -400,10 +400,29 @@ window.openMomentumRadar = function() {
     window.scrollTo(0, 0);
     mainContent.style.display = 'none';
 
+    // 🚨 LINE WebView 終極方案：用 screen.width 算 scale 適配所有裝置
+    // screen.width < 1024 = 手機/平板 → 必做 scale
+    // screen.width >= 1024 但窗口小 → LINE 電腦版等小窗口 → 也做 scale
+    // screen.width >= 1024 且窗口大 → 正常電腦版 → 不做 scale
     var safeWidth = window.screen.width || window.innerWidth;
-    if (safeWidth < 1024) {
-        // 📱 手機版：先隱形 → 用 screen.width 算 scale → 延遲才顯示
-        radarPage.style.display = 'block';
+    var needScale = (safeWidth < 1024);
+    // 🚨 額外偵測：如果 display:block 後實際窗口裝不下 980px，也強制做 scale
+    radarPage.style.display = 'block';
+
+    if (!needScale) {
+        // 先暫時全屏顯示，測量實際可用寬度
+        radarPage.style.transform = 'none';
+        radarPage.style.width = '100%';
+        radarPage.style.height = '100%';
+        var actualWidth = radarPage.clientWidth;
+        if (actualWidth < 980) {
+            needScale = true;
+            safeWidth = actualWidth;
+        }
+    }
+
+    if (needScale) {
+        // 📱 手機版 / 小窗口版：用 scale 等比縮放
         radarPage.style.visibility = 'hidden';
         var scale = safeWidth / 980;
         var safeHeight = window.screen.height || window.innerHeight;
@@ -416,13 +435,10 @@ window.openMomentumRadar = function() {
             radarPage.style.visibility = 'visible';
         }, 100);
     } else {
-        // 🖥️ 電腦版：強制清除 scale，確保全屏顯示
-        radarPage.style.transform = 'none';
-        radarPage.style.width = '100%';
-        radarPage.style.height = '100%';
-        radarPage.style.display = 'block';
+        // 🖥️ 電腦版：全屏顯示，已在上方設定完成
         radarPage.scrollTo(0, 0);
     }
+
     // 🚨 鎖定旗標：防止 scalePage 在戰情室開啟期間覆蓋設定
     window._radarLocked = true;    
 
