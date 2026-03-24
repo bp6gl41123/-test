@@ -171,13 +171,23 @@ window.renderNormalMode = function() {
             <div style="font-size: 16px; color: #94a3b8; margin-top: 8px;">(${totalW}勝 ${totalL}敗 / 歷史留存)</div>
         </div>
        
+
 <div style="display: flex; flex-direction: column; width: 100%;">
-            <div style="text-align: center; margin-bottom: 5px;">
-                <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; font-size: 12px; padding: 4px 15px; border-radius: 20px; letter-spacing: 0.5px; font-weight: bold;">👆 點擊圖表標籤，可自由開關走勢線</span>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; font-size: 13px; padding: 4px 15px; border-radius: 20px; letter-spacing: 0.5px; font-weight: bold;">👆 點擊下方按鈕，可自由開關觀測線</span>
             </div>
+            
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="chart-toggle-btn" data-idx="0" style="background: rgba(16,185,129,0.15); border: 1.5px solid #10b981; color: #10b981; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟩 30場指標</button>
+                <button class="chart-toggle-btn" data-idx="1" style="background: rgba(56,189,248,0.15); border: 1.5px solid #38bdf8; color: #38bdf8; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟦 20場指標</button>
+                <button class="chart-toggle-btn" data-idx="2" style="background: rgba(168,85,247,0.15); border: 1.5px solid #a855f7; color: #a855f7; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟪 7場維持度</button>
+                <button class="chart-toggle-btn" data-idx="3" style="background: rgba(251,191,36,0.15); border: 1.5px solid #fbbf24; color: #fbbf24; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟨 3場近況</button>
+            </div>
+
             <div style="position: relative; height: 200px; width: 100%; margin-bottom: 25px;">
                 <canvas id="normalModeChart"></canvas>
             </div>
+
             <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; border-top: 1px dashed #475569; padding-top: 20px; ${statsFlex}">
 
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div>
@@ -256,26 +266,13 @@ window.renderNormalMode = function() {
                     { label: '3場', data: generateAuthenticTrack(3, records), borderColor: c3,  borderWidth: 3, pointRadius: 2, pointHitRadius: 10, tension: 0.2 }
                 ]
             },
-            
-// 🎯 標籤按鈕化：放大字體、拉寬色塊並加上圓角，使其看起來像 UI 開關
-                    // 🚨 語法修復：補回被誤刪的 options 與 plugins 包裝
+            // 🚨 語法修復：補回被誤刪的 options 與 plugins 大門，讓設定生效！
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'nearest', axis: 'x', intersect: false },
                 plugins: {
-                    // 🎯 標籤按鈕化：放大字體、拉寬色塊並加上圓角，使其看起來像 UI 開關
-                    legend: { 
-                        position: 'top', 
-                        align: 'center', 
-                        labels: { 
-                            color: '#f8fafc', 
-                            font: { size: window.innerWidth < 1024 ? 13 : 14, weight: 'bold' }, 
-                            boxWidth: 26, 
-                            useBorderRadius: true, 
-                            borderRadius: 4, 
-                            padding: window.innerWidth < 1024 ? 16 : 25 
-                        } 
-                    },
+                    // 🚨 隱藏原生殘缺圖例，畫面交由我們新建的實體 HTML 按鈕控制
+                    legend: { display: false },
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { if (c.dataIndex === 0) return null; return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
                 },
 
@@ -284,7 +281,31 @@ window.renderNormalMode = function() {
                     y: { position: 'right', min: 0, max: 100, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
                 }
             }
+        }); // 👈 這裡宣告結束
+
+        // 🚨 終極綁定引擎：讓 HTML 按鈕可以控制畫布裡的線條顯示與隱藏！
+        document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-idx'));
+                const myChart = Chart.getChart(canvas); // 抓取當前圖表
+                if(!myChart) return;
+                
+                const meta = myChart.getDatasetMeta(idx);
+                // 切換隱藏狀態
+                meta.hidden = meta.hidden === null ? !myChart.data.datasets[idx].hidden : null;
+                myChart.update();
+                
+                // 視覺回饋：如果被隱藏，按鈕變暗；如果開啟，按鈕發光
+                if (meta.hidden) {
+                    this.style.opacity = '0.3';
+                    this.style.filter = 'grayscale(100%)';
+                } else {
+                    this.style.opacity = '1';
+                    this.style.filter = 'none';
+                }
+            });
         });
+        
     }, 150);
 };
 
