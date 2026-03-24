@@ -170,11 +170,16 @@ window.renderNormalMode = function() {
             <div style="font-size: 26px; margin-top: 15px; font-weight: bold;">總勝率：<span style="color: #34d399;">${totalRate}%</span></div>
             <div style="font-size: 16px; color: #94a3b8; margin-top: 8px;">(${totalW}勝 ${totalL}敗 / 歷史留存)</div>
         </div>
-        <div style="display: flex; flex-direction: column; width: 100%;">
+       
+<div style="display: flex; flex-direction: column; width: 100%;">
+            <div style="text-align: center; margin-bottom: 5px;">
+                <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; font-size: 12px; padding: 4px 15px; border-radius: 20px; letter-spacing: 0.5px; font-weight: bold;">👆 點擊圖表標籤，可自由開關走勢線</span>
+            </div>
             <div style="position: relative; height: 200px; width: 100%; margin-bottom: 25px;">
                 <canvas id="normalModeChart"></canvas>
             </div>
             <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; border-top: 1px dashed #475569; padding-top: 20px; ${statsFlex}">
+
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日指標</div><div style="font-size: 34px; font-weight: 900;">${s20.rate}%</div><div style="font-size: 16px; color: ${s20.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s20.net >= 0 ? '+' : ''}${s20.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日維持度</div><div style="font-size: 34px; font-weight: 900;">${s7.rate}%</div><div style="font-size: 16px; color: ${s7.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s7.net >= 0 ? '+' : ''}${s7.net} 注</div></div>
@@ -251,11 +256,21 @@ window.renderNormalMode = function() {
                     { label: '3場', data: generateAuthenticTrack(3, records), borderColor: c3,  borderWidth: 3, pointRadius: 2, pointHitRadius: 10, tension: 0.2 }
                 ]
             },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'nearest', axis: 'x', intersect: false },
-                plugins: { 
-                    legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' }, boxWidth: 15, padding: 15 } },
+            
+// 🎯 標籤按鈕化：放大字體、拉寬色塊並加上圓角，使其看起來像 UI 開關
+                    legend: { 
+                        position: 'top', 
+                        align: 'center', 
+                        labels: { 
+                            color: '#f8fafc', // 字體調亮
+                            font: { size: window.innerWidth < 1024 ? 13 : 14, weight: 'bold' }, // 字體放大
+                            boxWidth: 26, // 色塊拉寬
+                            useBorderRadius: true, // 啟用圓角
+                            borderRadius: 4, // 圓角弧度，看起來更像按鈕
+                            padding: window.innerWidth < 1024 ? 16 : 25 // 增加呼吸空間
+                        } 
+                    },
+
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { if (c.dataIndex === 0) return null; return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
                 },
                 scales: {
