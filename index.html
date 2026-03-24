@@ -430,8 +430,10 @@
 
 <script>
 (function() {
-    function scalePage() {
+    // 🚨 升級為全域函數，讓其他 JS 檔案也能隨時喚醒它！
+    window.scalePage = function() {
         var content = document.getElementById('mainContent');
+
         if (!content) return;
         var screenWidth = window.innerWidth;
         
@@ -476,11 +478,11 @@
         document.documentElement.style.visibility = 'visible';
     }
 
-    window.addEventListener('load', scalePage);
-    window.addEventListener('resize', scalePage);
+    window.addEventListener('load', window.scalePage);
+    window.addEventListener('resize', window.scalePage);
     // 💡 關鍵：加入翻轉監聽
     window.addEventListener('orientationchange', function() {
-        setTimeout(scalePage, 200);
+        setTimeout(window.scalePage, 200);
     });
 })();
 </script>
