@@ -405,7 +405,8 @@ mainContent.style.display = 'none';
         radarPage.style.transformOrigin = 'top left';
         radarPage.style.transform = 'scale(' + scale + ')';
         radarPage.style.width = '980px';
-        radarPage.style.height = Math.round(window.innerHeight / scale) + 'px';
+        // 🚨 不再用 innerHeight 算固定高度！改用 100vh/scale 讓瀏覽器自適應
+        radarPage.style.height = (100 / scale) + 'vh';
         // 強制 repaint：讀取 offsetHeight 觸發瀏覽器同步回流
         void radarPage.offsetHeight;
     }
