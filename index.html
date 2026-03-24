@@ -345,7 +345,6 @@
 
     </style> 
 
-</style>
 <script>
 (function() {
     if (window.innerWidth < 980) {
@@ -430,15 +429,17 @@
 
 <script>
 (function() {
-    // 🚨 升級為全域函數，讓其他 JS 檔案也能隨時喚醒它！
+    var lastWidth = 0; // 🚨 防呆記憶體：記住上一次的螢幕寬度
+
     window.scalePage = function() {
         var content = document.getElementById('mainContent');
-
-        if (!content) return;
+        var radar = document.getElementById('momentumRadarPage');
         var screenWidth = window.innerWidth;
-        
-        var radar = document.getElementById('momentumRadarPage'); // 👈 新增：把戰情室也抓進來
-        
+
+        // 🚨 終極防風暴鎖：如果現在的寬度跟上次一樣（代表只是上下滑動或雙指縮放），直接拒絕重新計算！保護排版不崩潰！
+        if (lastWidth === screenWidth) return; 
+        lastWidth = screenWidth; // 更新記憶體
+
         if (screenWidth < 1024) { 
             var scale = screenWidth / 980;
             
@@ -450,7 +451,7 @@
                 content.style.height = Math.round(window.innerHeight / scale) + 'px';
             }
             
-            // 2. 縮放戰情室 (新增這段，完美同步)
+            // 2. 縮放戰情室
             if (radar) {
                 radar.style.transformOrigin = 'top left';
                 radar.style.transform = 'scale(' + scale + ')';
@@ -462,26 +463,70 @@
             document.documentElement.style.overflowX = 'hidden';
         } else {
             // 電腦版還原
-            if (content) {
-                content.style.transform = '';
-                content.style.width = '';
-                content.style.height = '';
-            }
-            if (radar) {
-                radar.style.transform = '';
-                radar.style.width = '';
-                radar.style.height = '';
-            }
+            if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
+            if (radar) { radar.style.transform = ''; radar.style.width = ''; radar.style.height = ''; }
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
         document.documentElement.style.visibility = 'visible';
     }
-
+    
     window.addEventListener('load', window.scalePage);
     window.addEventListener('resize', window.scalePage);
-    // 💡 關鍵：加入翻轉監聽
     window.addEventListener('orientationchange', function() {
+        lastWidth = 0; // 💡 旋轉手機時，強制重置記憶體，允許重新計算
+        setTimeout(window.scalePage, 200);
+    });
+})();
+</script>
+<script>
+(function() {
+    var lastWidth = 0; // 🚨 防呆記憶體：記住上一次的螢幕寬度
+
+    window.scalePage = function() {
+        var content = document.getElementById('mainContent');
+        var radar = document.getElementById('momentumRadarPage');
+        var screenWidth = window.innerWidth;
+
+        // 🚨 終極防風暴鎖：如果現在的寬度跟上次一樣（代表只是上下滑動或雙指縮放），直接拒絕重新計算！保護排版不崩潰！
+        if (lastWidth === screenWidth) return; 
+        lastWidth = screenWidth; // 更新記憶體
+
+        if (screenWidth < 1024) { 
+            var scale = screenWidth / 980;
+            
+            // 1. 縮放主頁
+            if (content) {
+                content.style.transformOrigin = 'top left';
+                content.style.transform = 'scale(' + scale + ')';
+                content.style.width = '980px';
+                content.style.height = Math.round(window.innerHeight / scale) + 'px';
+            }
+            
+            // 2. 縮放戰情室
+            if (radar) {
+                radar.style.transformOrigin = 'top left';
+                radar.style.transform = 'scale(' + scale + ')';
+                radar.style.width = '980px';
+                radar.style.height = Math.round(window.innerHeight / scale) + 'px';
+            }
+            
+            document.body.style.overflowX = 'hidden';
+            document.documentElement.style.overflowX = 'hidden';
+        } else {
+            // 電腦版還原
+            if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
+            if (radar) { radar.style.transform = ''; radar.style.width = ''; radar.style.height = ''; }
+            document.body.style.overflowX = 'auto';
+            document.documentElement.style.overflowX = 'auto';
+        }
+        document.documentElement.style.visibility = 'visible';
+    }
+    
+    window.addEventListener('load', window.scalePage);
+    window.addEventListener('resize', window.scalePage);
+    window.addEventListener('orientationchange', function() {
+        lastWidth = 0; // 💡 旋轉手機時，強制重置記憶體，允許重新計算
         setTimeout(window.scalePage, 200);
     });
 })();
