@@ -151,15 +151,122 @@ window.renderNormalMode = function() {
     // 📊 預先結算四個區間的包裹數據
     const s30 = getStats(30), s20 = getStats(20), s7 = getStats(7), s3 = getStats(3);
 
-    // 🏆 終極版 radarHtml：包含賽事 Badge 與 淨值注數雙顯示 (正負自動變色)
-    const radarHtml = `<div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 25px; margin-bottom: 30px; background: #1e293b; color: white; padding: 35px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);"><div style="border-right: 1px solid #475569; padding-right: 30px;"><div style="display: inline-block; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; box-shadow: 0 0 10px rgba(56,189,248,0.2);">📌 目前項目：${itemNames[key] || key}</div><div style="font-size: 20px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">🏆 全賽季實力總榜</div><div style="font-size: 56px; font-weight: 900; color: #fbbf24; line-height: 1;">${totalNet >= 0 ? '+' : ''}${totalNet} <span style="font-size: 26px; color: #fff;">注</span></div><div style="font-size: 26px; margin-top: 15px; font-weight: bold;">總勝率：<span style="color: #34d399;">${totalRate}%</span></div><div style="font-size: 16px; color: #94a3b8; margin-top: 8px;">(${totalW}勝 ${totalL}敗 / 歷史留存)</div></div><div style="display: flex; justify-content: space-around; align-items: center; text-align: center;"><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日指標</div><div style="font-size: 34px; font-weight: 900;">${s20.rate}%</div><div style="font-size: 16px; color: ${s20.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s20.net >= 0 ? '+' : ''}${s20.net} 注</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日維持度</div><div style="font-size: 34px; font-weight: 900;">${s7.rate}%</div><div style="font-size: 16px; color: ${s7.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s7.net >= 0 ? '+' : ''}${s7.net} 注</div></div><div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">3日近況</div><div style="font-size: 34px; font-weight: 900; color: ${s3.rate>=60?'#f87171':'#fff'}">${s3.rate}%</div><div style="font-size: 16px; color: ${s3.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s3.net >= 0 ? '+' : ''}${s3.net} 注</div></div></div></div>`;
+    // 📱 手機版相容性偵測 (Responsive Web Design)
+    const isMobile = window.innerWidth < 1024;
+    // 如果是手機，改為上下 1 欄 (1fr)，否則維持左右並排 (1fr 1.8fr)
+    const gridLayout = isMobile ? 'grid-template-columns: 1fr; gap: 15px;' : 'grid-template-columns: 1fr 1.8fr; gap: 25px;';
+    // 如果是手機，分隔線從右邊改到底部
+    const dividerStyle = isMobile ? 'border-bottom: 1px solid #475569; padding-bottom: 20px; margin-bottom: 10px;' : 'border-right: 1px solid #475569; padding-right: 30px;';
+    // 手機版允許底下 4 個小標籤換行 (變成 2x2 排列)
+    const statsFlex = isMobile ? 'flex-wrap: wrap; gap: 15px;' : '';
+
+    // 🏆 終極版 radarHtml：具備手機偵測的變形排版
+    const radarHtml = `
+    <div style="display: grid; ${gridLayout} margin-bottom: 30px; background: #1e293b; color: white; padding: 35px; border-radius: 20px; box-shadow: 0 12px 30px rgba(0,0,0,0.2);">
+        <div style="${dividerStyle}">
+            <div style="display: inline-block; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; box-shadow: 0 0 10px rgba(56,189,248,0.2);">📌 目前項目：${itemNames[key] || key}</div>
+            <div style="font-size: 20px; color: #94a3b8; margin-bottom: 12px; font-weight: bold;">🏆 全賽季實力總榜</div>
+            <div style="font-size: 56px; font-weight: 900; color: #fbbf24; line-height: 1;">${totalNet >= 0 ? '+' : ''}${totalNet} <span style="font-size: 26px; color: #fff;">注</span></div>
+            <div style="font-size: 26px; margin-top: 15px; font-weight: bold;">總勝率：<span style="color: #34d399;">${totalRate}%</span></div>
+            <div style="font-size: 16px; color: #94a3b8; margin-top: 8px;">(${totalW}勝 ${totalL}敗 / 歷史留存)</div>
+        </div>
+        <div style="display: flex; flex-direction: column; width: 100%;">
+            <div style="position: relative; height: 200px; width: 100%; margin-bottom: 25px;">
+                <canvas id="normalModeChart"></canvas>
+            </div>
+            <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; border-top: 1px dashed #475569; padding-top: 20px; ${statsFlex}">
+                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div>
+                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日指標</div><div style="font-size: 34px; font-weight: 900;">${s20.rate}%</div><div style="font-size: 16px; color: ${s20.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s20.net >= 0 ? '+' : ''}${s20.net} 注</div></div>
+                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日維持度</div><div style="font-size: 34px; font-weight: 900;">${s7.rate}%</div><div style="font-size: 16px; color: ${s7.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s7.net >= 0 ? '+' : ''}${s7.net} 注</div></div>
+                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">3日近況</div><div style="font-size: 34px; font-weight: 900; color: ${s3.rate>=60?'#f87171':'#fff'}">${s3.rate}%</div><div style="font-size: 16px; color: ${s3.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s3.net >= 0 ? '+' : ''}${s3.net} 注</div></div>
+            </div>
+        </div>
+    </div>`;
 
     const isSingleColumn = key.includes('_total') || key.includes('_ml') || key.includes('_reg') || key.includes('_spread') || key.includes('_btts') || key === 'nbl_team' || key === 'jp_team' || key === 'kbl_team';
     area.className = 'data-layout'; area.style.flexDirection = 'column';
     if (isSingleColumn) { area.innerHTML = `${radarHtml} <div class="record-column" style="max-width: 100%;">${window.getRankBanner(itemNames[key] || '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div>`; } 
     else { let rightKey = base + '_total'; if (key === 'nhl_spread_ot') rightKey = 'nhl_total_ot'; area.innerHTML = `${radarHtml} <div style="display:flex; gap:20px;"><div class="record-column">${window.getRankBanner(itemNames[key] || '隊伍紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div><div class="record-column">${window.getRankBanner('大小紀錄', n, rightKey)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(window.dataDB[n][rightKey] || [], false, n, rightKey)}</div></div>`; }
 
+// 🎯 呼叫 Chart.js 渲染圖表
+    setTimeout(() => {
+        const canvas = document.getElementById('normalModeChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const c30 = '#10b981', c20 = '#38bdf8', c7 = '#a855f7', c3 = '#fbbf24';
+
+        // 沿用已算好的生涯數據
+        let trueTotalMatches = totalW + totalL;
+        let careerRate = totalRate;
+
+        const careerLevelPlugin = {
+            id: 'careerLevel',
+            afterDraw: (chart) => {
+                const ctx = chart.ctx;
+                const yAxis = chart.scales.y;
+                const chartArea = chart.chartArea;
+                const yPos = yAxis.getPixelForValue(careerRate);
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; 
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(chartArea.left, yPos);
+                ctx.lineTo(chartArea.right, yPos);
+                ctx.stroke();
+
+                const text = `生涯 ${careerRate}% (${trueTotalMatches}場)`;
+                ctx.font = 'bold 12px sans-serif'; // 配合微縮版，字體稍微縮小
+                const textWidth = ctx.measureText(text).width;
+                const paddingX = 10, boxHeight = 22; 
+                const boxWidth = textWidth + paddingX * 2;
+                const boxX = chartArea.left; 
+                let boxY = yPos - boxHeight / 2;
+
+                if (boxY < chartArea.top) boxY = chartArea.top + 2;
+                if (boxY + boxHeight > chartArea.bottom) boxY = chartArea.bottom - boxHeight - 2;
+
+                ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; 
+                ctx.beginPath();
+                ctx.rect(boxX, boxY, boxWidth, boxHeight);
+                ctx.fill();
+
+                ctx.fillStyle = '#ffffff'; 
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
+                ctx.restore();
+            }
+        };           
+
+        new Chart(ctx, {
+            type: 'line',
+            plugins: [careerLevelPlugin], 
+            data: {
+                datasets: [
+                    { label: '30場', data: generateAuthenticTrack(30, records), borderColor: c30, borderWidth: 2, pointRadius: 1, tension: 0.2 },
+                    { label: '20場', data: generateAuthenticTrack(20, records), borderColor: c20, borderWidth: 2, pointRadius: 1, tension: 0.2 },
+                    { label: '7場', data: generateAuthenticTrack(7, records), borderColor: c7,  borderWidth: 2.5, pointRadius: 1.5, tension: 0.2 },
+                    { label: '3場', data: generateAuthenticTrack(3, records), borderColor: c3,  borderWidth: 3, pointRadius: 2, pointHitRadius: 10, tension: 0.2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                plugins: { 
+                    legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: 11, weight: 'bold' }, boxWidth: 15, padding: 15 } },
+                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { if (c.dataIndex === 0) return null; return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
+                },
+                scales: {
+                    x: { type: 'linear', position: 'bottom', reverse: true, min: 1, max: 31, ticks: { stepSize: 1, autoSkip: false, color: '#64748b', maxRotation: 0, font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.02)' } },
+                    y: { position: 'right', min: 0, max: 100, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                }
+            }
+        });
+    }, 150);
 };
+
 window.getRankBanner = function(title, name, key) {
     let list = []; let systemLatestDate = window.getSystemLatestDate(key);
     // 🎯 特殊激活白名單
