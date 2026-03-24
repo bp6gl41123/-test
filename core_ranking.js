@@ -390,79 +390,36 @@ window.adminActivateExpert = function(wlKey) {
 /* ========================================================================= */
 
 window.openMomentumRadar = function() {
-    const mainContent = document.getElementById('mainContent');
-    const radarPage = document.getElementById('momentumRadarPage');
-    if (!radarPage) {
-        alert("找不到戰情室畫面，請確認 index.html 已經更新！");
-        return;
-    }
-    // 🚨 LINE WebView 終極方案：用 screen.width 判斷，手機版與電腦版走不同路徑
-    window.scrollTo(0, 0);
+    const mainContent = document.getElementById('mainContent');
+    const radarPage = document.getElementById('momentumRadarPage');
+    if (!radarPage) {
+        alert("找不到戰情室畫面，請確認 index.html 已經更新！");
+        return;
+    }
     mainContent.style.display = 'none';
-
-    // 🚨 LINE WebView 終極方案：用 screen.width 算 scale 適配所有裝置
-    // screen.width < 1024 = 手機/平板 → 必做 scale
-    // screen.width >= 1024 但窗口小 → LINE 電腦版等小窗口 → 也做 scale
-    // screen.width >= 1024 且窗口大 → 正常電腦版 → 不做 scale
-    var safeWidth = window.screen.width || window.innerWidth;
-    var needScale = (safeWidth < 1024);
-    // 🚨 額外偵測：如果 display:block 後實際窗口裝不下 980px，也強制做 scale
     radarPage.style.display = 'block';
+    window.scrollTo(0, 0);
 
-    if (!needScale) {
-        // 先暫時全屏顯示，測量實際可用寬度
-        radarPage.style.transform = 'none';
-        radarPage.style.width = '100%';
-        radarPage.style.height = '100%';
-        var actualWidth = radarPage.clientWidth;
-        if (actualWidth < 980) {
-            needScale = true;
-            safeWidth = actualWidth;
-        }
+    // 🚨 核心防呆：只負責打開畫面，然後強制呼叫主頁的統一引擎去計算完美高度！不自己瞎算！
+    if (typeof window.scalePage === 'function') {
+        setTimeout(function() { window.scalePage(true); }, 100);
     }
-
-    if (needScale) {
-        // 📱 手機版 / 小窗口版：用 scale 等比縮放
-        radarPage.style.visibility = 'hidden';
-        var scale = safeWidth / 980;
-        var safeHeight = window.screen.height || window.innerHeight;
-        radarPage.style.transformOrigin = 'top left';
-        radarPage.style.transform = 'scale(' + scale + ')';
-        radarPage.style.width = '980px';
-        radarPage.style.height = Math.round(safeHeight / scale) + 'px';
-        setTimeout(function() {
-            radarPage.scrollTo(0, 0);
-            radarPage.style.visibility = 'visible';
-        }, 100);
-    } else {
-        // 🖥️ 電腦版：全屏顯示，已在上方設定完成
-        radarPage.scrollTo(0, 0);
-    }
-
-    // 🚨 鎖定旗標：防止 scalePage 在戰情室開啟期間覆蓋設定
-    window._radarLocked = true;    
-
-    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
-    let defaultTimeframe = window.currentHomeFilter || 20;
-    window.renderMomentumRadar(defaultTimeframe); 
+    
+    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
+    let defaultTimeframe = window.currentHomeFilter || 20;
+    window.renderMomentumRadar(defaultTimeframe); 
 };
 
 window.closeMomentumRadar = function() {
-    // 🚨 解除鎖定旗標，讓 scalePage 恢復正常運作
-    window._radarLocked = false;
-    var radarPage = document.getElementById('momentumRadarPage');
-    radarPage.style.display = 'none';
-    radarPage.style.transform = 'none';
-    radarPage.style.width = '100%';
-    radarPage.style.height = '100%';
+    const radarPage = document.getElementById('momentumRadarPage');
+    if (radarPage) radarPage.style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
-    // 🚨 核心防呆升級：關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
+    // 🚨 關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
     if (typeof window.scalePage === 'function') {
         setTimeout(function() { window.scalePage(true); }, 100);
     }
 };
-
 
 // 2. 數據轉換器 (真實累積勝率走勢演算法 - 終極動能竄出版)
 function generateAuthenticTrack(maxMatches, records) {

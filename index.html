@@ -423,7 +423,7 @@
     <script src="core_utils.js?v=1.0.10"></script>
     <script src="core_tooltips.js?v=1.0.13"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.141"></script>
+    <script src="core_ranking.js?v=1.0.142"></script>
     <script src="core_recruit.js?v=1.0.81"></script>
     <script src="core_engine.js?v=1.0.84"></script>
 
@@ -432,48 +432,41 @@
     var lastWidth = 0;
     var lastHeight = 0;
 
-    // 🛡️ 究極縮放引擎：支援 force 強制執行與雙重長寬監控
     window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
         var radar = document.getElementById('momentumRadarPage');
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
-        // 🚨 邏輯核心：除非 force 為 true，否則長寬都沒變就拒絕重算，防止風暴
-        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return;
+        // 🚨 如果不是強制執行，且寬高都沒變，則拒絕重算 (防禦雙指縮放風暴)
+        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
-        if (screenWidth < 1024) {
+        if (screenWidth < 1024) { 
+            // 📱 手機版：進行完美等比例縮放
             var scale = screenWidth / 980;
+            var targetH = Math.round(screenHeight / scale) + 'px';
             
             if (content) {
                 content.style.transformOrigin = 'top left';
                 content.style.transform = 'scale(' + scale + ')';
                 content.style.width = '980px';
-                content.style.height = Math.round(screenHeight / scale) + 'px';
+                content.style.height = targetH;
             }
-            // 🚨 戰情室由 openMomentumRadar 自行管理，scalePage 不介入
-            if (radar && radar.style.display !== 'none' && !window._radarLocked) {
-    var radarWidth = window.screen.width || screenWidth;
-    if (radarWidth < 1024) {
-        var radarScale = radarWidth / 980;
-        var radarHeight = window.screen.height || screenHeight;
-        radar.style.transformOrigin = 'top left';
-        radar.style.transform = 'scale(' + radarScale + ')';
-        radar.style.width = '980px';
-        radar.style.height = Math.round(radarHeight / radarScale) + 'px';
-    } else {
-        radar.style.transform = 'none';
-        radar.style.width = '100%';
-        radar.style.height = '100%';
-    }
-}
+            if (radar) {
+                radar.style.transformOrigin = 'top left';
+                radar.style.transform = 'scale(' + scale + ')';
+                radar.style.width = '980px';
+                radar.style.height = targetH;
+            }
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
         } else {
-            if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
-            if (radar && !window._radarLocked) { radar.style.transform = 'none'; radar.style.width = '100%'; radar.style.height = '100%'; }
+            // 🖥️ 電腦版：完全解除所有縮放枷鎖，恢復 100% 原始滿版尺寸！
+            [content, radar].forEach(function(el) {
+                if(el) { el.style.transform = ''; el.style.width = ''; el.style.height = ''; }
+            });
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
