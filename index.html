@@ -453,11 +453,21 @@
                 content.style.width = '980px';
                 content.style.height = Math.round(screenHeight / scale) + 'px';
             }
+            // 🚨 戰情室獨立計算：用 screen.width 自適應任何裝置，避免 innerWidth 被污染
             if (radar && radar.style.display !== 'none') {
-    radar.style.transformOrigin = 'top left';
-    radar.style.transform = 'scale(' + scale + ')';
-    radar.style.width = '980px';
-    radar.style.height = Math.round(screenHeight / scale) + 'px';
+    var radarWidth = window.screen.width || screenWidth;
+    if (radarWidth < 1024) {
+        var radarScale = radarWidth / 980;
+        var radarHeight = window.screen.height || screenHeight;
+        radar.style.transformOrigin = 'top left';
+        radar.style.transform = 'scale(' + radarScale + ')';
+        radar.style.width = '980px';
+        radar.style.height = Math.round(radarHeight / radarScale) + 'px';
+    } else {
+        radar.style.transform = '';
+        radar.style.width = '';
+        radar.style.height = '';
+    }
 }
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
