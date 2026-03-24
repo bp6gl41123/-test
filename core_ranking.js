@@ -258,21 +258,27 @@ window.renderNormalMode = function() {
             },
             
 // 🎯 標籤按鈕化：放大字體、拉寬色塊並加上圓角，使其看起來像 UI 開關
+                    // 🚨 語法修復：補回被誤刪的 options 與 plugins 包裝
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                plugins: {
+                    // 🎯 標籤按鈕化：放大字體、拉寬色塊並加上圓角，使其看起來像 UI 開關
                     legend: { 
                         position: 'top', 
                         align: 'center', 
                         labels: { 
-                            color: '#f8fafc', // 字體調亮
-                            font: { size: window.innerWidth < 1024 ? 13 : 14, weight: 'bold' }, // 字體放大
-                            boxWidth: 26, // 色塊拉寬
-                            useBorderRadius: true, // 啟用圓角
-                            borderRadius: 4, // 圓角弧度，看起來更像按鈕
-                            padding: window.innerWidth < 1024 ? 16 : 25 // 增加呼吸空間
+                            color: '#f8fafc', 
+                            font: { size: window.innerWidth < 1024 ? 13 : 14, weight: 'bold' }, 
+                            boxWidth: 26, 
+                            useBorderRadius: true, 
+                            borderRadius: 4, 
+                            padding: window.innerWidth < 1024 ? 16 : 25 
                         } 
                     },
-
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { if (c.dataIndex === 0) return null; return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
                 },
+
                 scales: {
                     x: { type: 'linear', position: 'bottom', reverse: true, min: 1, max: 31, ticks: { stepSize: 1, autoSkip: false, color: '#64748b', maxRotation: 0, font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.02)' } },
                     y: { position: 'right', min: 0, max: 100, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
@@ -363,24 +369,34 @@ window.adminActivateExpert = function(wlKey) {
 /* ========================================================================= */
 
 window.openMomentumRadar = function() {
-    const mainContent = document.getElementById('mainContent');
-    const radarPage = document.getElementById('momentumRadarPage');
-    if (!radarPage) {
-        alert("找不到戰情室畫面，請確認 index.html 已經更新！");
-        return;
-    }
-    mainContent.style.display = 'none';
-    radarPage.style.display = 'block';
-    radarPage.scrollTo(0, 0);
-    
-    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
-    let defaultTimeframe = window.currentHomeFilter || 20;
-    renderMomentumRadar(defaultTimeframe); 
+    const mainContent = document.getElementById('mainContent');
+    const radarPage = document.getElementById('momentumRadarPage');
+    if (!radarPage) {
+        alert("找不到戰情室畫面，請確認 index.html 已經更新！");
+        return;
+    }
+    mainContent.style.display = 'none';
+    radarPage.style.display = 'block';
+    radarPage.scrollTo(0, 0);
+
+    // 🚨 核心防呆新增：打開瞬間，延遲 0.1 秒強迫喚醒 index.html 的縮放引擎！防止 LINE 縮在左上角
+    if (typeof window.scalePage === 'function') {
+        setTimeout(window.scalePage, 100);
+    }
+    
+    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
+    let defaultTimeframe = window.currentHomeFilter || 20;
+    window.renderMomentumRadar(defaultTimeframe); 
 };
 
 window.closeMomentumRadar = function() {
-    document.getElementById('momentumRadarPage').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('momentumRadarPage').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+
+    // 🚨 核心防呆新增：關閉時也喚醒一次，確保主頁完美歸位
+    if (typeof window.scalePage === 'function') {
+        setTimeout(window.scalePage, 100);
+    }
 };
 
 
