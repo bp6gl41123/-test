@@ -423,7 +423,7 @@
     <script src="core_utils.js?v=1.0.10"></script>
     <script src="core_tooltips.js?v=1.0.13"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.142"></script>
+    <script src="core_ranking.js?v=1.0.143"></script>
     <script src="core_recruit.js?v=1.0.81"></script>
     <script src="core_engine.js?v=1.0.84"></script>
 
@@ -438,43 +438,44 @@
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
-        // 🚨 如果不是強制執行，且寬高都沒變，則拒絕重算 (防禦雙指縮放風暴)
+        // 防禦雙指縮放風暴：如果不是強制執行，且尺寸完全沒變，才跳過
         if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
+        // 🚨 霸道全域邏輯：小於 1024 絕對等比縮放，大於 1024 絕對滿版，沒有例外！
         if (screenWidth < 1024) { 
-            // 📱 手機版：進行完美等比例縮放
             var scale = screenWidth / 980;
             var targetH = Math.round(screenHeight / scale) + 'px';
             
-            if (content) {
+            if (content && content.style.display !== 'none') {
                 content.style.transformOrigin = 'top left';
                 content.style.transform = 'scale(' + scale + ')';
                 content.style.width = '980px';
                 content.style.height = targetH;
             }
-            if (radar) {
+            if (radar && radar.style.display !== 'none') {
                 radar.style.transformOrigin = 'top left';
                 radar.style.transform = 'scale(' + scale + ')';
                 radar.style.width = '980px';
-                radar.style.height = targetH;
+                radar.style.height = targetH; // 高度瞬間補滿
             }
+            
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
         } else {
-            // 🖥️ 電腦版：完全解除所有縮放枷鎖，恢復 100% 原始滿版尺寸！
-            [content, radar].forEach(function(el) {
-                if(el) { el.style.transform = ''; el.style.width = ''; el.style.height = ''; }
-            });
+            // 💻 電腦版：強制清除所有縮放屬性，保證 100% 滿版！
+            if (content) { content.style.transform = ''; content.style.width = ''; content.style.height = ''; }
+            if (radar) { radar.style.transform = ''; radar.style.width = ''; radar.style.height = ''; }
+            
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
         document.documentElement.style.visibility = 'visible';
-    };
+    }
     
     window.addEventListener('load', function() { window.scalePage(true); });
-    window.addEventListener('resize', function() { window.scalePage(); });
+    window.addEventListener('resize', window.scalePage);
     window.addEventListener('orientationchange', function() {
         setTimeout(function() { window.scalePage(true); }, 200);
     });

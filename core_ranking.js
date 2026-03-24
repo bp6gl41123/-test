@@ -396,28 +396,31 @@ window.openMomentumRadar = function() {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
+    
+    // 1. 單純切換顯示
     mainContent.style.display = 'none';
     radarPage.style.display = 'block';
     window.scrollTo(0, 0);
+    radarPage.scrollTo(0, 0);
 
-    // 🚨 核心防呆：只負責打開畫面，然後強制呼叫主頁的統一引擎去計算完美高度！不自己瞎算！
+    // 2. 🚨 霸道展開指令：不分裝置，強制踹引擎一腳，要它立刻把畫面填滿！
     if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 100);
+        setTimeout(function() { window.scalePage(true); }, 50);
     }
     
-    // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
+    // 3. 渲染數據
     let defaultTimeframe = window.currentHomeFilter || 20;
     window.renderMomentumRadar(defaultTimeframe); 
 };
 
 window.closeMomentumRadar = function() {
-    const radarPage = document.getElementById('momentumRadarPage');
+    var radarPage = document.getElementById('momentumRadarPage');
     if (radarPage) radarPage.style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
-    // 🚨 關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
+    // 🚨 霸道歸位指令：關閉時也強制引擎重新計算一次主頁！
     if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 100);
+        setTimeout(function() { window.scalePage(true); }, 50);
     }
 };
 
