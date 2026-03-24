@@ -570,13 +570,17 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         let opacityStyle = isTopTier ? 'opacity: 1;' : 'opacity: 0.65; filter: grayscale(30%);';
         let sleepBadge = !isTopTier ? `<div style="position: absolute; top: -12px; right: 15px; background: #475569; color: #cbd5e1; padding: 4px 10px; border-radius: 20px; font-weight: 900; font-size: 12px; border: 1px solid #64748b; letter-spacing: 1px; z-index: 5;">❄️ 沉澱中</div>` : '';
 
-        rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative;`;
+        // 📱 手機相容性：偵測螢幕寬度自動縮放內距與左側卡片寬度，絕對不改變並排設計！
+        const isMobile = window.innerWidth < 1024;
+
+        rowDiv.style.cssText = `display: flex; gap: ${isMobile ? '10px' : '25px'}; background: #1e293b; padding: ${isMobile ? '15px 10px' : '25px'}; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative;`;
         
         const safeId = `radarChart_${rankStr.replace(/\s/g,'')}_${exp.name.replace(/\s+/g, '')}`;
 
+        // 💡 內容完全不變，僅在 isMobile 時將左側寬度從 200px 微縮至 140px，加上 flex-shrink: 0 防止被過度擠壓
         rowDiv.innerHTML = `
             ${sleepBadge}
-            <div style="width: 200px; background: #0f172a; border-radius: 15px; padding: 20px 10px; text-align: center; position: relative; border: 1px solid #334155; display:flex; flex-direction:column; justify-content:center;">
+            <div style="width: ${isMobile ? '140px' : '200px'}; flex-shrink: 0; background: #0f172a; border-radius: 15px; padding: 20px 10px; text-align: center; position: relative; border: 1px solid #334155; display:flex; flex-direction:column; justify-content:center;">
                 <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: ${rankBg}; color: ${rankColor}; padding: 4px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; letter-spacing: 1px; white-space: nowrap;">${rankStr}</div>
                 ${index === 0 && isTopTier ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
                 <div style="font-size: 18px; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${exp.name}</div>
@@ -591,10 +595,11 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                 </div>
 
             </div>
-            <div style="flex: 1; position: relative; height: 220px; width: 100%;">
+            <div style="flex: 1; position: relative; height: ${isMobile ? '180px' : '220px'}; min-width: 0;">
                 <canvas id="${safeId}"></canvas>
             </div>
         `;
+
         listContainer.appendChild(rowDiv);
 
 
@@ -682,25 +687,22 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     responsive: true, maintainAspectRatio: false,
                     // 🚨 修正核心：改為 nearest 與 axis: 'x'，絕對精準對齊游標位置！不再抓錯資料！
                     interaction: { mode: 'nearest', axis: 'x', intersect: false },
+
                     plugins: { 
-
-                        // 🎯 視覺升級：將圖例移至正中央 (center)，並加上 padding (20) 讓四個按鈕均勻散開不擁擠
-                        legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20, padding: 20 } },
-
+                        // 📱 手機相容性：手機版圖例文字稍微縮小並減少間距
+                        legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: window.innerWidth < 1024 ? 10 : 12, weight: 'bold' }, boxWidth: window.innerWidth < 1024 ? 12 : 20, padding: window.innerWidth < 1024 ? 10 : 20 } },
                         tooltip: { 
                             backgroundColor: 'rgba(15, 23, 42, 0.9)', 
                             titleColor: '#94a3b8', 
                             bodyFont: { weight: 'bold' }, 
                             callbacks: { 
                                 label: function(c) { 
-                                    // 🛡️ 終極防呆：攔截第 0 個點！不讓用戶看到底部的 0%
                                     if (c.dataIndex === 0) return null; 
                                     return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; 
                                 } 
                             } 
                         }
                     },
-                    // 🚨 終極修正：X 軸 1~31 完整顯示，並強制每個節點對齊刻度！
                     scales: {
                         x: { 
                             type: 'linear', 
@@ -710,8 +712,11 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                             max: 31, 
                             title: { display: true, text: '距今場次', color: '#475569' }, 
                             ticks: { 
-                                stepSize: 1,       // 👈 關鍵 1：每 1 單位就畫一個刻度
-                                autoSkip: false,   // 👈 關鍵 2：強制顯示所有數字，不允許系統自動隱藏
+                                stepSize: 1,       
+                                // 🚨 核心相容性修復：手機版允許 autoSkip 自動疏開數字(true)，電腦版維持不隱藏(false)
+                                autoSkip: window.innerWidth < 1024 ? true : false,   
+                                maxRotation: 0, // 強制數字不歪斜，確保版面乾淨
+                                font: { size: window.innerWidth < 1024 ? 9 : 12 }, // 手機版刻度稍微縮小
                                 color: '#64748b' 
                             }, 
                             grid: { color: 'rgba(255,255,255,0.02)' } 
