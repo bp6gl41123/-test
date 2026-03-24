@@ -454,11 +454,10 @@
                 content.style.height = Math.round(screenHeight / scale) + 'px';
             }
             if (radar && radar.style.display !== 'none') {
-    radar.style.transformOrigin = 'top left';
-    radar.style.transform = 'scale(' + scale + ')';
-    radar.style.width = '980px';
-    // 🚨 戰情室用 vh 單位，不受 innerHeight 波動影響
-    radar.style.height = Math.round(screenHeight / scale) + 'px';
+    // 🚨 戰情室不再參與 scale 縮放，保持原生全屏渲染
+    radar.style.transform = 'none';
+    radar.style.width = '100%';
+    radar.style.height = '100%';
 }
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';

@@ -401,36 +401,30 @@ window.openMomentumRadar = function() {
 mainContent.style.display = 'none';
     radarPage.style.display = 'block';
 
-    // 🚨 LINE WebView 專殺：display 切換後，先同步設定 transform，再強制 repaint
-    if (typeof window.scalePage === 'function' && window.innerWidth < 1024) {
-        var scale = window.innerWidth / 980;
-        radarPage.style.transformOrigin = 'top left';
-        radarPage.style.transform = 'scale(' + scale + ')';
-        radarPage.style.width = '980px';
-        // 🚨 不再用 innerHeight 算固定高度！改用 100vh/scale 讓瀏覽器自適應
-        radarPage.style.height = Math.round(window.innerHeight / scale) + 'px';
-        // 強制 repaint：讀取 offsetHeight 觸發瀏覽器同步回流
-        void radarPage.offsetHeight;
-    }
+    // 🚨 LINE WebView 終極方案：戰情室完全脫離 scale 縮放體系，用原生寬度渲染
+    // position:fixed 的全屏覆蓋層不需要 transform:scale，直接讓瀏覽器原生渲染即可
+    radarPage.style.transform = 'none';
+    radarPage.style.width = '100%';
+    radarPage.style.height = '100%';
 
     radarPage.scrollTo(0, 0);
+};
 
-    // 雙重保險：延遲再跑一次 scalePage 處理邊界情況
-    if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 50);
-        setTimeout(function() { window.scalePage(true); }, 300);
-    }
-    
     // 🎯 完美繼承：讀取 core_engine.js 中的 currentHomeFilter
     let defaultTimeframe = window.currentHomeFilter || 20;
     window.renderMomentumRadar(defaultTimeframe); 
 };
 
 window.closeMomentumRadar = function() {
-    document.getElementById('momentumRadarPage').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
+    var radarPage = document.getElementById('momentumRadarPage');
+    radarPage.style.display = 'none';
+    // 🚨 清除戰情室的獨立渲染樣式，避免殘留
+    radarPage.style.transform = '';
+    radarPage.style.width = '';
+    radarPage.style.height = '';
+    document.getElementById('mainContent').style.display = 'block';
 
-    // 🚨 核心防呆升級：關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
+    // 🚨 核心防呆升級：關閉時也強制傳入 true 更新一次主頁高度，確保完美歸位！
     if (typeof window.scalePage === 'function') {
         setTimeout(function() { window.scalePage(true); }, 100);
     }
