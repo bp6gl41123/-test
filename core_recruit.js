@@ -291,7 +291,7 @@ window.openRecruitModal = () => {
             // 手機版：強制螢幕正中央，並縮小至 65%
             tooltip.style.left = '50%';
             tooltip.style.top = '50%';
-            tooltip.style.transform = 'translate(-50%, -50%) scale(0.40)';
+            tooltip.style.transform = 'translate(-50%, -50%) scale(0.50)';
         } else {
             // 電腦版：維持 95%，水平位置跟隨滑鼠左側
             tooltip.style.left = Math.max(20, event.clientX - 330) + 'px';
