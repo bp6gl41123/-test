@@ -56,6 +56,17 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
             /* 🎯 正常狀態的懸浮展開 */
             .floating-recruit-btn:hover { right: 0; background: linear-gradient(135deg, #6366f1, #3730a3); padding-right: 22px; transform: translateY(-50%) scale(1.05); }
             
+/* 🛡️ 隱形防護罩：向左擴大 40px 的點擊熱區，防止誤觸下方卡片 */
+            .floating-recruit-btn::before { 
+                content: ""; 
+                position: absolute; 
+                top: -20px; 
+                bottom: -20px; 
+                left: -40px; /* 👈 向左偷出 40px 的隱形點擊區 */
+                right: 0; 
+                background: transparent; 
+            }
+
 /* 🎯 視覺魔術版：利用 transform 平移縮進，實體維持在原位，絕對不會撐出白邊！ */
             .floating-recruit-btn.is-comparing { transform: translate(52px, -50%); opacity: 0.7; }
             .floating-recruit-btn.is-comparing:hover { transform: translate(-8px, -50%) scale(1.05); opacity: 1; }
