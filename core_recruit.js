@@ -154,7 +154,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
         
         // 🎯 1. 放寬邊緣：原本 < 30，放寬到 < 60 (甚至 80)，讓手指不用貼死螢幕邊緣
-        const startedNearLeft = recruitTouchStartX < 60; 
+        const startedNearLeft = recruitTouchStartX < 100; 
         
         // 🎯 2. 提升靈敏度：原本要滑動 dx > 30，現在只要輕輕滑動 dx > 20 就會彈出
         if (startedNearLeft && dx > 20 && !recruitExpanded) {
