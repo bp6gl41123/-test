@@ -372,3 +372,29 @@ window.openPocketModal = () => {
     }
 
 })();
+
+
+
+/* ============================================================== */
+/* 🎯 專屬環境校正：針對非 LINE 的純網頁版 (Safari/Chrome) 進行高度覆寫 */
+/* ============================================================== */
+(function fixWebBrowserHeight() {
+    // 偵測是否為手機版
+    var isMobile = window.innerWidth < 1024;
+    // 偵測是否為 LINE 內建瀏覽器
+    var isLineApp = navigator.userAgent.includes("Line") || navigator.userAgent.includes("LINE");
+    
+    // 條件：如果是手機版，且「不是」LINE 內建瀏覽器 (代表跳轉到了 Safari 或 Chrome)
+    if (isMobile && !isLineApp) {
+        var fixStyle = document.createElement('style');
+        fixStyle.id = 'web-browser-height-fix';
+        // 使用 !important 強制覆寫原本的高度，數字越小越高
+        fixStyle.innerHTML = `
+            .floating-recruit-btn { top: 15% !important; transform: translateY(0) !important; }
+            .floating-pocket-btn { top: 25% !important; transform: translateY(0) !important; }
+        `;
+        // 插入到 document 中生效
+        document.head.appendChild(fixStyle);
+    }
+})();
+

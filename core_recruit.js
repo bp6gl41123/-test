@@ -315,6 +315,20 @@ window.openRecruitModal = () => {
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
             floatBtn.style.transform = '';
+
+// 🎯 【新增】專為「非 LINE 的純網頁版」覆寫高度，數字越小越高
+            if (!navigator.userAgent.includes("Line")) {
+                floatBtn.style.top = '15%'; 
+            }
+
+        } else {
+            floatBtn.style.transform = '';
+            floatBtn.style.width = '';
+            floatBtn.style.height = '';
+            floatBtn.style.left = '';
+            floatBtn.style.top = ''; // 電腦版恢復預設
+            // ...
+
         }
     }
     window.addEventListener('resize', syncRecruitBtnScale);
