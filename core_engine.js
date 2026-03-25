@@ -156,16 +156,15 @@ if (!document.getElementById('pickTooltipStyle')) {
 
         @keyframes flipFromWhite {
             0% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(180deg) rotate(var(--rot, 0deg)); background-color: #ffffff; color: transparent; border-color: #e2e8f0; }
-           100% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(0deg) rotate(var(--rot, 0deg)); background-color: #1e293b; color: #fca5a5; border-color: #450a0a; min-width: 0; overflow: hidden; box-sizing: border-box; padding: 15px 5px; text-align: center; }
+            100% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(0deg) rotate(var(--rot, 0deg)); background-color: #1e293b; color: #fca5a5; border-color: #450a0a; }
         }
 
         body.mode-neg { background-color: #0f172a; color: #f8fafc; transition: background-color 0.5s; }
 
         body.mode-neg .expert-card {
-            background: #1e293b; 
-            border-color: #450a0a; 
-            color: #fca5a5; 
-            z-index: 1;
+            animation: flipFromWhite 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards !important; 
+            transform-style: preserve-3d; perspective: 1000px; backface-visibility: hidden; 
+            opacity: 0; background: #1e293b; z-index: 1;
         }
 
         body.mode-neg .podium-card { background: linear-gradient(135deg, #7f1d1d, #450a0a); border-color: #ef4444; }
@@ -177,25 +176,18 @@ if (!document.getElementById('pickTooltipStyle')) {
         body.mode-neg .sleep-card .badge { background-color: #1e293b !important; color: #475569 !important; }
         body.mode-neg .sleep-card .sleep-text { color: #334155 !important; }
 
-        /* ✅ 這是新的 (只留這個就好！) */
+        /* ✅ 統一網格架構：移除強制的 gap 與 padding 覆蓋，讓黑底 100% 繼承白底的手機版空間設定 */
         body.mode-neg #expertGrid { 
             display: grid !important;
-            grid-template-columns: repeat(8, 1fr) !important; 
-            gap: 12px !important; /* 🎯 修正點：改為 12px，讓上下排間距恢復正常 */
+            grid-template-columns: repeat(8, minmax(0, 1fr)) !important; 
             max-width: 1550px !important; 
-            margin: 0px auto 30px auto !important; /* 🎯 修正點：下方留白恢復正常的 30px */
+            margin: 0px auto 30px auto !important; 
             position: relative;
             z-index: 50; 
-            padding: 0 20px; 
-        }       
+        }
         
-        /* 🚨 已經移除反向 U 形排列，恢復為原本正常的網格排版，同時保留紅光特效 */
         body.mode-neg .expert-card {
-            padding: 15px 5px !important; 
             border-radius: 12px !important; 
-            min-width: 0 !important;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important;
         }
 
