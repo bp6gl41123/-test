@@ -158,9 +158,9 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        const startedNearLeft = recruitTouchStartX < 180; 
+        const startedNearLeft = recruitTouchStartX < 200; 
         
-        if (startedNearLeft && dx > 8 && !recruitExpanded) {
+        if (startedNearLeft && dx > 5 && !recruitExpanded) {
             recruitExpanded = true;
             floatBtn.style.left = '0px';
         }

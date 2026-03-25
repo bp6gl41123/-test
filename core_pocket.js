@@ -111,9 +111,9 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - pocketTouchStartX;
-        const startedNearLeft = pocketTouchStartX < 180; 
+        const startedNearLeft = pocketTouchStartX < 200; 
         
-        if (startedNearLeft && dx > 8 && !pocketExpanded) {
+        if (startedNearLeft && dx > 5 && !pocketExpanded) {
             pocketExpanded = true;
             floatBtn.style.left = '0px';
         }
