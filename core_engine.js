@@ -156,7 +156,7 @@ if (!document.getElementById('pickTooltipStyle')) {
 
         @keyframes flipFromWhite {
             0% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(180deg) rotate(var(--rot, 0deg)); background-color: #ffffff; color: transparent; border-color: #e2e8f0; }
-            100% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(0deg) rotate(var(--rot, 0deg)); background-color: #1e293b; color: #fca5a5; border-color: #450a0a; }
+           100% { opacity: 1; transform: translate(var(--tx, 0px), var(--ty, 0px)) rotateY(0deg) rotate(var(--rot, 0deg)); background-color: #1e293b; color: #fca5a5; border-color: #450a0a; min-width: 0; overflow: hidden; box-sizing: border-box; padding: 15px 5px; text-align: center; }
         }
 
         body.mode-neg { background-color: #0f172a; color: #f8fafc; transition: background-color 0.5s; }
