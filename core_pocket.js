@@ -98,15 +98,20 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 從左邊往右滑展開
+    // 從左邊往右滑展開 (🎯 已升級：高靈敏度與寬邊緣)
     let pocketTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         pocketTouchStartX = e.touches[0].clientX;
     }, { passive: true });
+    
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - pocketTouchStartX;
-        const startedNearLeft = pocketTouchStartX < 30;
-        if (startedNearLeft && dx > 30 && !pocketExpanded) {
+        
+        // 👇 放寬到 110 (不用貼死螢幕邊緣，避開手機原生返回手勢)
+        const startedNearLeft = pocketTouchStartX < 110; 
+        
+        // 👇 滑動距離降到 15 (輕輕往右撥一下就瞬間觸發)
+        if (startedNearLeft && dx > 15 && !pocketExpanded) {
             pocketExpanded = true;
             floatBtn.style.left = '0px';
         }
@@ -307,7 +312,8 @@ window.openPocketModal = () => {
             floatBtn.style.right = 'auto';
             floatBtn.style.width = w + 'px';
             floatBtn.style.height = Math.round(270 * scale) + 'px';
-            floatBtn.style.left = '-' + Math.round(w - 8) + 'px';
+            floatBtn.style.left = '-' + Math.round(w - 12) + 'px';
+
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';

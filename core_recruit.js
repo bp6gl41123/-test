@@ -144,15 +144,19 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 從左邊往右滑展開
+    // 從左邊往右滑展開 (🎯 已升級：高靈敏度與寬邊緣)
     let recruitTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         recruitTouchStartX = e.touches[0].clientX;
     }, { passive: true });
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        const startedNearLeft = recruitTouchStartX < 30;
-        if (startedNearLeft && dx > 30 && !recruitExpanded) {
+        
+        // 👇 放寬到 110 (不用貼死邊緣)
+        const startedNearLeft = recruitTouchStartX < 110; 
+        
+        // 👇 滑動 15 就觸發
+        if (startedNearLeft && dx > 15 && !recruitExpanded) {
             recruitExpanded = true;
             floatBtn.style.left = '0px';
         }
@@ -302,7 +306,8 @@ window.openRecruitModal = () => {
             const w = Math.round(75 * scale);
             floatBtn.style.width = w + 'px';
             floatBtn.style.height = Math.round(270 * scale) + 'px';
-            floatBtn.style.left = '-' + Math.round(w - 8) + 'px';
+            floatBtn.style.left = '-' + Math.round(w - 12) + 'px';
+
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';
