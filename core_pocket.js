@@ -108,10 +108,10 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
         const dx = e.changedTouches[0].clientX - pocketTouchStartX;
         
         // 🎯 1. 放寬邊緣判定
-        const startedNearLeft = pocketTouchStartX < 100; 
+        const startedNearLeft = pocketTouchStartX < 110; 
         
         // 🎯 2. 提升滑動靈敏度
-        if (startedNearLeft && dx > 20 && !pocketExpanded) {
+        if (startedNearLeft && dx > 15 && !pocketExpanded) {
             pocketExpanded = true;
             floatBtn.style.left = '0px';
         }
