@@ -310,7 +310,7 @@ window.openRecruitModal = () => {
             const w = Math.round(75 * scale);
             floatBtn.style.width = w + 'px';
             floatBtn.style.height = Math.round(270 * scale) + 'px';
-            floatBtn.style.left = '-' + Math.round(w - 12) + 'px';
+            floatBtn.style.left = '-' + Math.round(w - 14) + 'px';
 
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
