@@ -77,57 +77,39 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
 
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-pocket-btn';
 
-   // 🎯 真實物理裝置偵測 (捕捉手機晶片)
-    const isRealMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
-
-    let isDraggingPocket = false;
-    let pocketStartY = 0;
+    // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
     let pocketExpanded = false;
-    let pocketTouchStartX = 0;
-
-    floatBtn.addEventListener('click', function(e) {
-        if (isRealMobile) {
-            if (!isDraggingPocket) window.openPocketModal();
-        } else {
+    floatBtn.addEventListener('click', function() {
+        if (window.innerWidth < 1024) {
             if (!pocketExpanded) {
                 pocketExpanded = true;
                 floatBtn.style.left = '0px';
             } else {
+                pocketExpanded = false;
                 window.openPocketModal();
             }
+        } else {
+            window.openPocketModal();
+        }
+    });
+    document.addEventListener('click', function(e) {
+        if (pocketExpanded && !floatBtn.contains(e.target)) {
+            pocketExpanded = false;
         }
     });
 
-    floatBtn.addEventListener('touchstart', function(e) {
-        if (!isRealMobile) return;
-        isDraggingPocket = false;
-        pocketStartY = e.touches[0].clientY;
-        floatBtn.style.transition = 'none';
+    // 從左邊往右滑展開
+    let pocketTouchStartX = 0;
+    document.addEventListener('touchstart', function(e) {
+        pocketTouchStartX = e.touches[0].clientX;
     }, { passive: true });
-
-    floatBtn.addEventListener('touchmove', function(e) {
-        if (!isRealMobile) return;
-        let deltaY = e.touches[0].clientY - pocketStartY;
-        if (Math.abs(deltaY) > 10) isDraggingPocket = true;
-        if (deltaY < 0) {
-            floatBtn.style.transform = `translateY(${deltaY}px)`;
-            floatBtn.style.opacity = 1 - (Math.abs(deltaY) / 250);
+    document.addEventListener('touchend', function(e) {
+        const dx = e.changedTouches[0].clientX - pocketTouchStartX;
+        const startedNearLeft = pocketTouchStartX < 30;
+        if (startedNearLeft && dx > 30 && !pocketExpanded) {
+            pocketExpanded = true;
+            floatBtn.style.left = '0px';
         }
-    }, { passive: true });
-
-    floatBtn.addEventListener('touchend', function(e) {
-        if (!isRealMobile) return;
-        floatBtn.style.transition = '0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        let deltaY = e.changedTouches[0].clientY - pocketStartY;
-        if (deltaY < -80) { // 拋棄隱藏
-            floatBtn.style.transform = 'translateY(-200px) scale(0.5)';
-            floatBtn.style.opacity = '0';
-            setTimeout(() => { floatBtn.style.display = 'none'; }, 300);
-        } else {
-            floatBtn.style.transform = 'translateY(0)';
-            floatBtn.style.opacity = '1';
-        }
-        setTimeout(() => { isDraggingPocket = false; }, 50);
     }, { passive: true });
 
     document.body.appendChild(floatBtn);
@@ -173,20 +155,12 @@ const isMobile = window.innerWidth < 1024;
 const scale = isMobile ? window.innerWidth / 980 : 1;
 const emojiSize = Math.round(20 * scale) + 'px';
 const textSize = Math.round(16 * scale) + 'px';
-// 🎯 手機圓球 vs 電腦版長條
-            if (typeof isRealMobile !== 'undefined' && isRealMobile) {
-                floatBtn.innerHTML = `
-                    <span style="font-size: 28px; line-height: 1;">🎁</span>
-                    <span class="pocket-badge" style="position: absolute; top: -2px; right: -2px; font-size: 13px; padding: 2px 7px;">${window.userPocket.length}</span>
-                `;
-            } else {
-                floatBtn.innerHTML = `
-                    <span style="font-size:${emojiSize};">🎁</span>
-                    <span style="font-size:${textSize}; margin-top:2px; letter-spacing:1px; font-weight:900;">我的</span>
-                    <span style="font-size:${textSize}; letter-spacing:1px; font-weight:900;">寶庫</span>
-                    <span class="pocket-badge" style="font-size:${Math.round(14*scale)}px; padding:${Math.round(3*scale)}px ${Math.round(10*scale)}px; top:${Math.round(-5*scale)}px;">${window.userPocket.length}</span>
-                `;
-            }
+floatBtn.innerHTML = `
+    <span style="font-size:${emojiSize};">🎁</span>
+    <span style="font-size:${textSize}; margin-top:2px; letter-spacing:1px; font-weight:900;">我的</span>
+    <span style="font-size:${textSize}; letter-spacing:1px; font-weight:900;">寶庫</span>
+    <span class="pocket-badge" style="font-size:${Math.round(14*scale)}px; padding:${Math.round(3*scale)}px ${Math.round(10*scale)}px; top:${Math.round(-5*scale)}px;">${window.userPocket.length}</span>
+`;
         } else { 
             floatBtn.style.display = 'none'; 
         }
@@ -325,21 +299,9 @@ window.openPocketModal = () => {
 
     window.updatePocketWidget();
 
-function syncPocketBtnScale() {
-        if (typeof isRealMobile !== 'undefined' && isRealMobile) {
-            // 📱 手機版：右下角懸浮球 (疊在麾下按鈕的上方 95px)
-            floatBtn.style.width = '60px';
-            floatBtn.style.height = '60px';
-            floatBtn.style.borderRadius = '50%';
-            floatBtn.style.padding = '0';
-            floatBtn.style.justifyContent = 'center';
-            floatBtn.style.left = 'auto';
-            floatBtn.style.right = '20px'; 
-            floatBtn.style.top = 'auto';
-            floatBtn.style.bottom = '95px'; 
-            floatBtn.style.transform = 'translateY(0)';
-        } else if (window.innerWidth < 1024) {
-            // 💻 非手機的小螢幕
+    // 手機版縮放同步
+    function syncPocketBtnScale() {
+        if (window.innerWidth < 1024) {
             const scale = window.innerWidth / 980;
             const w = Math.round(75 * scale);
             floatBtn.style.right = 'auto';
@@ -350,9 +312,7 @@ function syncPocketBtnScale() {
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';
             floatBtn.style.transform = '';
-            floatBtn.style.top = ''; 
         } else {
-            // 💻 電腦版大螢幕
             floatBtn.style.width = '';
             floatBtn.style.height = '';
             floatBtn.style.left = '';
@@ -360,10 +320,8 @@ function syncPocketBtnScale() {
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
             floatBtn.style.transform = '';
-            floatBtn.style.top = ''; 
         }
     }
-
     window.addEventListener('resize', syncPocketBtnScale);
     syncPocketBtnScale();
 
@@ -384,8 +342,33 @@ function syncPocketBtnScale() {
             if (recruitBtn) recruitBtn.classList.remove('is-comparing');
         }
     };
+// 手機版：偵測是否在上半部，自動露出按鈕
+    if (window.innerWidth < 1024) {
+        function checkScrollPosition() {
+            const details = document.getElementById('details');
+            const pocketBtn = document.querySelector('.floating-pocket-btn');
+            const recruitBtn = document.querySelector('.floating-recruit-btn');
+            if (!details || !pocketBtn || !recruitBtn) return;
 
-    
+            const detailsTop = details.getBoundingClientRect().top;
+            const isInUpperArea = detailsTop > window.innerHeight * 0.5;
+
+            if (isInUpperArea) {
+                // 上半部：露出按鈕
+                const scale = window.innerWidth / 980;
+                const w = Math.round(75 * scale);
+                pocketBtn.style.left = '-' + Math.round(w - 14) + 'px';
+                recruitBtn.style.left = '-' + Math.round(w - 14) + 'px';
+            } else {
+                // 下半部：完全縮回去
+                const scale = window.innerWidth / 980;
+                const w = Math.round(75 * scale);
+                pocketBtn.style.left = '-' + w + 'px';
+                recruitBtn.style.left = '-' + w + 'px';
+            }
+        }
+        window.addEventListener('scroll', checkScrollPosition);
+        checkScrollPosition();
+    }
 
 })();
-
