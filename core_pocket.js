@@ -98,15 +98,20 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 從左邊往右滑展開
+    // 從左邊往右滑展開 (🎯 升級版：放寬邊緣判定與滑動靈敏度)
     let pocketTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         pocketTouchStartX = e.touches[0].clientX;
     }, { passive: true });
+    
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - pocketTouchStartX;
-        const startedNearLeft = pocketTouchStartX < 30;
-        if (startedNearLeft && dx > 30 && !pocketExpanded) {
+        
+        // 🎯 1. 放寬邊緣判定
+        const startedNearLeft = pocketTouchStartX < 60; 
+        
+        // 🎯 2. 提升滑動靈敏度
+        if (startedNearLeft && dx > 20 && !pocketExpanded) {
             pocketExpanded = true;
             floatBtn.style.left = '0px';
         }

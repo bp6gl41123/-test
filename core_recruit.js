@@ -144,15 +144,20 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 從左邊往右滑展開
+    // 從左邊往右滑展開 (🎯 升級版：放寬邊緣判定與滑動靈敏度)
     let recruitTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         recruitTouchStartX = e.touches[0].clientX;
     }, { passive: true });
+    
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        const startedNearLeft = recruitTouchStartX < 30;
-        if (startedNearLeft && dx > 30 && !recruitExpanded) {
+        
+        // 🎯 1. 放寬邊緣：原本 < 30，放寬到 < 60 (甚至 80)，讓手指不用貼死螢幕邊緣
+        const startedNearLeft = recruitTouchStartX < 60; 
+        
+        // 🎯 2. 提升靈敏度：原本要滑動 dx > 30，現在只要輕輕滑動 dx > 20 就會彈出
+        if (startedNearLeft && dx > 20 && !recruitExpanded) {
             recruitExpanded = true;
             floatBtn.style.left = '0px';
         }
