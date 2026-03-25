@@ -259,18 +259,18 @@ window.openRecruitModal = () => {
         if (typeof window.renderDisplay === 'function') window.renderDisplay();
     };
 
-/* 🛡️ 核心黑科技：1:1 唯讀預覽卡片特效 (絕對置中升級版) */
+/* 🛡️ 核心黑科技：1:1 唯讀預覽卡片特效 (雙軌自適應版) */
     window.showRecruitPreview = function(expertName, sportKey, event) {
         let tooltip = document.getElementById('recruitPreviewBox');
         if(!tooltip) {
             tooltip = document.createElement('div');
             tooltip.id = 'recruitPreviewBox';
-            // 💡 絕對置中魔法：將 transform 加入 translateY(-50%)，讓它永遠垂直置中
-            tooltip.style.cssText = 'position:fixed; z-index:10005; pointer-events:none; width:300px; transform:translateY(-50%) scale(0.95); transform-origin: center center; transition:opacity 0.2s; background:transparent; border-radius:12px; box-shadow:0 30px 60px rgba(0,0,0,0.7); opacity:0;';
+            // 💡 完全保留你原版的初始樣式 (透明度為 0，確保淡入動畫正常運作)
+            tooltip.style.cssText = 'position:fixed; z-index:10005; pointer-events:none; width:300px; transform-origin: center center; transition:opacity 0.2s; background:transparent; border-radius:12px; box-shadow:0 30px 60px rgba(0,0,0,0.7); opacity:0;';
             document.body.appendChild(tooltip);
         }
 
-        // 模擬 core_ranking.js 算分邏輯來生成 mockItem
+        // 模擬 core_ranking.js 算分邏輯 (100% 保留)
         let list = (window.dataDB[expertName] && window.dataDB[expertName][sportKey]) ? window.dataDB[expertName][sportKey] : [];
         let w=0, l=0, n20=0; 
         list.slice(0, 20).forEach(r => { 
@@ -282,13 +282,24 @@ window.openRecruitModal = () => {
         let mockItem = { name: expertName, w: w, l: l, net: n20, rate: rate };
         let isReverse = rate < 0.5;
         
-        // 呼叫您原有完美的渲染邏輯
+        // 呼叫您原有完美的渲染邏輯 (100% 保留)
         let cardHtml = window.renderRankCard(mockItem, isReverse ? -1 : 0, sportKey, isReverse); 
         tooltip.innerHTML = `<div style="background:#fff; border-radius:8px; overflow:hidden;">${cardHtml}</div>`;
         
-        // 💡 排版校正：高度鎖定在螢幕正中央 (50%)，水平位置跟隨滑鼠左側
-        tooltip.style.left = Math.max(20, event.clientX - 330) + 'px';
-        tooltip.style.top = '50%';
+        // 💡 只有這裡做「雙軌分流」：手機置中縮小，電腦跟隨滑鼠
+        if (window.innerWidth < 1024) {
+            // 手機版：強制螢幕正中央，並縮小至 65%
+            tooltip.style.left = '50%';
+            tooltip.style.top = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%) scale(0.65)';
+        } else {
+            // 電腦版：維持 95%，水平位置跟隨滑鼠左側
+            tooltip.style.left = Math.max(20, event.clientX - 330) + 'px';
+            tooltip.style.top = '50%';
+            tooltip.style.transform = 'translateY(-50%) scale(0.95)';
+        }
+        
+        // 觸發 0.2 秒順滑淡入動畫
         tooltip.style.opacity = '1';
     };
 
