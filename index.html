@@ -491,7 +491,7 @@
         if (isLineApp) {
             if (isLandscape) {
                 // 📱 手機橫放：強制欺騙瀏覽器，塞入 1440px 的電腦版視角！
-                if (viewportMeta.getAttribute('content') !== 'width=1440, user-scalable=yes') {
+                if (viewportMeta.getAttribute('content') !== 'width=1920, user-scalable=yes') {
                     viewportMeta.setAttribute('content', 'width=1440, user-scalable=yes');
                     setTimeout(function() { window.scalePage(true); }, 100); // 🛡️ 雙重保險：強制重算
                     return; // 🛑 暫停執行，等待視角切換
