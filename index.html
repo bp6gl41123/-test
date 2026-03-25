@@ -468,7 +468,7 @@
     <script src="core_tooltips.js?v=1.0.14"></script>
     <script src="core_trend.js?v=1.0.10"></script>
     <script src="core_ranking.js?v=1.0.144"></script>
-    <script src="core_recruit.js?v=1.0.87"></script>
+    <script src="core_recruit.js?v=1.0.84"></script>
     <script src="core_engine.js?v=1.0.97"></script>
 
 <script>
@@ -482,12 +482,36 @@
         var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
+        // 🎯 核心黑科技：偵測「實體翻轉手機」(判斷寬度是否大於高度)
+        var isLandscape = (screenWidth > screenHeight);
+        var viewportMeta = document.getElementById('viewportMeta');
+        var isLineApp = (navigator.userAgent.indexOf("Line") > -1);
+
+        // 只有在 LINE 瀏覽器裡面才需要這個強制切換
+        if (isLineApp) {
+            if (isLandscape) {
+                // 📱 手機橫放：強制欺騙瀏覽器，塞入 1440px 的電腦版視角！
+                if (viewportMeta.getAttribute('content') !== 'width=1440, user-scalable=yes') {
+                    viewportMeta.setAttribute('content', 'width=1440, user-scalable=yes');
+                    setTimeout(function() { window.scalePage(true); }, 100); // 🛡️ 雙重保險：強制重算
+                    return; // 🛑 暫停執行，等待視角切換
+                }
+            } else {
+                // 📱 手機直放：恢復原本的手機版視角
+                if (viewportMeta.getAttribute('content') !== 'width=device-width, initial-scale=1.0') {
+                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0');
+                    setTimeout(function() { window.scalePage(true); }, 100); // 🛡️ 雙重保險：強制重算
+                    return; // 🛑 暫停並等待恢復
+                }
+            }
+        }
+
         // 防風暴鎖：如果不是強制執行，且尺寸完全沒變，才跳過
         if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
-        // 📱 手機版邏輯 (<1024)
+        // 📱 手機版邏輯 (<1024 且為直向時)
         if (screenWidth < 1024) { 
             var scale = screenWidth / 980;
             // 確保高度絕對能填滿被收起的網址列空間 (加上 100px 緩衝值，杜絕滑動白邊)
@@ -514,7 +538,7 @@
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
 
-        // 💻 電腦版邏輯 (>=1024)
+        // 💻 電腦版邏輯 (>=1024，包含手機橫放被判定為 1440 寬度時)
         } else {
             // 🚨 揪出凶手並修正：絕對不能用 '' 空字串！必須強迫鎖死 100% 滿版！
             if (content) { 
@@ -534,7 +558,7 @@
         }
         document.documentElement.style.visibility = 'visible';
     }
-    
+
     window.addEventListener('load', function() { window.scalePage(true); });
     window.addEventListener('resize', window.scalePage);
     window.addEventListener('orientationchange', function() {
