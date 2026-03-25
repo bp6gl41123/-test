@@ -162,9 +162,10 @@ if (!document.getElementById('pickTooltipStyle')) {
         body.mode-neg { background-color: #0f172a; color: #f8fafc; transition: background-color 0.5s; }
 
         body.mode-neg .expert-card {
-            animation: flipFromWhite 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards !important; 
-            backface-visibility: hidden; 
-            opacity: 0; background: #1e293b; z-index: 1;
+            background: #1e293b; 
+            border-color: #450a0a; 
+            color: #fca5a5; 
+            z-index: 1;
         }
 
         body.mode-neg .podium-card { background: linear-gradient(135deg, #7f1d1d, #450a0a); border-color: #ef4444; }
