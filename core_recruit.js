@@ -161,21 +161,6 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 3. 🎯 保留向右滑開邏輯 (高靈敏度版)
-    let recruitTouchStartX = 0;
-    document.addEventListener('touchstart', function(e) {
-        recruitTouchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    
-    document.addEventListener('touchend', function(e) {
-        const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        const startedNearLeft = recruitTouchStartX < 300; 
-        
-        if (startedNearLeft && dx > 5 && !recruitExpanded) {
-            recruitExpanded = true;
-            floatBtn.style.left = '0px';
-        }
-    }, { passive: true });
 
     document.body.appendChild(floatBtn);
 

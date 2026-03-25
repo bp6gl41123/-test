@@ -114,24 +114,6 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 3. 🎯 保留向右滑開邏輯 (高靈敏度版)
-    let pocketTouchStartX = 0;
-    document.addEventListener('touchstart', function(e) {
-        pocketTouchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    
-    document.addEventListener('touchend', function(e) {
-        const dx = e.changedTouches[0].clientX - pocketTouchStartX;
-        const startedNearLeft = pocketTouchStartX < 300; 
-        
-        if (startedNearLeft && dx > 5 && !pocketExpanded) {
-            pocketExpanded = true;
-            floatBtn.style.left = '0px';
-        }
-    }, { passive: true });
-
-    document.body.appendChild(floatBtn);
-
 const overlay = document.createElement('div'); overlay.className = 'pocket-modal-overlay';
     overlay.innerHTML = `
         <div class="pocket-modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
