@@ -410,7 +410,7 @@
                         </div>
                     </div>
 
-                    <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 送出戰力分析 / 複選對比</button>
+                    <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 賽事成績 複選對比</button>
 
 <button style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #f8fafc; border: 2px solid #334155; padding: 15px 40px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: 0.3s;" 
                             onmouseover="this.style.borderColor='#fbbf24'; this.style.color='#fbbf24';" 
@@ -561,9 +561,21 @@
             左側為所選區間之結算實力，右側為近 <span style="color:#10b981">30</span> / <span style="color:#38bdf8">20</span> / <span style="color:#a855f7">7</span> / <span style="color:#fbbf24">3</span> 日真實動能發射軌跡 (從實際天數拔地而起)
         </p>
 
-        <div id="momentumRadarList" style="display: flex; flex-direction: column; gap: 30px;">
+       <div id="momentumRadarList" style="display: flex; flex-direction: column; gap: 30px;">
         </div>
     </div>
 </div>
+
+<script>
+// 全域點擊偵測：關閉主推下拉選單
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.main-pick-dropdown-content') && !e.target.innerText.includes('眾選主推')) {
+        document.querySelectorAll('.main-pick-dropdown-content').forEach(function(el) {
+            el.style.display = 'none';
+        });
+    }
+});
+</script>
+
 </body>
 </html>
