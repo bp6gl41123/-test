@@ -299,7 +299,7 @@ window.openPocketModal = () => {
 
     window.updatePocketWidget();
 
-    // 手機版縮放同步
+// 手機版縮放同步
     function syncPocketBtnScale() {
         if (window.innerWidth < 1024) {
             const scale = window.innerWidth / 980;
@@ -311,7 +311,16 @@ window.openPocketModal = () => {
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';
-            floatBtn.style.transform = '';
+
+            // 🎯 【最高指導原則】：只管純網頁版，LINE 維持原樣
+            if (window.SysEnv && window.SysEnv.isWebBrowser) {
+                floatBtn.style.top = '38vh'; // Safari/Chrome 強制鎖定，保持與麾下按鈕的間隔
+                floatBtn.style.transform = 'translateY(0)';
+            } else {
+                floatBtn.style.top = ''; // LINE 版清空行內樣式，完美吃回你原本的 CSS calc()
+                floatBtn.style.transform = '';
+            }
+
         } else {
             floatBtn.style.width = '';
             floatBtn.style.height = '';
@@ -320,6 +329,7 @@ window.openPocketModal = () => {
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
             floatBtn.style.transform = '';
+            floatBtn.style.top = ''; // 電腦版恢復預設
         }
     }
     window.addEventListener('resize', syncPocketBtnScale);
@@ -342,7 +352,8 @@ window.openPocketModal = () => {
             if (recruitBtn) recruitBtn.classList.remove('is-comparing');
         }
     };
-// 手機版：偵測是否在上半部，自動露出按鈕
+
+    // 手機版：偵測是否在上半部，自動露出按鈕
     if (window.innerWidth < 1024) {
         function checkScrollPosition() {
             const details = document.getElementById('details');

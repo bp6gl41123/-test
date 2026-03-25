@@ -306,7 +306,16 @@ window.openRecruitModal = () => {
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';
-            floatBtn.style.transform = '';
+            
+            // 🎯 【最高指導原則】：只管純網頁版，LINE 維持原樣
+            if (window.SysEnv && window.SysEnv.isWebBrowser) {
+                floatBtn.style.top = '25vh'; // Safari/Chrome 強制鎖定在上方 25% (賽事項目之上)
+                floatBtn.style.transform = 'translateY(0)';
+            } else {
+                floatBtn.style.top = ''; // LINE 版清空行內樣式，完美吃回你原本的 CSS calc()
+                floatBtn.style.transform = '';
+            }
+
         } else {
             floatBtn.style.width = '';
             floatBtn.style.height = '';
@@ -315,19 +324,7 @@ window.openRecruitModal = () => {
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
             floatBtn.style.transform = '';
-
-// 🎯 【新增】專為「非 LINE 的純網頁版」覆寫高度，數字越小越高
-            if (!navigator.userAgent.includes("Line")) {
-                floatBtn.style.top = '15%'; 
-            }
-
-            floatBtn.style.transform = '';
-            floatBtn.style.width = '';
-            floatBtn.style.height = '';
-            floatBtn.style.left = '';
             floatBtn.style.top = ''; // 電腦版恢復預設
-            // ...
-
         }
     }
     window.addEventListener('resize', syncRecruitBtnScale);
