@@ -78,30 +78,32 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-pocket-btn';
 
     // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
-    let recruitExpanded = false; // 保留變數給滑動引擎用
+    let pocketExpanded = false;
+    
+    // 1. 點擊邏輯
     floatBtn.addEventListener('click', function() {
         if (window.innerWidth < 1024) {
-            // 🎯 核心修復：直接看按鈕是不是已經拉出來了！
-            if (floatBtn.style.left === '0px') {
-                window.openRecruitModal(); // 拉出來了，直接開視窗
+            // 🎯 只要按鈕滑出來了，或是變數是 true，點擊就直接開視窗！
+            if (floatBtn.style.left === '0px' || pocketExpanded) {
+                window.openPocketModal();
             } else {
-                floatBtn.style.left = '0px'; // 沒拉出來，就拉出來
+                pocketExpanded = true;
+                floatBtn.style.left = '0px';
             }
         } else {
-            window.openRecruitModal();
+            window.openPocketModal();
         }
     });
 
-    // 🎯 視覺修復：點擊外面時，按鈕要「真的」縮回去
+    // 2. 點擊外部縮回邏輯
     document.addEventListener('click', function(e) {
-        if (floatBtn.style.left === '0px' && !floatBtn.contains(e.target)) {
-            if (typeof syncRecruitBtnScale === 'function') {
-                syncRecruitBtnScale(); // 呼叫底部的縮放引擎把它收合
-            }
+        if (pocketExpanded && !floatBtn.contains(e.target)) {
+            pocketExpanded = false;
+            if (typeof syncPocketBtnScale === 'function') syncPocketBtnScale();
         }
     });
 
-    // 從左邊往右滑展開 (🎯 已升級：高靈敏度與寬邊緣)
+    // 3. 🎯 保留向右滑開邏輯 (高靈敏度版)
     let pocketTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         pocketTouchStartX = e.touches[0].clientX;
@@ -109,11 +111,8 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - pocketTouchStartX;
-        
-        // 👇 放寬到 110 (不用貼死螢幕邊緣，避開手機原生返回手勢)
         const startedNearLeft = pocketTouchStartX < 110; 
         
-        // 👇 滑動距離降到 15 (輕輕往右撥一下就瞬間觸發)
         if (startedNearLeft && dx > 15 && !pocketExpanded) {
             pocketExpanded = true;
             floatBtn.style.left = '0px';

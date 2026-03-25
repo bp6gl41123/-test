@@ -124,41 +124,42 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-recruit-btn';
 
     // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
-    let pocketExpanded = false; // 保留變數給滑動引擎用
+    let recruitExpanded = false;
+    
+    // 1. 點擊邏輯
     floatBtn.addEventListener('click', function() {
         if (window.innerWidth < 1024) {
-            // 🎯 核心修復：直接看按鈕是不是已經拉出來了！
-            if (floatBtn.style.left === '0px') {
-                window.openPocketModal(); 
+            // 🎯 只要按鈕滑出來了，或是變數是 true，點擊就直接開視窗！
+            if (floatBtn.style.left === '0px' || recruitExpanded) {
+                window.openRecruitModal();
             } else {
-                floatBtn.style.left = '0px'; 
+                recruitExpanded = true;
+                floatBtn.style.left = '0px';
             }
         } else {
-            window.openPocketModal();
+            window.openRecruitModal();
         }
     });
 
-    // 🎯 視覺修復：點擊外面時，按鈕要「真的」縮回去
+    // 2. 點擊外部縮回邏輯
     document.addEventListener('click', function(e) {
-        if (floatBtn.style.left === '0px' && !floatBtn.contains(e.target)) {
-            if (typeof syncPocketBtnScale === 'function') {
-                syncPocketBtnScale(); // 呼叫底部的縮放引擎把它收合
-            }
+        if (recruitExpanded && !floatBtn.contains(e.target)) {
+            recruitExpanded = false;
+            // 呼叫下方的縮放引擎讓它乖乖縮回去
+            if (typeof syncRecruitBtnScale === 'function') syncRecruitBtnScale();
         }
     });
 
-    // 從左邊往右滑展開 (🎯 已升級：高靈敏度與寬邊緣)
+    // 3. 🎯 保留向右滑開邏輯 (高靈敏度版)
     let recruitTouchStartX = 0;
     document.addEventListener('touchstart', function(e) {
         recruitTouchStartX = e.touches[0].clientX;
     }, { passive: true });
+    
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        
-        // 👇 放寬到 110 (不用貼死邊緣)
         const startedNearLeft = recruitTouchStartX < 110; 
         
-        // 👇 滑動 15 就觸發
         if (startedNearLeft && dx > 15 && !recruitExpanded) {
             recruitExpanded = true;
             floatBtn.style.left = '0px';
