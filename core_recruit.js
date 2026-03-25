@@ -169,7 +169,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     
     document.addEventListener('touchend', function(e) {
         const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        const startedNearLeft = recruitTouchStartX < 200; 
+        const startedNearLeft = recruitTouchStartX < 300; 
         
         if (startedNearLeft && dx > 5 && !recruitExpanded) {
             recruitExpanded = true;
