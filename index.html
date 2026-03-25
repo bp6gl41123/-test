@@ -393,7 +393,10 @@
             👑 眾選主推 ▾
         </button>
         
-        <div onclick="window.activeSportKey='nba_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+        <div class="main-pick-dropdown-content" style="display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background-color: #1e293b; min-width: 220px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); z-index: 999; border-radius: 12px; border: 1px solid #fbbf24; overflow: hidden; margin-bottom: 10px;">
+
+
+            <div onclick="window.activeSportKey='nba_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
                                  style="color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
                                  onmouseover="this.style.background='#334155'; this.style.color='#fbbf24'" 
                                  onmouseout="this.style.background='transparent'; this.style.color='white'">
