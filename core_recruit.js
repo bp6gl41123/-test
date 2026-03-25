@@ -124,23 +124,26 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-recruit-btn';
 
     // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
-    let recruitExpanded = false;
+    let pocketExpanded = false; // 保留變數給滑動引擎用
     floatBtn.addEventListener('click', function() {
         if (window.innerWidth < 1024) {
-            if (!recruitExpanded) {
-                recruitExpanded = true;
-                floatBtn.style.left = '0px';
+            // 🎯 核心修復：直接看按鈕是不是已經拉出來了！
+            if (floatBtn.style.left === '0px') {
+                window.openPocketModal(); 
             } else {
-                recruitExpanded = false;
-                window.openRecruitModal();
+                floatBtn.style.left = '0px'; 
             }
         } else {
-            window.openRecruitModal();
+            window.openPocketModal();
         }
     });
+
+    // 🎯 視覺修復：點擊外面時，按鈕要「真的」縮回去
     document.addEventListener('click', function(e) {
-        if (recruitExpanded && !floatBtn.contains(e.target)) {
-            recruitExpanded = false;
+        if (floatBtn.style.left === '0px' && !floatBtn.contains(e.target)) {
+            if (typeof syncPocketBtnScale === 'function') {
+                syncPocketBtnScale(); // 呼叫底部的縮放引擎把它收合
+            }
         }
     });
 

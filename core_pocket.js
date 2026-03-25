@@ -78,23 +78,26 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-pocket-btn';
 
     // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
-    let pocketExpanded = false;
+    let recruitExpanded = false; // 保留變數給滑動引擎用
     floatBtn.addEventListener('click', function() {
         if (window.innerWidth < 1024) {
-            if (!pocketExpanded) {
-                pocketExpanded = true;
-                floatBtn.style.left = '0px';
+            // 🎯 核心修復：直接看按鈕是不是已經拉出來了！
+            if (floatBtn.style.left === '0px') {
+                window.openRecruitModal(); // 拉出來了，直接開視窗
             } else {
-                pocketExpanded = false;
-                window.openPocketModal();
+                floatBtn.style.left = '0px'; // 沒拉出來，就拉出來
             }
         } else {
-            window.openPocketModal();
+            window.openRecruitModal();
         }
     });
+
+    // 🎯 視覺修復：點擊外面時，按鈕要「真的」縮回去
     document.addEventListener('click', function(e) {
-        if (pocketExpanded && !floatBtn.contains(e.target)) {
-            pocketExpanded = false;
+        if (floatBtn.style.left === '0px' && !floatBtn.contains(e.target)) {
+            if (typeof syncRecruitBtnScale === 'function') {
+                syncRecruitBtnScale(); // 呼叫底部的縮放引擎把它收合
+            }
         }
     });
 
