@@ -12,11 +12,28 @@
 </script>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+<meta id="viewportMeta" name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            // 偵測訪客是不是用 LINE 內建瀏覽器打開的
+            var isLineApp = (navigator.userAgent.indexOf("Line") > -1);
+            
+            // 如果「不是」在 LINE 裡面 (代表是用 Chrome/Safari 等外部預設瀏覽器開啟)
+            // 且螢幕寬度小於 1024 (代表他是在手機上)
+            if (!isLineApp && window.innerWidth < 1024) {
+                // 強制把視角拉遠，變成 1440px 的電腦版視野
+                document.getElementById('viewportMeta').setAttribute('content', 'width=1440, user-scalable=yes');
+            }
+        })();
+    </script>
+
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>齊聚眾選 - 戰績實時反饋儀表板 (每日密鑰版)</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <meta property="og:title" content="齊聚眾選 一起來預測吧 !" />
 <meta property="og:description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢，尊爵黑金風儀表板。" />
@@ -29,6 +46,23 @@
 <meta name="description" content="全台最強運動賽事分析對比系統，即時掌握好手動向與戰績趨勢，尊爵黑金風儀表板。" />
     
     <style>
+/* ==================================================== */
+/* 🚀 隱藏電腦版多餘捲軸 (保留滑鼠滾動功能)               */
+/* ==================================================== */
+@media (min-width: 1024px) {
+    /* 針對 Firefox 瀏覽器 */
+    html, body, #authGate {
+        scrollbar-width: none !important;
+    }
+    /* 針對 Chrome, Safari, Edge 瀏覽器 */
+    html::-webkit-scrollbar, 
+    body::-webkit-scrollbar, 
+    #authGate::-webkit-scrollbar {
+        display: none !important;
+        width: 0px !important;
+    }
+}
+
 /* ==================================================== */
         /* 🌟 主視覺中央招牌 (鎮壓全場！超越第一名的極致金光)    */
         /* ==================================================== */
@@ -159,10 +193,35 @@
         /* ==================================================== */
         .container { max-width: 1650px; margin: 0 auto; position: relative; padding: 20px; }
         .grid-container { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 30px; }
-        .expert-card { background: white; border: 1px solid #e1e4e8; border-radius: 10px; padding: 15px 5px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+.expert-card { 
+    background: white; 
+    border: 1px solid #e1e4e8; 
+    border-radius: 10px; 
+    padding: 15px 5px; 
+    text-align: center; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    position: relative; /* 確保休眠圖示定位正確 */
+    /* 👇 網格防爆鎖：強制允許卡片縮小，絕對不准撐開網格！ */
+    min-width: 0; 
+    overflow: hidden; 
+}
+
 .expert-card:hover { border-color: #1877f2; }
         .expert-card.active { border: 2.5px solid #1877f2; background-color: #e7f3ff; }
-        .name { font-weight: bold; font-size: 16px; display: block; }
+        
+.name { 
+    font-weight: bold; 
+    font-size: 16px; 
+    display: block; 
+    /* 👇 補回來的截斷防護罩 */
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+}
+
         .badge { font-size: 12px; color: #ff4d4f; font-weight: bold; margin-top: 5px; display: block; }
 
         #details { display: none; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-top: 30px; }
@@ -326,7 +385,6 @@
 
     </style> 
 
-</style>
 <script>
 (function() {
     if (window.innerWidth < 980) {
@@ -367,10 +425,39 @@
                 <p style="font-weight:bold; color:#64748b; margin-bottom:15px;">
 🔍 步驟：請選擇賽事項目 按對比送出 就能開始全域對比 / 或單獨點選好手卡片按送出也能比照成績清單 </p>
                 <div class="sport-tabs" id="tabContainer" style="justify-content: center; margin-bottom: 20px;"></div>
-                <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 送出戰力分析 / 複選對比</button>
-            </div>
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+    <div style="position: relative; display: inline-block;">
+        <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();" 
+                style="background: linear-gradient(135deg, #1a1a1a, #000000); color: #fbbf24; border: 2px solid #fbbf24; padding: 13px 35px; font-size: 22px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.3s; display: flex; align-items: center; gap: 10px;">
+            👑 眾選主推 ▾
+        </button>
+        
+        <div class="main-pick-dropdown-content" style="display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background-color: #1e293b; min-width: 220px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); z-index: 999; border-radius: 12px; border: 1px solid #fbbf24; overflow: hidden; margin-bottom: 10px;">
+
+
+            <div onclick="window.activeSportKey='nba_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                                 style="color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                                 onmouseover="this.style.background='#334155'; this.style.color='#fbbf24'" 
+                                 onmouseout="this.style.background='transparent'; this.style.color='white'">
+                                 🏀 NBA 主推
+                            </div>
+                            <div onclick="window.activeSportKey='mlb_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                                 style="color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s;" 
+                                 onmouseover="this.style.background='#334155'; this.style.color='#fbbf24'" 
+                                 onmouseout="this.style.background='transparent'; this.style.color='white'">
+                                 ⚾ MLB 主推
+                            </div>
+        </div>
+    </div>
+
+                <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 眾選成績清單(複選)</button> 
+
+<button onclick="openMomentumRadar()" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #22d3ee; border: 2px solid #22d3ee; padding: 13px 40px; font-size: 22px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); transition: all 0.3s ease; " onmouseover="this.style.boxShadow='0 0 30px rgba(34, 211, 238, 0.7)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 0 20px rgba(34, 211, 238, 0.3)'; this.style.transform='translateY(0)';">📈 啟動戰情室</button>
+                </div> </div>
 
             <div id="details">
+
                 <div class="expert-header-box" id="singleHeader" style="display:none;">
                     <h3 id="expertTitle"></h3>
                     <div class="item-badge" id="topBadge" style="background:#1877f2; color:white; padding:3px 10px; border-radius:5px; font-size:14px; font-weight:bold;">NBA</div>
@@ -395,51 +482,88 @@
             </div>
         </div>
     </div>
-    <script src="config.js?v=1.0.95"></script>
-    <script src="data.js?v=1.0.26"></script>
-    <script src="auth.js?v=1.0.25"></script>
-    <script src="core_admin.js?v=1.0.25"></script>
-    <script src="core_backup.js?v=1.0.14"></script>
+    <script src="config.js?v=1.0.130"></script>
+    <script src="data.js?v=1.0.34"></script>
+    <script src="auth.js?v=1.0.35"></script>
+    <script src="core_admin.js?v=1.0.32"></script>
+    <script src="core_backup.js?v=1.0.16"></script>
     <script src="core_settle.js?v=1.0.10"></script>
-    <script src="core_pocket.js?v=1.0.19"></script>
+    <script src="core_pocket.js?v=1.0.87"></script>
     <script src="core_utils.js?v=1.0.10"></script>
-    <script src="core_tooltips.js?v=1.0.13"></script>
+    <script src="core_tooltips.js?v=1.0.14"></script>
     <script src="core_trend.js?v=1.0.10"></script>
-    <script src="core_ranking.js?v=1.0.16"></script>
-    <script src="core_recruit.js?v=1.0.20"></script>
-    <script src="core_engine.js?v=1.0.71"></script>
+    <script src="core_ranking.js?v=1.0.144"></script>
+    <script src="core_recruit.js?v=1.0.88"></script>
+    <script src="core_engine.js?v=1.0.87"></script>
 
 <script>
 (function() {
-    function scalePage() {
+    var lastWidth = 0;
+    var lastHeight = 0;
+
+    window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
-        if (!content) return;
+        var radar = document.getElementById('momentumRadarPage');
         var screenWidth = window.innerWidth;
-        
-        if (screenWidth < 1024) { // 💡 門檻提高到 1024
+        var screenHeight = window.innerHeight;
+
+        // 防風暴鎖：如果不是強制執行，且尺寸完全沒變，才跳過
+        if (force !== true && lastWidth === screenWidth && lastHeight === screenHeight) return; 
+        lastWidth = screenWidth;
+        lastHeight = screenHeight;
+
+        // 📱 手機版邏輯 (<1024)
+        if (screenWidth < 1024) { 
             var scale = screenWidth / 980;
-            content.style.transformOrigin = 'top left';
-            content.style.transform = 'scale(' + scale + ')';
-            content.style.width = '980px';
-            // 💡 修正高度計算錯誤 (原本寫成了 width)
-            content.style.height = Math.round(window.innerHeight / scale) + 'px';
+            // 確保高度絕對能填滿被收起的網址列空間 (加上 100px 緩衝值，杜絕滑動白邊)
+            var targetH = Math.round((screenHeight + 100) / scale) + 'px'; 
+            
+            if (content && content.style.display !== 'none') {
+                content.style.transformOrigin = 'top left';
+                content.style.transform = 'scale(' + scale + ')';
+                content.style.width = '980px';
+                content.style.height = targetH;
+            }
+            if (radar && radar.style.display !== 'none') {
+                radar.style.transformOrigin = 'top left';
+                radar.style.transform = 'scale(' + scale + ')';
+                radar.style.width = '980px';
+                radar.style.height = targetH;
+                // 🚨 終極防線：用 CSS 強制將網頁底色塗黑，這樣就算高度計算有毫秒延遲，也不會閃現白邊！
+                document.body.style.backgroundColor = '#060b14';
+            } else {
+                // 如果戰情室關閉，恢復主頁底色
+                document.body.style.backgroundColor = '#f4f7f9';
+            }
+            
             document.body.style.overflowX = 'hidden';
             document.documentElement.style.overflowX = 'hidden';
+
+        // 💻 電腦版邏輯 (>=1024)
         } else {
-            // 電腦版還原
-            content.style.transform = '';
-            content.style.width = '';
-            content.style.height = '';
+            // 🚨 揪出凶手並修正：絕對不能用 '' 空字串！必須強迫鎖死 100% 滿版！
+            if (content) { 
+                content.style.transform = 'none'; 
+                content.style.width = '100%'; 
+                content.style.height = 'auto'; 
+            }
+            if (radar) { 
+                radar.style.transform = 'none'; 
+                radar.style.width = '100%';    // 鎖死寬度 100%
+                radar.style.height = '100%';   // 鎖死高度 100%
+            }
+            document.body.style.backgroundColor = '#f4f7f9'; // 恢復正常底色
+            
             document.body.style.overflowX = 'auto';
             document.documentElement.style.overflowX = 'auto';
         }
         document.documentElement.style.visibility = 'visible';
     }
-    window.addEventListener('load', scalePage);
-    window.addEventListener('resize', scalePage);
-    // 💡 關鍵：加入翻轉監聽
+    
+    window.addEventListener('load', function() { window.scalePage(true); });
+    window.addEventListener('resize', window.scalePage);
     window.addEventListener('orientationchange', function() {
-        setTimeout(scalePage, 200);
+        setTimeout(function() { window.scalePage(true); }, 200);
     });
 })();
 </script>
@@ -450,6 +574,43 @@
         document.documentElement.style.visibility = 'hidden';
     }
 })();
+</script>
+
+
+<div id="momentumRadarPage" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060b14; z-index: 10000; overflow-y: auto; padding: 40px 20px; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <button onclick="closeMomentumRadar()" style="background: #1e293b; color: #fbbf24; border: 1px solid #fbbf24; padding: 10px 24px; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.3s;" onmouseover="this.style.background='#fbbf24'; this.style.color='#000';" onmouseout="this.style.background='#1e293b'; this.style.color='#fbbf24';">
+            ⬅️ 關閉戰情室 (返回主控制台)
+        </button>
+        
+        <h1 style="text-align:center; color:#f8fafc; margin-bottom: 15px; font-size: 36px; font-weight: 900; letter-spacing: 2px;">📈 專家實力與動能縱向對比總表</h1>
+        
+        <div class="ranking-filter-bar" style="margin-bottom: 25px; display: flex; justify-content: center; gap: 10px;">
+            <button class="r-btn" onclick="renderMomentumRadar(30, this)">近 30 場</button>
+            <button class="r-btn active" onclick="renderMomentumRadar(20, this)">近 20 場</button>
+            <button class="r-btn" onclick="renderMomentumRadar(7, this)">近 7 場</button>
+            <button class="r-btn" onclick="renderMomentumRadar(3, this)">近 3 場 (爆發)</button>
+        </div>
+
+        <p style="text-align:center; color:#94a3b8; font-weight:bold; margin-bottom: 40px; font-size: 16px;">
+            左側為所選區間之結算實力，右側為近 <span style="color:#10b981">30</span> / <span style="color:#38bdf8">20</span> / <span style="color:#a855f7">7</span> / <span style="color:#fbbf24">3</span> 日真實動能發射軌跡 (從實際天數拔地而起)
+        </p>
+
+        <div id="momentumRadarList" style="display: flex; flex-direction: column; gap: 30px;">
+        </div>
+    </div>
+</div>
+<script>
+// 🎯 監聽全域點擊事件：當點擊選單以外的地方，自動收起主推選單
+document.addEventListener('click', function(e) {
+    var dropdownContent = document.querySelector('.main-pick-dropdown-content');
+    var mainPickBtn = e.target.closest('button');
+
+    // 如果點擊的地方不是選單內部，且不是那個「👑 眾選主推」按鈕，就隱藏選單
+    if (dropdownContent && !dropdownContent.contains(e.target) && (!mainPickBtn || !mainPickBtn.innerText.includes('眾選主推'))) {
+        dropdownContent.style.display = 'none';
+    }
+});
 </script>
 
 </body>
