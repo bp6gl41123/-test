@@ -184,12 +184,21 @@ if (!document.getElementById('pickTooltipStyle')) {
             margin: 0px auto 30px auto !important; 
             position: relative;
             z-index: 50; 
+
         }
         
+        /* ✅ 統一卡片外觀：強制禁止 iOS 膨脹字體，維持白底架構，並補回全黑透明背景 */
         body.mode-neg .expert-card {
+            background: transparent !important; /* 🎯 關鍵修正：讓黑卡變透明，露出下方的全黑背景 */
+            -webkit-text-size-adjust: 100% !important; /* 🎯 修正：徹底禁止蘋果自作聰明放大字體 */
+            text-size-adjust: 100% !important; 
             border-radius: 12px !important; 
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important;
         }
+
+        /* ✅ 如果 index.html 裡的 mode-neg 被刪了，這裡補回全黑背景，絕對安全 */
+        body.mode-neg { background-color: #020617 !important; color: #f8fafc !important; }
+        body.mode-neg #details { background-color: #0f172a !important; border-color: #1e293b !important; }
 
         body.mode-neg .expert-card:hover {
             transform: translateY(-2px) scale(1.02) !important;
