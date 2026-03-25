@@ -63,7 +63,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
                 top: -20px; 
                 bottom: -20px; 
                 left: 0; 
-                right: -100px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
+                right: -200px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
                 background: transparent; 
             }
 
