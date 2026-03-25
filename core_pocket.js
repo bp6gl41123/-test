@@ -37,7 +37,7 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
                 position: absolute; 
                 top: -20px; 
                 bottom: -20px; 
-                left: -40px; /* 👈 向左偷出 40px 的隱形點擊區 */
+                left: -50px; /* 👈 向左偷出 40px 的隱形點擊區 */
                 right: 0; 
                 background: transparent; 
             }
