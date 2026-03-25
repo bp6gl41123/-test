@@ -33,6 +33,22 @@
     <meta http-equiv="Expires" content="0">
     <title>齊聚眾選 - 戰績實時反饋儀表板 (每日密鑰版)</title>
 
+    <script>
+    window.SysEnv = (function() {
+        var w = window.innerWidth;
+        var ua = navigator.userAgent || navigator.vendor || window.opera;
+        var isLine = ua.includes("Line") || ua.includes("LINE");
+        var isMobileSize = w < 1024;
+
+        return {
+            isDesktop: !isMobileSize,
+            isMobile: isMobileSize,
+            isLineApp: isMobileSize && isLine,
+            isWebBrowser: isMobileSize && !isLine // 🎯 純網頁版 (Safari/Chrome 等)
+        };
+    })();
+    </script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <meta property="og:title" content="齊聚眾選 一起來預測吧 !" />
