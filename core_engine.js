@@ -2,7 +2,7 @@
 /* ==== 【組件 E：核心引擎 - core_engine.js】 ==== */
 /* ============================================================== */
 
-const DB_KEY = 'DashboardDB_V109_Final'; 
+const DB_KEY = 'DashboardDB_V110_Final'; 
 window.dataDB = JSON.parse(localStorage.getItem(DB_KEY));
 window.isNegativeMode = false; // 🪄 魔法反向開關
 
@@ -186,23 +186,15 @@ if (!document.getElementById('pickTooltipStyle')) {
             position: relative;
             z-index: 50; 
             padding: 0 20px; 
-        }
-        
-        body.mode-neg #expertGrid { 
-            display: grid !important;
-            grid-template-columns: repeat(8, 1fr) !important; 
-            gap: 12px !important; /* 🎯 修正點：改為 12px，讓上下排間距恢復正常 */
-            max-width: 1550px !important; 
-            margin: 0px auto 30px auto !important; /* 🎯 修正點：下方留白恢復正常的 30px */
-            position: relative;
-            z-index: 50; 
-            padding: 0 20px; 
-        }
+        }       
         
         /* 🚨 已經移除反向 U 形排列，恢復為原本正常的網格排版，同時保留紅光特效 */
         body.mode-neg .expert-card {
             padding: 15px 5px !important; 
             border-radius: 12px !important; 
+            min-width: 0 !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s !important;
         }
 
