@@ -77,7 +77,7 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
 
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-pocket-btn';
 
-    // 🎯 真實物理裝置偵測 (捕捉手機晶片)
+   // 🎯 真實物理裝置偵測 (捕捉手機晶片)
     const isRealMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
     let isDraggingPocket = false;

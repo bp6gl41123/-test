@@ -123,26 +123,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
 
     const floatBtn = document.createElement('div'); floatBtn.className = 'floating-recruit-btn';
 
-    // 手機版：第一下展開，第二下開 Modal；電腦版直接開 Modal
-    let recruitExpanded = false;
-    floatBtn.addEventListener('click', function() {
-        if (window.innerWidth < 1024) {
-            if (!recruitExpanded) {
-                recruitExpanded = true;
-                floatBtn.style.left = '0px';
-            } else {
-                recruitExpanded = false;
-                window.openRecruitModal();
-            }
-        } else {
-            window.openRecruitModal();
-        }
-    });
-    document.addEventListener('click', function(e) {
-        if (recruitExpanded && !floatBtn.contains(e.target)) {
-            recruitExpanded = false;
-        }
-    });
+   
 
     // 🎯 真實物理裝置偵測 (捕捉手機晶片)
     const isRealMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
