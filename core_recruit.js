@@ -321,7 +321,6 @@ window.openRecruitModal = () => {
                 floatBtn.style.top = '15%'; 
             }
 
-        } else {
             floatBtn.style.transform = '';
             floatBtn.style.width = '';
             floatBtn.style.height = '';
