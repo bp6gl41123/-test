@@ -106,6 +106,8 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
         }
     });
 
+document.body.appendChild(floatBtn);
+
     // 2. 點擊外部縮回邏輯
     document.addEventListener('click', function(e) {
         if (pocketExpanded && !floatBtn.contains(e.target)) {
@@ -113,6 +115,8 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
             if (typeof syncPocketBtnScale === 'function') syncPocketBtnScale();
         }
     });
+
+
 
 const overlay = document.createElement('div'); overlay.className = 'pocket-modal-overlay';
     overlay.innerHTML = `
