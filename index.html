@@ -385,42 +385,7 @@
                 <p style="font-weight:bold; color:#64748b; margin-bottom:15px;">
 🔍 步驟：請選擇賽事項目 按對比送出 就能開始全域對比 / 或單獨點選好手卡片按送出也能比照成績清單 </p>
                 <div class="sport-tabs" id="tabContainer" style="justify-content: center; margin-bottom: 20px;"></div>
-
-                <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
-                    
-                    <div style="position: relative; display: inline-block;">
-                        <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();" 
-                                style="background: linear-gradient(135deg, #1a1a1a, #000000); color: #fbbf24; border: 2px solid #fbbf24; padding: 15px 35px; font-size: 22px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.3s; display: flex; align-items: center; gap: 10px;">
-                            👑 眾選主推 ▾
-                        </button>
-                        
-                        <div class="main-pick-dropdown-content" style="display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background-color: #1e293b; min-width: 220px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); z-index: 999; border-radius: 12px; border: 1px solid #fbbf24; overflow: hidden; margin-bottom: 10px;">
-                            <div onclick="window.activeSportKey='nba_main'; handleCompare(); this.parentElement.style.display='none';" 
-                                 style="color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
-                                 onmouseover="this.style.background='#334155'; this.style.color='#fbbf24'" 
-                                 onmouseout="this.style.background='transparent'; this.style.color='white'">
-                                 🏀 NBA 主推
-                            </div>
-                            <div onclick="window.activeSportKey='mlb_main'; handleCompare(); this.parentElement.style.display='none';" 
-                                 style="color: white; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s;" 
-                                 onmouseover="this.style.background='#334155'; this.style.color='#fbbf24'" 
-                                 onmouseout="this.style.background='transparent'; this.style.color='white'">
-                                 ⚾ MLB 主推
-                            </div>
-                        </div>
-                    </div>
-
-                    <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 送出戰力分析 / 複選對比</button>
-
-<button style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #f8fafc; border: 2px solid #334155; padding: 15px 40px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: 0.3s;" 
-                            onmouseover="this.style.borderColor='#fbbf24'; this.style.color='#fbbf24';" 
-                            onmouseout="this.style.borderColor='#334155'; this.style.color='#f8fafc';"
-                            onclick="document.getElementById('momentumRadarPage').style.display='block'; window.scalePage(true);">
-                        📈 進入戰情室
-                    </button>
-
-
-                </div>
+                <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 送出戰力分析 / 複選對比</button> <button onclick="openMomentumRadar()" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fbbf24; border: 2px solid #fbbf24; padding: 13px 40px; font-size: 22px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); transition: all 0.3s ease; margin-left: 20px;" onmouseover="this.style.boxShadow='0 0 30px rgba(251, 191, 36, 0.6)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 0 20px rgba(251, 191, 36, 0.3)'; this.style.transform='translateY(0)';">📈 啟動動能戰情室</button>
             </div>
 
             <div id="details">
