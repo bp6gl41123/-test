@@ -144,42 +144,58 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
         }
     });
 
-    // 從左邊往右滑展開 (🎯 升級版：放寬邊緣判定與滑動靈敏度)
-    let recruitTouchStartX = 0;
-    document.addEventListener('touchstart', function(e) {
-        recruitTouchStartX = e.touches[0].clientX;
+    // 🎯 真實物理裝置偵測 (捕捉手機晶片)
+    const isRealMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
+    let isDraggingRecruit = false;
+    let recruitStartY = 0;
+    let recruitExpanded = false;
+    let recruitTouchStartX = 0; // 保留給電腦版或特例使用
+
+    floatBtn.addEventListener('click', function(e) {
+        if (isRealMobile) {
+            if (!isDraggingRecruit) window.openRecruitModal();
+        } else {
+            if (!recruitExpanded) {
+                recruitExpanded = true;
+                floatBtn.style.left = '0px';
+            } else {
+                window.openRecruitModal();
+            }
+        }
+    });
+
+    floatBtn.addEventListener('touchstart', function(e) {
+        if (!isRealMobile) return;
+        isDraggingRecruit = false;
+        recruitStartY = e.touches[0].clientY;
+        floatBtn.style.transition = 'none'; 
     }, { passive: true });
-    
-    document.addEventListener('touchend', function(e) {
-        const dx = e.changedTouches[0].clientX - recruitTouchStartX;
-        
-        // 🎯 1. 放寬邊緣：原本 < 30，放寬到 < 60 (甚至 80)，讓手指不用貼死螢幕邊緣
-        const startedNearLeft = recruitTouchStartX < 110; 
-        
-        // 🎯 2. 提升靈敏度：原本要滑動 dx > 30，現在只要輕輕滑動 dx > 20 就會彈出
-        if (startedNearLeft && dx > 15 && !recruitExpanded) {
-            recruitExpanded = true;
-            floatBtn.style.left = '0px';
+
+    floatBtn.addEventListener('touchmove', function(e) {
+        if (!isRealMobile) return;
+        let deltaY = e.touches[0].clientY - recruitStartY;
+        if (Math.abs(deltaY) > 10) isDraggingRecruit = true;
+        if (deltaY < 0) { // 只能往上丟
+            floatBtn.style.transform = `translateY(${deltaY}px)`;
+            floatBtn.style.opacity = 1 - (Math.abs(deltaY) / 250); 
         }
     }, { passive: true });
 
-    document.body.appendChild(floatBtn);
-
-    const overlay = document.createElement('div'); overlay.className = 'recruit-modal-overlay';
-    overlay.innerHTML = `
-        <div class="recruit-modal-content">
-            <div class="recruit-modal-header">
-                <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900;">🏯 麾下好手名單</h3>
-                <div style="cursor:pointer;font-size:45px;line-height:1;color:white;" onclick="closeRecruitModal()">&times;</div>
-            </div>
-            <div style="padding:10px 35px; background:#f1f5f9; font-size:13px; color:#64748b; font-weight:bold; border-bottom:1px solid #e2e8f0;">💡 提示：將滑鼠移至名單上方，即可直接預覽該好手的 1:1 原版戰力卡片。</div>
-            <ul class="recruit-list" id="recruitListArea"></ul>
-            <div class="recruit-modal-footer">
-                <button style="background: #f1f5f9; color: #64748b; border: 2px solid #cbd5e1; padding: 10px 25px; border-radius: 12px; cursor: pointer; font-weight: bold;" onclick="clearRecruit()">🗑️ 清空麾下名單</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
+    floatBtn.addEventListener('touchend', function(e) {
+        if (!isRealMobile) return;
+        floatBtn.style.transition = '0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        let deltaY = e.changedTouches[0].clientY - recruitStartY;
+        if (deltaY < -80) { // 拋棄隱藏
+            floatBtn.style.transform = 'translateY(-200px) scale(0.5)';
+            floatBtn.style.opacity = '0';
+            setTimeout(() => { floatBtn.style.display = 'none'; }, 300);
+        } else {
+            floatBtn.style.transform = 'translateY(0)';
+            floatBtn.style.opacity = '1';
+        }
+        setTimeout(() => { isDraggingRecruit = false; }, 50);
+    }, { passive: true });
 
 window.updateRecruitWidget = () => {
         if (window.userRecruit.length > 0) { 
@@ -189,12 +205,27 @@ const isMobile = window.innerWidth < 1024;
 const scale = isMobile ? window.innerWidth / 980 : 1;
 const emojiSize = Math.round(20 * scale) + 'px';
 const textSize = Math.round(16 * scale) + 'px';
-floatBtn.innerHTML = `
-                <span style="font-size:${emojiSize};">🏯</span>
-                <span style="font-size:${textSize}; margin-top:2px; letter-spacing:1px; font-weight:900;">麾下</span>
-                <span style="font-size:${textSize}; letter-spacing:1px; font-weight:900;">名單</span>
-                <span class="recruit-badge" style="font-size:${Math.round(14*scale)}px; padding:${Math.round(3*scale)}px ${Math.round(10*scale)}px; top:${Math.round(-5*scale)}px;">${window.userRecruit.length}</span>
-            `;
+// --- 👇 從這裡開始替換 👇 ---
+            if (typeof isRealMobile !== 'undefined' && isRealMobile) {
+                // 📱 手機實體晶片：只出圓球與數字
+                floatBtn.innerHTML = `
+                    <span style="font-size: 28px; line-height: 1;">🏯</span>
+                    <span class="recruit-badge" style="position: absolute; top: -2px; right: -2px; font-size: 13px; padding: 2px 7px;">${window.userRecruit.length}</span>
+                `;
+                floatBtn.onmouseenter = null;
+                floatBtn.onmouseleave = null;
+            } else {
+                // 💻 電腦版 / 平板：完全保留你原本的參數與邏輯！
+                floatBtn.innerHTML = `
+                    <span style="font-size:${emojiSize};">🏯</span>
+                    <span style="font-size:${textSize}; margin-top:2px; letter-spacing:1px; font-weight:900;">麾下</span>
+                    <span style="font-size:${textSize}; letter-spacing:1px; font-weight:900;">名單</span>
+                    <span class="recruit-badge" style="font-size:${Math.round(14*scale)}px; padding:${Math.round(3*scale)}px ${Math.round(10*scale)}px; top:${Math.round(-5*scale)}px;">${window.userRecruit.length}</span>
+                `;
+                floatBtn.onmouseenter = window.showRecruitPreview;
+                floatBtn.onmouseleave = window.hideRecruitPreview;
+            }
+            // --- 👆 到這裡結束替換 👆 ---
         } else { 
             floatBtn.style.display = 'none'; 
         }
@@ -302,7 +333,20 @@ window.openRecruitModal = () => {
 
     // 手機版縮放同步
     function syncRecruitBtnScale() {
-        if (window.innerWidth < 1024) {
+        if (typeof isRealMobile !== 'undefined' && isRealMobile) {
+            // 📱 手機版物理晶片：右下角懸浮球
+            floatBtn.style.width = '60px';
+            floatBtn.style.height = '60px';
+            floatBtn.style.borderRadius = '50%'; 
+            floatBtn.style.padding = '0';
+            floatBtn.style.justifyContent = 'center';
+            floatBtn.style.left = 'auto'; 
+            floatBtn.style.right = '20px'; 
+            floatBtn.style.top = 'auto'; 
+            floatBtn.style.bottom = '20px'; // 麾下在最下方
+            floatBtn.style.transform = 'translateY(0)';
+        } else if (window.innerWidth < 1024) {
+            // 💻 非手機的小螢幕：保留你原本的比例縮放邏輯
             const scale = window.innerWidth / 980;
             const w = Math.round(75 * scale);
             floatBtn.style.width = w + 'px';
@@ -311,17 +355,10 @@ window.openRecruitModal = () => {
             floatBtn.style.borderRadius = '0 45px 45px 0';
             floatBtn.style.padding = Math.round(8*scale) + 'px ' + Math.round(12*scale) + 'px ' + Math.round(8*scale) + 'px ' + Math.round(6*scale) + 'px';
             floatBtn.style.fontSize = Math.round(33*scale) + 'px';
-            
-            // 🎯 【最高指導原則】：只管純網頁版，LINE 維持原樣
-            if (window.SysEnv && window.SysEnv.isWebBrowser) {
-                floatBtn.style.top = '25vh'; // Safari/Chrome 強制鎖定在上方 25% (賽事項目之上)
-                floatBtn.style.transform = 'translateY(0)';
-            } else {
-                floatBtn.style.top = ''; // LINE 版清空行內樣式，完美吃回你原本的 CSS calc()
-                floatBtn.style.transform = '';
-            }
-
+            floatBtn.style.transform = '';
+            floatBtn.style.top = ''; 
         } else {
+            // 💻 電腦版大螢幕：清空
             floatBtn.style.width = '';
             floatBtn.style.height = '';
             floatBtn.style.left = '';
@@ -329,7 +366,7 @@ window.openRecruitModal = () => {
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
             floatBtn.style.transform = '';
-            floatBtn.style.top = ''; // 電腦版恢復預設
+            floatBtn.style.top = ''; 
         }
     }
     window.addEventListener('resize', syncRecruitBtnScale);
