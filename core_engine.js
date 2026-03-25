@@ -163,7 +163,7 @@ if (!document.getElementById('pickTooltipStyle')) {
 
         body.mode-neg .expert-card {
             animation: flipFromWhite 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards !important; 
-            transform-style: preserve-3d; perspective: 1000px; backface-visibility: hidden; 
+            backface-visibility: hidden; 
             opacity: 0; background: #1e293b; z-index: 1;
         }
 
