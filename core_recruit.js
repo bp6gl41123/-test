@@ -132,20 +132,24 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
 
 /* 💻 真正的電腦版專屬：永久保持 Hover 展開狀態 */
 @media (min-width: 1024px) {
-    .floating-pocket-btn { 
+    .floating-recruit-btn { 
         right: 0 !important; 
         padding-right: 22px !important; 
-        background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; 
+        background: linear-gradient(135deg, #6366f1, #3730a3) !important; 
     }
 }
 
-/* 📱 手機看網頁版專屬：阻斷文字膨脹 Bug、左右縮窄、上下拉長 */
+/* 📱 手機看網頁版專屬：阻斷文字膨脹 Bug、左右縮窄、上下拉長、鎖定大字體 */
 @media (pointer: coarse) and (min-width: 1024px), (max-device-width: 1024px) and (min-width: 1024px) {
-    .floating-pocket-btn { 
+    .floating-recruit-btn { 
         width: 65px !important; 
         padding: 24px 12px 24px 12px !important; 
         -webkit-text-size-adjust: 100% !important; 
     }
+    /* 強制放大內部文字與圖示 */
+    .floating-recruit-btn span:nth-child(1) { font-size: 20px !important; } 
+    .floating-recruit-btn span:nth-child(2), 
+    .floating-recruit-btn span:nth-child(3) { font-size: 16px !important; } 
 }
 
         `; document.head.appendChild(style);
