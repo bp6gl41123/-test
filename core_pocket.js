@@ -92,6 +92,14 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
                     background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; 
                 }
             }
+/* 📱 手機看網頁版專屬 (直向+電腦寬度)：上下拉長、左右變窄 */
+            @media (min-width: 1024px) and (orientation: portrait) {
+                .floating-pocket-btn { 
+                    width: 65px !important; 
+                    padding: 25px 15px 25px 12px !important; 
+                }
+            }
+
 
         `; document.head.appendChild(style);
     }

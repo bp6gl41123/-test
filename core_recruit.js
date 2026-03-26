@@ -139,6 +139,14 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
                 }
             }
 
+/* 📱 手機看網頁版專屬 (直向+電腦寬度)：上下拉長、左右變窄 */
+            @media (min-width: 1024px) and (orientation: portrait) {
+                .floating-recruit-btn { 
+                    width: 65px !important; 
+                    padding: 25px 15px 25px 12px !important; 
+                }
+            }
+
         `; document.head.appendChild(style);
     }
 
