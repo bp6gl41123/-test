@@ -149,9 +149,8 @@ const overlay = document.createElement('div'); overlay.className = 'pocket-modal
             <div class="pocket-modal-header" style="flex-shrink: 0;">
                 <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
     🎁 我的寶庫精選推薦
-    <span style="font-size:15px; color:#ff4d4f; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
+    <span style="font-size:15px; color:white; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
 </h3>
-
                 <div style="cursor:pointer;font-size:clamp(20px,4vw,50px);line-height:1;" onclick="closePocketModal()">&times;</div>
             </div>
             

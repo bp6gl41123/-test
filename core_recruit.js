@@ -191,12 +191,10 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     overlay.innerHTML = `
         <div class="recruit-modal-content">
             <div class="recruit-modal-header">
-
                 <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
     🏯 麾下好手名單
-    <span style="font-size:15px; color:#ff4d4f; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
+    <span style="font-size:15px; color:white; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
 </h3>
-
                 <div style="cursor:pointer;font-size:45px;line-height:1;color:white;" onclick="closeRecruitModal()">&times;</div>
             </div>
             <div style="padding:10px 35px; background:#f1f5f9; font-size:13px; color:#64748b; font-weight:bold; border-bottom:1px solid #e2e8f0;">💡 提示：將滑鼠移至名單上方，即可直接預覽該好手的 1:1 原版戰力卡片。</div>
