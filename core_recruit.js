@@ -152,6 +152,11 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     .floating-recruit-btn span:nth-child(3) { font-size: 16px !important; } 
 }
 
+/* 📱 一般手機版專屬：隱藏直立觀看提示 */
+            @media (max-width: 1023px) {
+                .orientation-tip { display: none !important; }
+            }
+
         `; document.head.appendChild(style);
     }
 
@@ -193,7 +198,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
             <div class="recruit-modal-header">
                 <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
     🏯 麾下好手名單
-    <span style="font-size:15px; color:white; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
+    <span class="orientation-tip" style="font-size:15px; color:white; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
 </h3>
                 <div style="cursor:pointer;font-size:45px;line-height:1;color:white;" onclick="closeRecruitModal()">&times;</div>
             </div>
