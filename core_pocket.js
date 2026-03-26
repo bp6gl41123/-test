@@ -27,11 +27,9 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     if (!document.getElementById('pocketWidgetStyle')) {
         const style = document.createElement('style'); style.id = 'pocketWidgetStyle';
         style.innerHTML = `
-
-/* 🎯 永久展開：將 right 設為 0，加寬 padding 與 width，並套用明亮漸層 */
-.floating-pocket-btn { position: fixed; top: calc(75% - 65px); right: 0; transform: translateY(-50%); z-index: 9995; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; width: 85px; box-sizing: border-box; padding: 12px 22px 12px 18px; border-radius: 45px 0 0 45px; font-weight: 900; cursor: pointer; box-shadow: -8px 8px 30px rgba(0,0,0,0.5); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; align-items: center; gap: 4px; border: 2px solid rgba(255,255,255,0.2); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-            /* 🎯 互動回饋：滑鼠指上去時不再位移，只做微放大與發亮 */
-            .floating-pocket-btn:hover { transform: translateY(-50%) scale(1.05); filter: brightness(1.1); }
+.floating-pocket-btn { position: fixed; top: calc(75% - 65px); right: -8px; transform: translateY(-50%); z-index: 9995; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 75px; box-sizing: border-box; padding: 12px 10px 12px 18px; border-radius: 45px 0 0 45px; font-weight: 900; cursor: pointer; box-shadow: -8px 8px 30px rgba(0,0,0,0.5); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; align-items: center; gap: 4px; border: 2px solid rgba(255,255,255,0.2); text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+            /* 🎯 正常狀態的懸浮展開 */
+            .floating-pocket-btn:hover { right: 0; background: linear-gradient(135deg, #fbbf24, #f59e0b); padding-right: 22px; transform: translateY(-50%) scale(1.05); }
             
 /* 🛡️ 隱形防護罩：向【右】擴大 40px 的點擊熱區，防止誤觸右側卡片 */
             .floating-recruit-btn::before { 
@@ -85,6 +83,16 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
                 .pocket-clear-btn { padding: 6px 14px !important; font-size: 7px !important; border-radius: 8px !important; }
                 .pocket-sport-tag { font-size: 6px !important; padding: 2px 5px !important; }
             }
+
+/* 💻 電腦版專屬：不用滑鼠指，也永久保持展開狀態 */
+            @media (min-width: 1024px) {
+                .floating-pocket-btn { 
+                    right: 0 !important; 
+                    padding-right: 22px !important; 
+                    background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; 
+                }
+            }
+
         `; document.head.appendChild(style);
     }
 
