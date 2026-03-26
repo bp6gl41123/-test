@@ -84,21 +84,23 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
                 .pocket-sport-tag { font-size: 6px !important; padding: 2px 5px !important; }
             }
 
-/* 💻 電腦版專屬：不用滑鼠指，也永久保持展開狀態 */
-            @media (min-width: 1024px) {
-                .floating-pocket-btn { 
-                    right: 0 !important; 
-                    padding-right: 22px !important; 
-                    background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; 
-                }
-            }
-/* 📱 手機看網頁版專屬 (直向+電腦寬度)：上下拉長、左右變窄 */
-            @media (min-width: 1024px) and (orientation: portrait) {
-                .floating-pocket-btn { 
-                    width: 65px !important; 
-                    padding: 25px 15px 25px 12px !important; 
-                }
-            }
+/* 💻 真正的電腦版專屬：永久保持 Hover 展開狀態 */
+@media (min-width: 1024px) {
+    .floating-recruit-btn { 
+        right: 0 !important; 
+        padding-right: 22px !important; 
+        background: linear-gradient(135deg, #6366f1, #3730a3) !important; 
+    }
+}
+
+/* 📱 手機看網頁版專屬：阻斷文字膨脹 Bug、左右縮窄、上下拉長 */
+@media (pointer: coarse) and (min-width: 1024px), (max-device-width: 1024px) and (min-width: 1024px) {
+    .floating-recruit-btn { 
+        width: 65px !important; 
+        padding: 24px 12px 24px 12px !important; 
+        -webkit-text-size-adjust: 100% !important; 
+    }
+}
 
 
         `; document.head.appendChild(style);
