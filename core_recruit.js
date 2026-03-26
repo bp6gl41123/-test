@@ -327,6 +327,8 @@ window.openRecruitModal = () => {
             floatBtn.style.width = '';
             floatBtn.style.height = '';
             floatBtn.style.left = '';
+            // 👇 一樣補上這行：確保乾淨清除所有殘留設定
+            floatBtn.style.right = ''; 
             floatBtn.style.borderRadius = '';
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';

@@ -321,6 +321,8 @@ window.openPocketModal = () => {
             floatBtn.style.width = '';
             floatBtn.style.height = '';
             floatBtn.style.left = '';
+            // 👇 補上這行：清除手機版的右側鎖定，讓它乖乖回歸 CSS 的預設右邊！
+            floatBtn.style.right = ''; 
             floatBtn.style.borderRadius = '';
             floatBtn.style.padding = '';
             floatBtn.style.fontSize = '';
@@ -350,6 +352,8 @@ window.openPocketModal = () => {
 // 手機版：偵測是否在上半部，自動露出按鈕
     if (window.innerWidth < 1024) {
         function checkScrollPosition() {
+            if (window.innerWidth >= 1024) return;
+
             const details = document.getElementById('details');
             const pocketBtn = document.querySelector('.floating-pocket-btn');
             const recruitBtn = document.querySelector('.floating-recruit-btn');
