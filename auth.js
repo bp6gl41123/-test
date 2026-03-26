@@ -4,7 +4,7 @@
 /* ========================================== */
 
 // 你的專屬 LIFF ID
-const LIFF_ID = '2009615655-Qfz6sgKV'; 
+const LIFF_ID = '2009615655-KgVltEBz'; 
 
 let isRestrictedMode = false; 
 let validClickCount = 0;      
