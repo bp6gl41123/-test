@@ -194,7 +194,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
 
                 <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
     🏯 麾下好手名單
-    <span style="font-size:14px; color:#fff; background:linear-gradient(135deg, #ef4444, #b91c1c); padding:5px 14px; border-radius:30px; font-weight:bold; letter-spacing:1px; box-shadow:0 0 10px rgba(239,68,68,0.6); text-shadow:none;">📱 建議: 手機直立觀看 體驗更佳</span>
+    <span style="font-size:15px; color:#ff4d4f; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
 </h3>
 
                 <div style="cursor:pointer;font-size:45px;line-height:1;color:white;" onclick="closeRecruitModal()">&times;</div>
