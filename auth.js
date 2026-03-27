@@ -59,6 +59,19 @@ function loadLiffSdk() {
 
 // 🚀 系統大腦：啟動與判斷
 document.addEventListener('DOMContentLoaded', async () => {
+
+    // 🌟 新增：神隱登出暗門 (專為 LINE 環境測試設計)
+    if (window.location.search.includes('action=logout')) {
+        localStorage.removeItem('qiJu_Key');
+        localStorage.removeItem('qiJu_ExpiresAt');
+        alert('🔄 測試專用：金鑰已註銷，恢復一般訪客身分！');
+        window.location.href = window.location.pathname; // 洗掉網址參數並重新載入
+        return; // 終止後續執行
+    }
+
+    // 預設隱藏舊門 (付費牆)
+    const authGate = document.getElementById('authGate');
+    // ... 下面維持原樣不動 ...
     // 預設隱藏舊門 (付費牆)
     const authGate = document.getElementById('authGate');
     if (authGate) authGate.style.display = 'none';
