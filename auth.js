@@ -469,7 +469,9 @@ function handleTransitionLogin(type) {
             <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#d4af37;">
                 <div style="width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom:20px;"></div>
                 <h3 style="letter-spacing: 2px;">建立安全連線中...</h3>
-                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+</style>
             </div>
         `;
         setTimeout(() => { if (window.liff) liff.login({ redirectUri: window.location.href }); }, 1500);
