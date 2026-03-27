@@ -60,11 +60,11 @@ function loadLiffSdk() {
 // 🚀 系統大腦：啟動與判斷
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // 🌟 新增：神隱登出暗門 (專為 LINE 環境測試設計)
-    if (window.location.search.includes('action=logout')) {
-        localStorage.removeItem('qiJu_Key');
-        localStorage.removeItem('qiJu_ExpiresAt');
-        alert('🔄 測試專用：金鑰已註銷，恢復一般訪客身分！');
+    // 🌟 升級版：核彈重置暗門 (殺光金鑰、LINE 登入記憶、訪客天數)
+    if (window.location.search.includes('action=reset')) {
+        localStorage.clear();   // 殺光所有 LocalStorage 記憶
+        sessionStorage.clear(); // 殺光所有 Session 記憶
+        alert('💥 系統已重置：LINE 登入、金鑰、天數皆已清除，您現在是全新小白訪客！');
         window.location.href = window.location.pathname; 
         return; 
     }
