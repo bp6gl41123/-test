@@ -230,9 +230,6 @@ function triggerLockdown() {
 }
 
 /* ========================================== */
-/* 🚪 【召喚第一扇門】：高科技重金屬奢華版 UI
-/* ========================================== */
-/* ========================================== */
 /* 🚪 【召喚第一扇門】：破謊雷達 (三界完美顯示版)
 /* ========================================== */
 function showNewDoor() {
@@ -328,21 +325,21 @@ function showNewDoor() {
             .env-line-mobile .qiju-modal-footer a { font-size: 12px; }
             .env-line-mobile #modalErrorMsg { font-size: 12px; margin: 0 0 12px 0; }
 
-            /* 🐜 界線三：原生螞蟻視角 (強制放大 2.5 倍，抗衡手機縮小騙局) */
-            .env-ant-view .qiju-modal-box { width: 850px; padding: 80px 50px; border-radius: 30px; border-width: 4px; }
-            .env-ant-view .qiju-modal-deco { height: 12px; border-bottom-width: 2px;}
-            .env-ant-view .qiju-modal-logo { width: 150px; height: 150px; font-size: 65px; margin-bottom: 40px; border-width: 6px; }
-            .env-ant-view .qiju-modal-title { font-size: 55px; letter-spacing: 4px; margin-bottom: 16px; }
-            .env-ant-view .qiju-modal-desc { font-size: 32px; margin-bottom: 60px; letter-spacing: 2px; }
-            .env-ant-view .qiju-modal-btn-line { padding: 36px; font-size: 38px; margin-bottom: 50px; border-radius: 16px; border-width: 3px; }
-            .env-ant-view .qiju-modal-divider { margin-bottom: 50px; }
-            .env-ant-view .qiju-modal-divider-line { height: 4px; border-bottom-width: 2px;}
-            .env-ant-view .qiju-modal-divider-text { font-size: 28px; padding: 0 30px; }
-            .env-ant-view .qiju-modal-input { padding: 32px; margin-bottom: 30px; font-size: 36px; border-radius: 12px; border-width: 2px; border-bottom-width: 4px; }
-            .env-ant-view .qiju-modal-btn-unlock { padding: 32px; font-size: 36px; border-radius: 12px; border-width: 3px; margin-bottom: 20px;}
-            .env-ant-view .qiju-modal-footer { margin-top: 40px; }
-            .env-ant-view .qiju-modal-footer a { font-size: 30px; border-bottom-width: 2px; }
-            .env-ant-view #modalErrorMsg { font-size: 30px; margin: 0 0 30px 0; }
+            /* 🐜 界線三：原生螞蟻視角 (1250px 終極巨無霸版) */
+            .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
+            .env-ant-view .qiju-modal-deco { height: 18px; border-bottom-width: 4px;}
+            .env-ant-view .qiju-modal-logo { width: 200px; height: 200px; font-size: 90px; margin-bottom: 55px; border-width: 8px; }
+            .env-ant-view .qiju-modal-title { font-size: 80px; letter-spacing: 6px; margin-bottom: 25px; }
+            .env-ant-view .qiju-modal-desc { font-size: 45px; margin-bottom: 90px; letter-spacing: 3px; }
+            .env-ant-view .qiju-modal-btn-line { padding: 50px; font-size: 50px; margin-bottom: 65px; border-radius: 25px; border-width: 5px; }
+            .env-ant-view .qiju-modal-divider { margin-bottom: 65px; }
+            .env-ant-view .qiju-modal-divider-line { height: 7px; border-bottom-width: 3px;}
+            .env-ant-view .qiju-modal-divider-text { font-size: 40px; padding: 0 45px; }
+            .env-ant-view .qiju-modal-input { padding: 45px; margin-bottom: 45px; font-size: 50px; border-radius: 20px; border-width: 4px; border-bottom-width: 6px; }
+            .env-ant-view .qiju-modal-btn-unlock { padding: 45px; font-size: 50px; border-radius: 20px; border-width: 5px; margin-bottom: 35px;}
+            .env-ant-view .qiju-modal-footer { margin-top: 55px; }
+            .env-ant-view .qiju-modal-footer a { font-size: 42px; border-bottom-width: 4px; }
+            .env-ant-view #modalErrorMsg { font-size: 42px; margin: 0 0 45px 0; }
         `;
         document.head.appendChild(css);
     }
