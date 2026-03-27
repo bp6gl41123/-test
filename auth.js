@@ -10,7 +10,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 99; // 👉 測試地雷請改 0
+const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
