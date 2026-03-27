@@ -65,11 +65,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.removeItem('qiJu_Key');
         localStorage.removeItem('qiJu_ExpiresAt');
         alert('🔄 測試專用：金鑰已註銷，恢復一般訪客身分！');
-        window.location.href = window.location.pathname; // 洗掉網址參數並重新載入
-        return; // 終止後續執行
+        window.location.href = window.location.pathname; 
+        return; 
     }
 
-    // 預設隱藏舊門 (付費牆)
+    // 預設隱藏舊門 (付費牆) - 💡 修正重複宣告
     const authGate = document.getElementById('authGate');
     if (authGate) authGate.style.display = 'none';
 
@@ -103,11 +103,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fullUnlockSystem();
                 return; // 試用/金鑰正常，放行
             } else {
-                // 🚨 金鑰過期：直接引爆第二門鎖死！
+                // 🚨 邏輯修復：金鑰過期，不再瞬間死刑！改為「開啟地雷模式」
+                console.log('❌ 金鑰已過期！啟動地雷模式 (未點擊前可無限滑動)');
                 localStorage.removeItem('qiJu_Key');
                 localStorage.removeItem('qiJu_ExpiresAt');
-                triggerLockdown(); 
-                return; 
+                
+                isRestrictedMode = true; // 將地雷通電
+                
+                // 顯示主頁面讓他看，直到他點擊才會觸發地雷
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) mainContent.style.display = 'block'; 
+                if (typeof window.init === 'function') window.init();
+                return; // 終止後續判斷，因為他已經是過期黑名單
             }
         }
     }
