@@ -249,20 +249,23 @@ function showNewDoor() {
         document.head.appendChild(style);
     }
 
-    // 🎯 破謊雷達：偵測三界真實環境
+    // 🎯 破謊雷達 V2：加入基因檢測，徹底區分電腦與手機
     let envClass = 'env-desktop'; // 預設：電腦版
-    const screenW = window.screen.width;
     const windowW = window.innerWidth;
     
-    // 如果實體螢幕很小 (手機/平板)
-    if (screenW <= 768 || window.screen.height <= 768) {
+    // 驗 DNA：確認是不是真的是手機或平板
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobileDevice) {
+        // 如果是手機/平板
         if (windowW > 800) {
-            // 畫布很大，但螢幕很小 👉 原生瀏覽器 (它在說謊放大畫布)
-            envClass = 'env-ant-view'; 
+            envClass = 'env-ant-view'; // 畫布大於 800 👉 原生瀏覽器騙局 (放大)
         } else {
-            // 畫布小，螢幕也小 👉 LINE 內建瀏覽器 (誠實)
-            envClass = 'env-line-mobile'; 
+            envClass = 'env-line-mobile'; // 畫布正常 👉 LINE 內建瀏覽器 (正常縮放)
         }
+    } else {
+        // 如果是電腦 (不管螢幕多小、有沒有開 F12)，強制鎖死電腦版外觀
+        envClass = 'env-desktop';
     }
 
     // 🌟 注入專屬三界 CSS (完美繼承你所有高科技重金屬視覺)
