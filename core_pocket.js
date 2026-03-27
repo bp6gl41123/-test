@@ -38,7 +38,7 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
                 top: -20px; 
                 bottom: -20px; 
                 left: 0; 
-                right: -200px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
+                right: -60px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
                 background: transparent; 
             }
 
@@ -152,10 +152,13 @@ const overlay = document.createElement('div'); overlay.className = 'pocket-modal
         <div class="pocket-modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
             
             <div class="pocket-modal-header" style="flex-shrink: 0;">
+
+
                <h3 style="margin:0;font-size:28px;letter-spacing:2px;font-weight:900; display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
     🎁 我的寶庫精選推薦
-    <span class="orientation-tip" style="font-size:15px; color:white; font-weight:900; letter-spacing:1px;">📱 建議: 手機直立觀看 體驗更佳</span>
+    <span class="orientation-tip" style="font-size:17px; color:white; font-weight:900; letter-spacing:1px; border:2px solid white; padding:6px 16px; border-radius:12px; background:rgba(255,255,255,0.15);">📱 建議: 手機直立觀看 體驗更佳</span>
 </h3>
+
                 <div style="cursor:pointer;font-size:clamp(20px,4vw,50px);line-height:1;" onclick="closePocketModal()">&times;</div>
             </div>
             
