@@ -1,19 +1,19 @@
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
-/* ==== (究極完全體：地雷防禦網 + 兩扇門切換) ==== */
+/* ==== (高科技重金屬奢華版：純 CSS 打造立體質感) ==== */
+/* ==== (已修復：完整保留推廣字串邏輯) ============ */
 /* ========================================== */
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
-const BROWSE_TIME_LIMIT = 5000; // 5秒體驗時間
+const BROWSE_TIME_LIMIT = 5000; 
 
-// 💣 繼承 V15.4 的地雷變數
 let isRestrictedMode = false; 
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;    
+const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
 
-// 🌟 推廣雷達
+// 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
@@ -27,18 +27,14 @@ async function trackReferrals() {
         const clickKey = `click_sent_${refCode}_${today}`;
         if (!localStorage.getItem(clickKey)) {
             try {
-                fetch('/api/track-click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ refCode: refCode })
-                });
+                fetch('/api/track-click', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refCode: refCode }) });
                 localStorage.setItem(clickKey, 'true'); 
-            } catch (e) { console.error("點擊追蹤失敗", e); }
+            } catch (e) {}
         }
     }
 }
 
-// 🌟 本地訪客天數追蹤 (V15.4 核心)
+// 🌟 本地天數追蹤 (完整保留)
 function trackVisitorDays() {
     const today = new Date().toLocaleDateString('en-CA'); 
     let visitedDays = JSON.parse(localStorage.getItem('qiJuVisitedDays')) || [];
@@ -49,11 +45,11 @@ function trackVisitorDays() {
     }
 
     if (visitedDays.length > FREE_DAYS_LIMIT) {
-        isRestrictedMode = true; // 超過天數，開啟地雷模式
+        isRestrictedMode = true; 
+        console.log("💣 訪客天數已達上限，地雷模式已開啟！(等待點擊觸發)");
     }
 }
 
-// 🌟 載入 LINE SDK
 function loadLiffSdk() {
     return new Promise((resolve, reject) => {
         if (window.liff) return resolve(window.liff);
@@ -65,98 +61,76 @@ function loadLiffSdk() {
     });
 }
 
-// 🚀 系統大腦：啟動與判斷
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    // 1. 預設隱藏舊門 (pricing_v2.html)，保持畫面乾淨
     const authGate = document.getElementById('authGate');
     if (authGate) authGate.style.display = 'none';
 
     trackReferrals(); 
-    trackVisitorDays(); // 執行本地天數檢查
+    trackVisitorDays(); 
 
-    // 2. 🕵️ 改良版後門：管理員地雷測試
     if (window.location.search.includes('test=lock')) {
         setTimeout(() => {
-            if (localStorage.getItem('qiJu_Key')) return;
             isRestrictedMode = true;
-            console.log("🕵️ 管理員測試模式：地雷已就緒");
         }, 300);
     }
 
-    // 3. 取得管理員金鑰 (V15.4 核心)
     let ADMIN_KEY = '';
     try { if (typeof config !== 'undefined') ADMIN_KEY = atob(config.adminCode); } catch(e) {}
 
-    // 4. 檢查金鑰狀態
     const localKey = localStorage.getItem('qiJu_Key');
     const expiresAt = localStorage.getItem('qiJu_ExpiresAt');
 
     if (localKey) {
-        // 管理員免死金牌
         if (ADMIN_KEY && localKey === ADMIN_KEY) {
             window.isAdmin = true;
             fullUnlockSystem();
             return;
         }
-
-        // 會員到期判定
         if (expiresAt) {
             const now = new Date();
             const expireDate = new Date(expiresAt);
             if (now < expireDate) {
-                console.log('⚡ 金鑰尚在有效期限內，瞬間解鎖！');
                 window.isAdmin = false;
                 fullUnlockSystem();
                 return; 
             } else {
-                console.log('❌ 金鑰已過期！直接召喚第二扇門 (舊版付費牆)！');
                 localStorage.removeItem('qiJu_Key');
                 localStorage.removeItem('qiJu_ExpiresAt');
-                triggerLockdown(); // 👉 金鑰過期，直接觸發地雷鎖死！
+                triggerLockdown(); 
                 return; 
             }
         }
     }
 
     window.isAdmin = false;
-
-    // 5. 確保主畫面開啟
     const mainContent = document.getElementById('mainContent');
     if (mainContent) mainContent.style.display = 'block'; 
     if (typeof window.init === 'function') window.init(); 
 
-    // 6. 判斷是否需要召喚第一扇門 (黑金新門)
+    let liffLoggedIn = false;
     try {
         const liff = await loadLiffSdk();
         await liff.init({ liffId: LIFF_ID });
-
-        if (liff.isLoggedIn()) {
-            fullUnlockSystem(); 
-            return; 
-        }
-
-        // 新客 5 秒定時炸彈
-        setTimeout(() => {
-            showNewDoor();
-        }, BROWSE_TIME_LIMIT);
-
+        if (liff.isLoggedIn()) liffLoggedIn = true;
     } catch (err) {
-        console.error('LIFF 初始化失敗:', err);
+        console.error('⚠️ LIFF 初始化失敗，忽略錯誤繼續');
+    }
+
+    if (liffLoggedIn) {
+        fullUnlockSystem(); 
+    } else {
+        setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
     }
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (繼承自 V15.4)
+/* 💣 地雷防禦系統 (完整保留)
 /* ========================================== */
-
 document.addEventListener('click', (e) => {
     if (!isRestrictedMode || hasLockedDown) return;
-    // 點擊新門或舊門都不算觸發地雷
     if (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal')) return;
 
     validClickCount++;
-
     if (validClickCount === 1) {
         armMovementTrap();
     } else if (validClickCount > 1) {
@@ -169,28 +143,21 @@ document.addEventListener('click', (e) => {
 function armMovementTrap() {
     setTimeout(() => {
         if (hasLockedDown) return; 
-
         const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
         const detonateTrap = (e) => {
             if (hasLockedDown) return;
             if (e.target && e.target.closest && (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal'))) return;
-            
             triggerLockdown();
             trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
         };
-
         trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
-        console.log("💣 滑動地雷已佈署！滑鼠一動即刻召喚舊門！");
-
     }, 800); 
 }
 
-// 🚪 【召喚第二扇門】：舊版付費牆 (pricing_v2.html)
 function triggerLockdown() {
     if (hasLockedDown) return; 
     hasLockedDown = true; 
 
-    // 拆除可能正在顯示的新門
     const modal = document.getElementById('premium-auth-modal');
     if (modal) modal.remove();
 
@@ -200,28 +167,19 @@ function triggerLockdown() {
     if (authGate) {
         authGate.style.display = 'block'; 
         authGate.classList.add('scatter-fly-in');  
-
         document.body.style.overflow = 'hidden'; 
         document.body.style.userSelect = 'none'; 
         if (mainContent) {
             mainContent.style.pointerEvents = 'none'; 
             mainContent.style.filter = 'blur(8px)';   
         }
-
-        if (!document.getElementById('nukeTooltipsStyle')) {
-            const style = document.createElement('style');
-            style.id = 'nukeTooltipsStyle';
-            style.innerHTML = `.pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }`;
-            document.head.appendChild(style);
-        }
     }
 }
 
 /* ========================================== */
-/* 🚪 【召喚第一扇門】：黑金雙軌新門
+/* 🚪 【召喚第一扇門】：高科技重金屬奢華版
 /* ========================================== */
 function showNewDoor() {
-    // 如果地雷已經引爆 (已經在顯示舊門了)，就不要再彈出新門干擾
     if (hasLockedDown) return; 
     if (document.getElementById('premium-auth-modal')) return;
 
@@ -230,37 +188,39 @@ function showNewDoor() {
     mainContent.style.filter = 'blur(8px) brightness(0.5)';
     mainContent.style.pointerEvents = 'none';
 
-    if (!document.getElementById('nukeTooltipsStyle')) {
-        const style = document.createElement('style');
-        style.id = 'nukeTooltipsStyle';
-        style.innerHTML = `.pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }`;
-        document.head.appendChild(style);
-    }
-
     const modal = document.createElement('div');
     modal.id = 'premium-auth-modal';
-    modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 2147483647; background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.5s ease;`;
+    modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 2147483647; background: rgba(0, 0, 0, 0.7); opacity: 0; transition: opacity 0.5s ease;`;
 
     modal.innerHTML = `
-        <div style="background: #111; border: 1px solid #d4af37; border-radius: 12px; width: 90%; max-width: 400px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; font-family: sans-serif; pointer-events: auto;">
-            <div style="width: 60px; height: 60px; background: #d4af37; border-radius: 50%; margin: 0 auto 15px; display:flex; align-items:center; justify-content:center; color:#111; font-weight:bold; font-size:24px;">齊</div>
-            <h2 style="color: #d4af37; margin: 0 0 5px; font-size: 22px; letter-spacing: 1px;">齊聚眾選 會員中心</h2>
-            <p style="color: #888; font-size: 14px; margin-bottom: 25px;">您的免費體驗已結束，請驗證身分解鎖即時指標</p>
-            <button onclick="handleTransitionLogin('line')" style="width: 100%; background: #06C755; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <div style="background: linear-gradient(145deg, #1a1c23 0%, #0d1117 100%); border: 2px solid #b48608; border-radius: 16px; width: 90%; max-width: 420px; padding: 40px 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 30px rgba(180, 134, 8, 0.15), inset 0 0 20px rgba(0,0,0,0.8); text-align: center; font-family: sans-serif; pointer-events: auto; position: relative; overflow: hidden;">
+            
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(45deg, #333 0, #333 2px, #222 2px, #222 4px); border-bottom: 1px solid #b48608;"></div>
+
+            <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #fde047 0%, #b45309 100%); border-radius: 50%; margin: 0 auto 20px; display:flex; align-items:center; justify-content:center; color:#111; font-weight:900; font-size:30px; border: 3px solid #78350f; box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.4);">齊</div>
+
+            <h2 style="color: #fbbf24; margin: 0 0 8px; font-size: 24px; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">齊聚眾選 戰情中心</h2>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 30px; font-weight: bold; letter-spacing: 1px;">您的體驗已達上限・請進行身分驗證</p>
+
+            <button onclick="handleTransitionLogin('line')" style="width: 100%; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: 1px solid #22c55e; padding: 16px; border-radius: 8px; font-size: 17px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: 0.2s;">
                 使用 LINE 一鍵快速登入 (送試用)
             </button>
-            <div style="display: flex; align-items: center; margin-bottom: 20px;">
-                <div style="flex: 1; height: 1px; background: #333;"></div>
-                <div style="color: #666; font-size: 12px; padding: 0 10px;">或使用專屬金鑰</div>
-                <div style="flex: 1; height: 1px; background: #333;"></div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 25px;">
+                <div style="flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #475569); border-bottom: 1px solid #111;"></div>
+                <div style="color: #64748b; font-size: 12px; padding: 0 15px; font-weight: 900; letter-spacing: 1px;">或使用金鑰解鎖</div>
+                <div style="flex: 1; height: 2px; background: linear-gradient(270deg, transparent, #475569); border-bottom: 1px solid #111;"></div>
             </div>
-            <input type="text" id="modalPasscodeInput" placeholder="請輸入付費金鑰" style="width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box;">
-            <p id="modalErrorMsg" style="color: #ff4d4d; font-size: 13px; margin: 0 0 10px 0; display: none;"></p>
-            <button onclick="checkPasscode()" style="width: 100%; background: transparent; color: #d4af37; border: 1px solid #d4af37; padding: 12px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
-                解鎖權限
+
+            <input type="text" id="modalPasscodeInput" placeholder="請輸入授權金鑰" style="width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #111; border-bottom: 2px solid #fbbf24; background: #050505; color: #fbbf24; font-size: 16px; font-weight: bold; text-align: center; letter-spacing: 2px; box-shadow: inset 0 4px 10px rgba(0,0,0,0.8); outline: none;">
+            <p id="modalErrorMsg" style="color: #ef4444; font-size: 13px; font-weight: bold; margin: 0 0 15px 0; display: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);"></p>
+            
+            <button onclick="checkPasscode()" style="width: 100%; background: linear-gradient(180deg, #2a2d35 0%, #111418 100%); color: #fbbf24; border: 1px solid #b48608; padding: 14px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 900; box-shadow: 0 6px 15px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1); letter-spacing: 2px; transition: 0.2s;">
+                解鎖數據權限
             </button>
-            <div style="margin-top: 15px;">
-                <a href="${getDynamicLineUrl()}" target="_blank" style="color: #888; font-size: 12px; text-decoration: none;">沒有金鑰？點此聯絡版大</a>
+            
+            <div style="margin-top: 20px;">
+                <a href="${getDynamicLineUrl()}" target="_blank" style="color: #64748b; font-size: 13px; font-weight: bold; text-decoration: none; border-bottom: 1px dashed #64748b; padding-bottom: 2px;">沒有金鑰？點此聯絡版大</a>
             </div>
         </div>
     `;
@@ -272,7 +232,7 @@ function showNewDoor() {
 function handleTransitionLogin(type) {
     if (type === 'line') {
         document.body.innerHTML = `
-            <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#d4af37; font-family:sans-serif;">
+            <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#d4af37;">
                 <div style="width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom:20px;"></div>
                 <h3 style="letter-spacing: 2px;">建立安全連線中...</h3>
                 <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
@@ -283,24 +243,21 @@ function handleTransitionLogin(type) {
 }
 
 /* ========================================== */
-/* 🧠 統一驗證中心 (大腦 API + 支援新舊門)
+/* 🧠 統一驗證中心 (完整保留)
 /* ========================================== */
 async function checkPasscode() {
     let userInput = '';
     let errorMsg = null;
     
-    // 優先尋找舊門
     const iframe = document.querySelector('#authGate iframe');
     if (iframe && iframe.contentWindow) {
         try {
-            const iframeDoc = iframe.contentWindow.document;
-            const inputEl = iframeDoc.getElementById('passcodeInput');
+            const inputEl = iframe.contentWindow.document.getElementById('passcodeInput');
             if (inputEl) userInput = inputEl.value;
-            errorMsg = iframeDoc.getElementById('errorMsg');
+            errorMsg = iframe.contentWindow.document.getElementById('errorMsg');
         } catch(e) {} 
     }
     
-    // 尋找新門
     if (!userInput) {
         const inputEl = document.getElementById('modalPasscodeInput');
         if (inputEl) userInput = inputEl.value;
@@ -309,7 +266,6 @@ async function checkPasscode() {
 
     if (!userInput) return;
 
-    // 🌟 恢復管理員金鑰邏輯 (V15.4)
     try {
         let ADMIN_KEY = '';
         if (typeof config !== 'undefined') ADMIN_KEY = atob(config.adminCode);
@@ -324,16 +280,11 @@ async function checkPasscode() {
         }
     } catch(e) {}
 
-    // 會員金鑰 API
     try {
         const isV2Key = userInput.toUpperCase().includes('V2');
         const apiUrl = isV2Key ? '/api/verify-key-v2' : '/api/verify-key';
         
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key: userInput })
-        });
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: userInput }) });
         const result = await response.json();
 
         if (result.valid) {
@@ -368,7 +319,6 @@ async function checkPasscode() {
     }
 }
 
-// 🔓 終極解鎖魔法：拆新門、拆舊門、初始化管理員 (V15.4)
 function fullUnlockSystem() {
     const modal = document.getElementById('premium-auth-modal');
     if (modal) modal.remove();
@@ -388,9 +338,6 @@ function fullUnlockSystem() {
         mainContent.style.display = 'block';
     }
     
-    const nukeStyle = document.getElementById('nukeTooltipsStyle');
-    if (nukeStyle) nukeStyle.remove();
-
     isRestrictedMode = false;
     validClickCount = 0;
     hasLockedDown = false; 
@@ -399,20 +346,16 @@ function fullUnlockSystem() {
         if (typeof window.initAdminWidget === 'function') window.initAdminWidget();
         if (typeof window.initBackupWidget === 'function') window.initBackupWidget();
     }
-
     if (typeof window.init === 'function') window.init();
 }
 
-// 🌟 恢復 Enter 鍵登入 (V15.4)
 document.addEventListener('keypress', (e) => {
     const authGate = document.getElementById('authGate');
     const modal = document.getElementById('premium-auth-modal');
-    // 不管是新門還是舊門打開，只要按 Enter 就觸發
-    if (((authGate && authGate.style.display !== 'none') || modal) && e.key === 'Enter') {
-        checkPasscode();
-    }
+    if (((authGate && authGate.style.display !== 'none') || modal) && e.key === 'Enter') checkPasscode();
 });
 
+// 🚨 這裡就是剛剛被我遺漏，現在完美恢復的推廣字串邏輯！
 window.getDynamicLineUrl = function() {
     const LINE_OFFICIAL_ID = "@yhd0256r"; 
     const ref = localStorage.getItem('qiJu_ref');
