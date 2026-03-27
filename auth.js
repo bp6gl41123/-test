@@ -382,12 +382,28 @@ function showNewDoor() {
 }
 
 
+// 🚨 升級版：LINE 登入過場動畫 (自帶破謊雷達，動態放大)
 function handleTransitionLogin(type) {
     if (type === 'line') {
+        // 🎯 啟動微型破謊雷達：決定放大倍率
+        let scale = 1; // 預設 1 倍 (電腦版、LINE 內建瀏覽器)
+        const screenW = window.screen.width;
+        const windowW = window.innerWidth;
+        
+        if ((screenW <= 768 || window.screen.height <= 768) && windowW > 800) {
+            scale = 3; // 原生瀏覽器騙局，強制放大 3 倍！
+        }
+
+        // 動態計算大小
+        const spinnerSize = 50 * scale;
+        const borderThickness = 3 * scale;
+        const fontSize = 18 * scale;
+        const marginBottom = 20 * scale;
+
         document.body.innerHTML = `
             <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#d4af37;">
-                <div style="width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom:20px;"></div>
-                <h3 style="letter-spacing: 2px;">建立安全連線中...</h3>
+                <div style="width: ${spinnerSize}px; height: ${spinnerSize}px; border: ${borderThickness}px solid #333; border-top: ${borderThickness}px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom:${marginBottom}px;"></div>
+                <h3 style="font-size: ${fontSize}px; letter-spacing: ${2 * scale}px; margin: 0;">建立安全連線中...</h3>
                 <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
             </div>
         `;
