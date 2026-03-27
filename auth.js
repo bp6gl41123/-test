@@ -11,7 +11,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 99;    
+const FREE_DAYS_LIMIT = 0;    
 
 // 🌟 推廣雷達
 async function trackReferrals() {
