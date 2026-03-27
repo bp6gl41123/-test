@@ -1,30 +1,12 @@
 /* ========================================== */
-/* ==== 【開發模組：LINE 終極身分防禦 - auth.js】 ==== */
-/* ==== (V16.0 完美融合版：保留所有原功能 + LIFF) ==== */
+/* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
+/* ==== (混血進化版：保留推廣雷達 + 5秒雙軌攔截) ==== */
 /* ========================================== */
 
-// 你的專屬 LIFF ID
-const LIFF_ID = '2009615655-naRtA4Om'; 
+const LIFF_ID = '2009615655-KgVItEBz'; // 測試網域的 LIFF 鑰匙
+const BROWSE_TIME_LIMIT = 5000; // 5秒後攔截 (測試用)
 
-let isRestrictedMode = false; 
-let validClickCount = 0;      
-let hasLockedDown = false;    
-const MAX_CLICKS = 1;         
-// const FREE_DAYS_LIMIT = 99; // 註：天數計算已全面移交給 Supabase 雲端大腦判斷
-
-// 🌟 動態載入 LINE LIFF SDK
-function loadLiffSdk() {
-    return new Promise((resolve, reject) => {
-        if (window.liff) return resolve(window.liff);
-        const script = document.createElement('script');
-        script.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
-        script.onload = () => resolve(window.liff);
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-}
-
-// 🌟 【原版保留】雙參數雷達：網址參數解析與記憶 (含防禦型計次)
+// 🌟 保留核心 1：推廣雷達與防禦型計次
 async function trackReferrals() {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
@@ -44,172 +26,142 @@ async function trackReferrals() {
                     body: JSON.stringify({ refCode: refCode })
                 });
                 localStorage.setItem(clickKey, 'true'); 
-            } catch (e) {
-                console.error("點擊追蹤失敗", e);
-            }
+            } catch (e) { console.error("點擊追蹤失敗", e); }
         }
     }
 }
 
-// 🚀 核心防禦：初始化與登入攔截
+// 🌟 動態載入 LINE LIFF SDK
+function loadLiffSdk() {
+    return new Promise((resolve, reject) => {
+        if (window.liff) return resolve(window.liff);
+        const script = document.createElement('script');
+        script.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
+        script.onload = () => resolve(window.liff);
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// 🚀 系統啟動與雙軌判斷
 document.addEventListener('DOMContentLoaded', async () => {
-    trackReferrals();
-    
-    // 🕵️ 【原版保留】管理員測試模式後門
-    if (window.location.search.includes('test=lock')) {
-        setTimeout(() => {
-            if (localStorage.getItem('qiJu_Key')) return;
-            isRestrictedMode = true;
-            console.log("🕵️ 管理員測試模式：地雷已就緒");
-        }, 300);
+    trackReferrals(); // 啟動推廣雷達
+
+    // 🌟 保留核心 2：檢查老客戶的本地金鑰記憶
+    const localKey = localStorage.getItem('qiJu_Key');
+    const expiresAt = localStorage.getItem('qiJu_ExpiresAt');
+
+    if (localKey && expiresAt) {
+        const now = new Date();
+        const expireDate = new Date(expiresAt);
+        if (now < expireDate) {
+            console.log('⚡ 金鑰尚在有效期限內，瞬間解鎖！');
+            window.isAdmin = false; // 或依據 admin key 判斷
+            fullUnlockSystem();
+            return; // 終止後續攔截
+        } else {
+            localStorage.removeItem('qiJu_Key');
+            localStorage.removeItem('qiJu_ExpiresAt');
+        }
     }
 
     try {
         const liff = await loadLiffSdk();
         await liff.init({ liffId: LIFF_ID });
 
-        // 🛑 第一道門：如果沒有登入 LINE，強制跳轉
-        if (!liff.isLoggedIn()) {
-            console.log("未偵測到 LINE 身分，強制跳轉登入...");
-            const redirectUri = window.location.href; 
-            liff.login({ redirectUri: redirectUri });
+        if (liff.isLoggedIn()) {
+            console.log("✅ 已偵測到 LINE 身分，直接放行 (未來接 Supabase)");
+            fullUnlockSystem(); 
             return; 
         }
 
-        // ✅ 第二道門：已登入，取得身分並呼叫大腦
-        const profile = await liff.getProfile();
-        const lineUserId = profile.userId;
-        const savedRef = localStorage.getItem('qiJu_ref');
-
-        console.log("👤 LINE 身分確認：", lineUserId);
-
-        const response = await fetch('/api/check-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                line_user_id: lineUserId,
-                ref_code: savedRef
-            })
-        });
-
-        const brainResult = await response.json();
-        
-        // 判斷大腦的裁決
-        if (brainResult.status === 'active_paid' || brainResult.status === 'active_free') {
-            console.log(`✅ 大腦核准放行。狀態：${brainResult.status}，剩餘天數：${brainResult.remaining_days}`);
-            
-            if (brainResult.status === 'active_free') {
-                isRestrictedMode = true; // 免費仔，掛上滑動地雷
-            } else {
-                isRestrictedMode = false; // 付費大佬，完全自由
-                window.isAdmin = (brainResult.key_type === 'Admin');
-            }
-            
-            openDoorForVisitor(); 
-
-        } else if (brainResult.status === 'expired' || brainResult.shouldLock) {
-            console.log("❌ 大腦裁決：試用期已滿或無權限。啟動封鎖。");
-            triggerLockdown(); // 直接啟動封鎖畫面
-        }
+        // ⏰ 啟動 5 秒自由體驗炸彈
+        setTimeout(() => {
+            showPremiumLoginPrompt();
+        }, BROWSE_TIME_LIMIT);
 
     } catch (err) {
-        console.error('LIFF 初始化或大腦連線失敗:', err);
-        triggerLockdown(); // 防禦機制：系統異常時預設鎖定
+        console.error('LIFF 初始化失敗:', err);
     }
 });
 
-// 🖱️ 【原版保留】全域點擊攔截
-document.addEventListener('click', (e) => {
-    if (!isRestrictedMode || hasLockedDown) return;
-    if (e.target.closest('#authGate')) return;
+// 🎨 顯示「頂級專業版」雙軌登入視窗
+function showPremiumLoginPrompt() {
+    if (document.getElementById('premium-auth-modal')) return;
 
-    validClickCount++;
+    // 鎖死背景
+    document.body.style.overflow = 'hidden';
+    const mainContent = document.getElementById('mainContent') || document.body;
+    mainContent.style.filter = 'blur(8px) brightness(0.5)';
+    mainContent.style.pointerEvents = 'none';
 
-    if (validClickCount === 1) {
-        armMovementTrap();
-    } else if (validClickCount > 1) {
-        e.preventDefault();  
-        e.stopPropagation(); 
-        triggerLockdown();
-    }
-}, true); 
+    // 抹除泡泡框防偷看
+    const style = document.createElement('style');
+    style.id = 'nukeTooltipsStyle';
+    style.innerHTML = `.pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }`;
+    document.head.appendChild(style);
 
-// 💣 【原版保留】埋設滑動地雷
-function armMovementTrap() {
-    setTimeout(() => {
-        if (hasLockedDown) return; 
-        const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
-        const detonateTrap = (e) => {
-            if (hasLockedDown) return;
-            if (e.target && e.target.closest && e.target.closest('#authGate')) return;
-            triggerLockdown();
-            trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
-        };
-        trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
-    }, 800); 
+    const modal = document.createElement('div');
+    modal.id = 'premium-auth-modal';
+    modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; z-index: 99999; background: rgba(0, 0, 0, 0.6); opacity: 0; transition: opacity 0.5s ease;`;
+
+    // 介面融合：上面 LINE，下面接回舊版的「金鑰輸入」
+    modal.innerHTML = `
+        <div style="background: #111; border: 1px solid #d4af37; border-radius: 12px; width: 90%; max-width: 400px; padding: 30px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; font-family: sans-serif; pointer-events: auto;">
+            
+            <div style="width: 60px; height: 60px; background: #d4af37; border-radius: 50%; margin: 0 auto 15px; display:flex; align-items:center; justify-content:center; color:#111; font-weight:bold; font-size:24px;">齊</div>
+            <h2 style="color: #d4af37; margin: 0 0 5px; font-size: 22px; letter-spacing: 1px;">齊聚眾選 會員中心</h2>
+            <p style="color: #888; font-size: 14px; margin-bottom: 25px;">您的免費體驗已結束，請驗證身分解鎖即時指標</p>
+
+            <button onclick="handleTransitionLogin('line')" style="width: 100%; background: #06C755; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                使用 LINE 一鍵快速登入 (送試用)
+            </button>
+
+            <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                <div style="flex: 1; height: 1px; background: #333;"></div>
+                <div style="color: #666; font-size: 12px; padding: 0 10px;">或使用專屬金鑰</div>
+                <div style="flex: 1; height: 1px; background: #333;"></div>
+            </div>
+
+            <input type="text" id="passcodeInput" placeholder="請輸入付費金鑰" style="width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #333; background: #222; color: #fff; box-sizing: border-box;">
+            <p id="errorMsg" style="color: #ff4d4d; font-size: 13px; margin: 0 0 10px 0; display: none;"></p>
+            
+            <button onclick="checkPasscode()" style="width: 100%; background: transparent; color: #d4af37; border: 1px solid #d4af37; padding: 12px; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold;">
+                解鎖權限
+            </button>
+            
+            <div style="margin-top: 15px;">
+                <a href="${getDynamicLineUrl()}" target="_blank" style="color: #888; font-size: 12px; text-decoration: none;">沒有金鑰？點此聯絡版大</a>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+    setTimeout(() => { modal.style.opacity = '1'; }, 50);
 }
 
-// 🎯 【原版保留】關門放狗 + 終極鎖死
-function triggerLockdown() {
-    if (hasLockedDown) return; 
-    hasLockedDown = true; 
-    const authGate = document.getElementById('authGate');
-    const mainContent = document.getElementById('mainContent');
-    
-    if (authGate) {
-        authGate.style.display = 'block'; 
-        authGate.classList.add('scatter-fly-in');  
-        document.body.style.overflow = 'hidden'; 
-        document.body.style.userSelect = 'none'; 
-        if (mainContent) {
-            mainContent.style.pointerEvents = 'none'; 
-            mainContent.style.filter = 'blur(8px)';   
-        }
-        if (!document.getElementById('nukeTooltipsStyle')) {
-            const style = document.createElement('style');
-            style.id = 'nukeTooltipsStyle';
-            style.innerHTML = `
-                .pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }
-            `;
-            document.head.appendChild(style);
-        }
+// 🌌 LINE 安全轉場
+function handleTransitionLogin(type) {
+    if (type === 'line') {
+        document.body.innerHTML = `
+            <div style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#d4af37; font-family:sans-serif;">
+                <div style="width: 50px; height: 50px; border: 3px solid #333; border-top: 3px solid #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom:20px;"></div>
+                <h3 style="letter-spacing: 2px;">建立安全連線中...</h3>
+                <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+            </div>
+        `;
+        setTimeout(() => { if (window.liff) liff.login({ redirectUri: window.location.href }); }, 1500);
     }
 }
 
-// 🔐 【原版保留】完整金鑰驗證邏輯
+// 🌟 保留核心 3：金鑰驗證大腦 API
 async function checkPasscode() {
-    let userInput = '';
-    let errorMsg = null;
-    
-    const iframe = document.querySelector('#authGate iframe');
-    if (iframe && iframe.contentWindow) {
-        const iframeDoc = iframe.contentWindow.document;
-        const inputEl = iframeDoc.getElementById('passcodeInput');
-        if (inputEl) userInput = inputEl.value;
-        errorMsg = iframeDoc.getElementById('errorMsg');
-    } else {
-        const inputEl = document.getElementById('passcodeInput');
-        if (inputEl) userInput = inputEl.value;
-        errorMsg = document.getElementById('errorMsg');
-    }
-    
+    const inputEl = document.getElementById('passcodeInput');
+    const errorMsg = document.getElementById('errorMsg');
+    if (!inputEl) return;
+    const userInput = inputEl.value;
     if (!userInput) return;
 
-    // 管理員金鑰
-    try {
-        const ADMIN_KEY = atob(config.adminCode);
-        if (userInput === ADMIN_KEY) {
-            window.isAdmin = true;
-            localStorage.setItem('qiJu_Key', ADMIN_KEY);
-            const adminExpire = new Date();
-            adminExpire.setDate(adminExpire.getDate() + 30); 
-            localStorage.setItem('qiJu_ExpiresAt', adminExpire.toISOString());
-            fullUnlockSystem();
-            return;
-        }
-    } catch(e) {}
-
-    // 會員金鑰 (API 驗證)
     try {
         const isV2Key = userInput.toUpperCase().includes('V2');
         const apiUrl = isV2Key ? '/api/verify-key-v2' : '/api/verify-key';
@@ -219,129 +171,63 @@ async function checkPasscode() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: userInput })
         });
-
-        const result = await response.json(); 
+        const result = await response.json();
 
         if (result.valid) {
             const isExpiredByDays = result.remaining_days !== undefined && result.remaining_days <= 0;
             const isExpiredByDate = result.expires_at && (new Date(result.expires_at) <= new Date());
 
             if (isExpiredByDays || isExpiredByDate) {
-                if (errorMsg) {
-                    errorMsg.style.display = 'block';
-                    errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約';
-                }
-                localStorage.removeItem('qiJu_Key');
-                localStorage.removeItem('qiJu_ExpiresAt');
-                return; 
+                if (errorMsg) { errorMsg.style.display = 'block'; errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約'; }
+                return;
             }
 
             localStorage.setItem('qiJu_Key', userInput);
-            let expireDateStr = result.expires_at;
-            if (!expireDateStr) {
-                const tomorrow = new Date();
-                tomorrow.setHours(tomorrow.getHours() + 24);
-                expireDateStr = tomorrow.toISOString();
-            }
+            let expireDateStr = result.expires_at || new Date(new Date().getTime() + 24*60*60*1000).toISOString();
             localStorage.setItem('qiJu_ExpiresAt', expireDateStr);
             
-            sessionStorage.removeItem('verifiedKey'); 
-            localStorage.removeItem('verifiedKey_v2');
-            
-            if (result.remaining_days !== undefined) {
-                alert(`✅ 驗證成功！剩餘天數：${result.remaining_days} 天`);
-            }
-            
-            window.isAdmin = false;
+            if (result.remaining_days !== undefined) alert(`✅ 驗證成功！剩餘天數：${result.remaining_days} 天`);
             fullUnlockSystem();
         } else {
-            if (errorMsg) errorMsg.style.display = 'block';
-            if (result.reason === 'used') {
-                if (errorMsg) errorMsg.innerHTML = '❌ 此金鑰已被使用過';
-            } else if (result.reason === 'expired') {
-                if (errorMsg) errorMsg.innerHTML = '❌ 金鑰已過期，請聯絡版大續約';
-            } else {
-                if (errorMsg) errorMsg.innerHTML = '❌ 密鑰錯誤或已過期';
+            if (errorMsg) {
+                errorMsg.style.display = 'block';
+                errorMsg.innerHTML = result.reason === 'used' ? '❌ 此金鑰已被使用' : (result.reason === 'expired' ? '❌ 金鑰已過期' : '❌ 密鑰錯誤');
             }
         }
     } catch (e) {
-        if (errorMsg) {
-            errorMsg.style.display = 'block';
-            errorMsg.innerHTML = '❌ 系統錯誤，請稍後再試';
-        }
+        if (errorMsg) { errorMsg.style.display = 'block'; errorMsg.innerHTML = '❌ 系統錯誤，請稍後再試'; }
     }
 }
 
-// 🚪 【原版保留】開門邏輯
-function openDoorForVisitor() {
-    const authGate = document.getElementById('authGate');
-    const mainContent = document.getElementById('mainContent');
-    if (authGate) authGate.style.display = 'none'; 
-    if (mainContent) mainContent.style.display = 'block'; 
-    if (typeof window.init === 'function') window.init(); 
-}
-
-// 🔓 【原版保留】解鎖系統 (包含 Admin Widget 啟動)
+// 🔓 完全解鎖
 function fullUnlockSystem() {
-    const authGate = document.getElementById('authGate');
-    const mainContent = document.getElementById('mainContent');
-    if (authGate) {
-        authGate.classList.remove('scatter-fly-in');
-        authGate.style.display = 'none'; 
-    }
-    if (mainContent) mainContent.style.display = 'block';
-
+    const modal = document.getElementById('premium-auth-modal');
+    if (modal) modal.remove();
+    
     document.body.style.overflow = '';
-    document.body.style.userSelect = '';
+    const mainContent = document.getElementById('mainContent');
     if (mainContent) {
-        mainContent.style.pointerEvents = '';
         mainContent.style.filter = '';
+        mainContent.style.pointerEvents = '';
     }
-
     const nukeStyle = document.getElementById('nukeTooltipsStyle');
     if (nukeStyle) nukeStyle.remove();
-
-    isRestrictedMode = false;
-    validClickCount = 0;
-    hasLockedDown = false; 
-
-    // 恢復管理員套件啟動邏輯
-    if (window.isAdmin === true) {
-        if (typeof window.initAdminWidget === 'function') window.initAdminWidget();
-        if (typeof window.initBackupWidget === 'function') window.initBackupWidget();
-    }
 
     if (typeof window.init === 'function') window.init();
 }
 
-// ⌨️ 【原版保留】鍵盤事件
-document.addEventListener('keypress', (e) => {
-    const authGate = document.getElementById('authGate');
-    if (authGate && authGate.style.display !== 'none' && e.key === 'Enter') {
-        checkPasscode();
-    }
-});
-
-// 🌟 【原版保留】LINE 收網組裝機
+// 🌟 保留：聯絡版大動態連結
 window.getDynamicLineUrl = function() {
     const LINE_OFFICIAL_ID = "@yhd0256r"; 
     const ref = localStorage.getItem('qiJu_ref');
     const author = localStorage.getItem('qiJu_author');
-    
     let message = "版大你好，我要買金鑰！";
-    if (author && ref && author !== ref) {
-        message += ` (原創碼：${author}，推廣碼：${ref})`;
-    } else if (ref || author) {
-        const singleCode = ref || author;
-        message += ` (推薦碼：${singleCode})`;
-    } else {
-        message += ` (無推薦人)`;
-    }
+    if (author && ref && author !== ref) message += ` (原創碼：${author}，推廣碼：${ref})`;
+    else if (ref || author) message += ` (推薦碼：${ref || author})`;
     return `https://line.me/R/oaMessage/${LINE_OFFICIAL_ID}/?${encodeURIComponent(message)}`;
 };
 
-// 🌟 【原版保留】推廣者專用：產生雙軌分潤連結
+// 🌟 保留：推廣連結生成
 window.generateShareLink = function(authorCode, promoterCode) {
-    const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?author=${authorCode}&ref=${promoterCode}`;
+    return `${window.location.origin}${window.location.pathname}?author=${authorCode}&ref=${promoterCode}`;
 };
