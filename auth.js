@@ -71,9 +71,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 預設隱藏舊門 (付費牆)
     const authGate = document.getElementById('authGate');
-    // ... 下面維持原樣不動 ...
-    // 預設隱藏舊門 (付費牆)
-    const authGate = document.getElementById('authGate');
     if (authGate) authGate.style.display = 'none';
 
     trackReferrals(); 
