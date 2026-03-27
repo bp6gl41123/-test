@@ -1,7 +1,6 @@
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
-/* ==== (高科技重金屬奢華版：純 CSS 打造立體質感) ==== */
-/* ==== (已修復：完整保留推廣字串邏輯) ============ */
+/* ==== (高科技重金屬奢華版 UI + 精準漏斗攔截邏輯) ==== */
 /* ========================================== */
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
@@ -11,7 +10,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
+const FREE_DAYS_LIMIT = 99; // 👉 測試地雷請改 0
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
@@ -34,7 +33,7 @@ async function trackReferrals() {
     }
 }
 
-// 🌟 本地天數追蹤 (完整保留)
+// 🌟 本地天數追蹤 (邏輯修復：只回傳結果，不無差別埋雷)
 function trackVisitorDays() {
     const today = new Date().toLocaleDateString('en-CA'); 
     let visitedDays = JSON.parse(localStorage.getItem('qiJuVisitedDays')) || [];
@@ -43,11 +42,8 @@ function trackVisitorDays() {
         visitedDays.push(today);
         localStorage.setItem('qiJuVisitedDays', JSON.stringify(visitedDays));
     }
-
-    if (visitedDays.length > FREE_DAYS_LIMIT) {
-        isRestrictedMode = true; 
-        console.log("💣 訪客天數已達上限，地雷模式已開啟！(等待點擊觸發)");
-    }
+    // 回傳 true 代表試用期已滿
+    return visitedDays.length > FREE_DAYS_LIMIT; 
 }
 
 function loadLiffSdk() {
@@ -61,19 +57,22 @@ function loadLiffSdk() {
     });
 }
 
+// 🚀 系統大腦：啟動與判斷
 document.addEventListener('DOMContentLoaded', async () => {
+    // 預設隱藏舊門 (付費牆)
     const authGate = document.getElementById('authGate');
     if (authGate) authGate.style.display = 'none';
 
     trackReferrals(); 
-    trackVisitorDays(); 
 
+    // 管理員地雷測試
     if (window.location.search.includes('test=lock')) {
-        setTimeout(() => {
-            isRestrictedMode = true;
-        }, 300);
+        setTimeout(() => { isRestrictedMode = true; }, 300);
     }
 
+    // ==========================================
+    // 🛡️ 漏斗第一層：實體金鑰檢查 (優先權最高)
+    // ==========================================
     let ADMIN_KEY = '';
     try { if (typeof config !== 'undefined') ADMIN_KEY = atob(config.adminCode); } catch(e) {}
 
@@ -92,8 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (now < expireDate) {
                 window.isAdmin = false;
                 fullUnlockSystem();
-                return; 
+                return; // 試用/金鑰正常，放行
             } else {
+                // 🚨 金鑰過期：直接引爆第二門鎖死！
                 localStorage.removeItem('qiJu_Key');
                 localStorage.removeItem('qiJu_ExpiresAt');
                 triggerLockdown(); 
@@ -103,10 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     window.isAdmin = false;
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) mainContent.style.display = 'block'; 
-    if (typeof window.init === 'function') window.init(); 
 
+    // ==========================================
+    // 🛡️ 漏斗第二層：LINE 登入狀態檢查
+    // ==========================================
     let liffLoggedIn = false;
     try {
         const liff = await loadLiffSdk();
@@ -116,9 +116,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('⚠️ LIFF 初始化失敗，忽略錯誤繼續');
     }
 
+    // ==========================================
+    // 🎯 終極防禦判斷 (落實兩段式邏輯)
+    // ==========================================
     if (liffLoggedIn) {
-        fullUnlockSystem(); 
+        // 情況 A：他有 LINE 登入過，開始檢查試用期
+        const isTrialExpired = trackVisitorDays(); 
+
+        if (isTrialExpired) {
+            // 🚨 試用期過期！通電開啟地雷模式 (等待點擊/滑動引爆第二門)
+            isRestrictedMode = true;
+            console.log("💣 LINE登入者試用期滿，地雷模式已開啟！(等待滑鼠引爆)");
+            
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) mainContent.style.display = 'block'; 
+            if (typeof window.init === 'function') window.init();
+        } else {
+            // 試用期內，放行
+            fullUnlockSystem();
+        }
+
     } else {
+        // 情況 B：未登入 LINE 的新客
+        trackVisitorDays(); // 照常記錄他來了幾天
+        isRestrictedMode = false; // 🚫 絕對禁止地雷通電，保護小白！
+
+        // 讓他看 5 秒乾淨畫面
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) mainContent.style.display = 'block'; 
+        if (typeof window.init === 'function') window.init(); 
+
+        // 5 秒後砸出第一扇門 (重金屬黑金窗)
+        console.log("🚪 未登入訪客，5秒後召喚第一扇門 (黑金登入窗)");
         setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
     }
 });
@@ -173,11 +202,18 @@ function triggerLockdown() {
             mainContent.style.pointerEvents = 'none'; 
             mainContent.style.filter = 'blur(8px)';   
         }
+        // 🚨 救回：防偷看泡泡框抹除術
+        if (!document.getElementById('nukeTooltipsStyle')) {
+            const style = document.createElement('style');
+            style.id = 'nukeTooltipsStyle';
+            style.innerHTML = `.pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }`;
+            document.head.appendChild(style);
+        }
     }
 }
 
 /* ========================================== */
-/* 🚪 【召喚第一扇門】：高科技重金屬奢華版
+/* 🚪 【召喚第一扇門】：高科技重金屬奢華版 UI
 /* ========================================== */
 function showNewDoor() {
     if (hasLockedDown) return; 
@@ -187,6 +223,14 @@ function showNewDoor() {
     const mainContent = document.getElementById('mainContent') || document.body;
     mainContent.style.filter = 'blur(8px) brightness(0.5)';
     mainContent.style.pointerEvents = 'none';
+
+    // 🚨 救回：防偷看泡泡框抹除術 (在新門也生效)
+    if (!document.getElementById('nukeTooltipsStyle')) {
+        const style = document.createElement('style');
+        style.id = 'nukeTooltipsStyle';
+        style.innerHTML = `.pick-tooltip-container, .pick-tooltip { display: none !important; opacity: 0 !important; visibility: hidden !important; transform: scale(0) !important; }`;
+        document.head.appendChild(style);
+    }
 
     const modal = document.createElement('div');
     modal.id = 'premium-auth-modal';
@@ -338,6 +382,10 @@ function fullUnlockSystem() {
         mainContent.style.display = 'block';
     }
     
+    // 🚨 救回：解除鎖定時，拔除抹除泡泡框的咒語
+    const nukeStyle = document.getElementById('nukeTooltipsStyle');
+    if (nukeStyle) nukeStyle.remove();
+
     isRestrictedMode = false;
     validClickCount = 0;
     hasLockedDown = false; 
@@ -355,7 +403,7 @@ document.addEventListener('keypress', (e) => {
     if (((authGate && authGate.style.display !== 'none') || modal) && e.key === 'Enter') checkPasscode();
 });
 
-// 🚨 這裡就是剛剛被我遺漏，現在完美恢復的推廣字串邏輯！
+// 🌟 推廣連結動態組裝 (完整保留)
 window.getDynamicLineUrl = function() {
     const LINE_OFFICIAL_ID = "@yhd0256r"; 
     const ref = localStorage.getItem('qiJu_ref');
