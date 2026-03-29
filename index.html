@@ -391,6 +391,8 @@
                 <button class="r-btn active" onclick="changeHomeRanking(20, this)">近 20 場</button>
                 <button class="r-btn" onclick="changeHomeRanking(7, this)">近 7 場</button>         
                 <button class="r-btn" onclick="changeHomeRanking(3, this)">近 3 場 (爆發)</button>
+
+
             </div>
 
             <div style="position: relative; width: 100%;">
@@ -398,14 +400,14 @@
                 <div style="
                     position: absolute; 
                     left: 0; 
-                    top: 15px; /* 🎯 關鍵修改：從 bottom 改成 top，直接懸浮在最高處 */
+                    top: 0px; /* 🎯 關鍵修改：從 bottom 改成 top，直接懸浮在最高處 15 改成 0 會變高  數字大則降 數字小高*/
                     z-index: 10;
                     display: inline-flex; 
                     align-items: flex-start; 
                     gap: 10px; 
                     padding: 12px 16px; 
                     background: linear-gradient(135deg, #1e293b, #0f172a); 
-                    border-left: 4px solid #38bdf8; 
+                    border-left: 15px solid #38bdf8;  /* 🎯15px 數字多靠右 數字少靠左 */
                     border-radius: 8px; 
                     box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 0 10px rgba(56, 189, 248, 0.05);
                     max-width: 220px;
@@ -422,6 +424,8 @@
             </div>
 
             <div class="grid-container" id="expertGrid"></div>
+
+
 
             <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center; border: 1px solid #eef2f6;">
                 <p style="font-weight:bold; color:#64748b; margin-bottom:15px;">
