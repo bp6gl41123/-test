@@ -788,3 +788,69 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
 
     });
 };
+
+
+
+
+/* ============================================================== */
+/* 🌟 [系統一編碼 專屬外掛] 動態攔截：賽季總榜左下角警語注入系統 */
+/* ============================================================== */
+(function() {
+    function injectUpdateNotice() {
+        const grid = document.getElementById('expertGrid');
+        if (!grid) return;
+        
+        // 防重複注入鎖
+        if (document.getElementById('sys-update-notice')) return;
+
+        const notice = document.createElement('div');
+        notice.id = 'sys-update-notice';
+        
+        // 🎯 頂級版面運算：讓它跨越 3 到 4 個卡片的寬度，完美佔據左下角剩餘網格空間
+        notice.style.cssText = `
+            grid-column: span 4; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 10px 16px; 
+            background: linear-gradient(135deg, #1e293b, #0f172a); 
+            border-left: 4px solid #38bdf8; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 0 10px rgba(56, 189, 248, 0.05);
+            margin-top: 5px;
+            cursor: default;
+        `;
+        
+        notice.innerHTML = `
+            <div style="width: 8px; height: 8px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 10px #38bdf8; animation: pulse-glow 2s infinite ease-in-out; flex-shrink: 0;"></div>
+            
+            <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+                <span style="color: #38bdf8; font-size: 14px; font-weight: 900; letter-spacing: 0.5px;">每日下午 5 點前更新成績</span>
+                <span style="color: #94a3b8; font-size: 12px; font-weight: bold;">更新成績之前，可瀏覽各好手得知本日狀況，以待賽後如實核定。</span>
+            </div>
+        `;
+        
+        // 將警語精準塞入網格的最後一位！
+        grid.appendChild(notice);
+    }
+
+    // 啟動全域雷達：監聽 expertGrid 的一舉一動
+    const observer = new MutationObserver((mutations) => {
+        for (let mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+                // 只要有卡片被畫出來，立刻在 50 毫秒後補上警語
+                setTimeout(injectUpdateNotice, 50);
+            }
+        }
+    });
+
+    // 等待網頁結構載入後，掛載雷達
+    window.addEventListener('DOMContentLoaded', () => {
+        const grid = document.getElementById('expertGrid');
+        if (grid) {
+            observer.observe(grid, { childList: true });
+            // 雙重保險：初次進入時也掃描一次
+            setTimeout(injectUpdateNotice, 800);
+        }
+    });
+})();
