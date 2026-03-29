@@ -399,15 +399,15 @@
                 
                 <div style="
                     position: absolute; 
-                    left: 0; 
-                    top: 0px; /* 🎯 關鍵修改：從 bottom 改成 top，直接懸浮在最高處 15 改成 0 會變高  數字大則降 數字小高*/
+                    left: 20px; /* 🎯 關鍵修改 1：改這裡！把 0 改成 20px，整個框框就會往右平移。數字越大越往右！ */
+                    top: 0px; /* ✅ 您的改法非常完美，保持 0px 讓它在最高處 */
                     z-index: 10;
                     display: inline-flex; 
                     align-items: flex-start; 
                     gap: 10px; 
                     padding: 12px 16px; 
                     background: linear-gradient(135deg, #1e293b, #0f172a); 
-                    border-left: 15px solid #38bdf8;  /* 🎯15px 數字多靠右 數字少靠左 */
+                    border-left: 4px solid #38bdf8; 
                     border-radius: 8px; 
                     box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 0 10px rgba(56, 189, 248, 0.05);
                     max-width: 220px;
