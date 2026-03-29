@@ -393,8 +393,37 @@
                 <button class="r-btn" onclick="changeHomeRanking(3, this)">近 3 場 (爆發)</button>
             </div>
 
-            <div id="podiumArea" class="podium-container"></div>
+            <div style="position: relative; width: 100%;">
+                
+                <div style="
+                    position: absolute; 
+                    left: 0; 
+                    bottom: 10px; /* 稍微浮貼在頒獎台底部基準線上 */
+                    z-index: 10;
+                    display: inline-flex; 
+                    align-items: flex-start; 
+                    gap: 10px; 
+                    padding: 12px 16px; 
+                    background: linear-gradient(135deg, #1e293b, #0f172a); 
+                    border-left: 4px solid #38bdf8; 
+                    border-radius: 8px; 
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.15), inset 0 0 10px rgba(56, 189, 248, 0.05);
+                    max-width: 220px;
+                ">
+                    <div style="margin-top: 5px; width: 6px; height: 6px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 8px #38bdf8; animation: pulse-glow 2s infinite ease-in-out; flex-shrink: 0;"></div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+                        <span style="color: #38bdf8; font-size: 14px; font-weight: 900; letter-spacing: 0.5px;">每日下午 5 點更新</span>
+                        <span style="color: #94a3b8; font-size: 12px; font-weight: bold; line-height: 1.4;">更新前可瀏覽好手狀況<br>以待賽後如實核定。</span>
+                    </div>
+                </div>
+
+                <div id="podiumArea" class="podium-container"></div>
+            </div>
+
             <div class="grid-container" id="expertGrid"></div>
+
+
 
             <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center; border: 1px solid #eef2f6;">
                 <p style="font-weight:bold; color:#64748b; margin-bottom:15px;">
@@ -467,10 +496,10 @@
             </div>
         </div>
     </div>
-    <script src="config.js?v=1.0.141"></script>
-    <script src="data.js?v=1.0.40"></script>
+    <script src="config.js?v=1.0.142"></script>
+    <script src="data.js?v=1.0.41"></script>
     <script src="auth.js?v=1.0.35"></script>
-    <script src="core_admin.js?v=1.0.38"></script>
+    <script src="core_admin.js?v=1.0.39"></script>
     <script src="core_backup.js?v=1.0.16"></script>
     <script src="core_settle.js?v=1.0.10"></script>
     <script src="core_pocket.js?v=1.0.104"></script>
@@ -479,7 +508,7 @@
     <script src="core_trend.js?v=1.0.10"></script>
     <script src="core_ranking.js?v=1.0.146"></script>
     <script src="core_recruit.js?v=1.0.90"></script>
-    <script src="core_engine.js?v=1.0.108"></script>
+    <script src="core_engine.js?v=1.0.109"></script>
 
 <script>
 (function() {
