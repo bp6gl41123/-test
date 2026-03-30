@@ -63,7 +63,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
                 top: -20px; 
                 bottom: -20px; 
                 left: 0; 
-                right: -60px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
+                right: -40px; /* 👈 關鍵修正：向「右」偷出 40px 的隱形點擊區！ */
                 background: transparent; 
             }
 
@@ -238,14 +238,16 @@ window.openRecruitModal = () => {
         } else {
             // 🎯 升級完整字典，確保所有賽事(含日棒)標籤正確顯示
             const itemNames = {
-                "nba_main": "🏀 NBA主推", "mlb_main": "⚾ MLB主推",
+                "nba_main": "🏀 NBA主推(隊伍)", "mlb_main": "⚾ MLB主推(隊伍)",
+                "nba_total_main": "🏀 NBA主推(大小)", "mlb_total_main": "⚾ MLB主推(大小)",
                 "npb_runline": "日棒讓分", "npb_ml": "日棒獨贏", "npb_total": "日棒大小", "npb_1h_runline": "日棒上半讓分", "npb_1h_ml": "日棒上半獨贏", "npb_1h_total": "日棒上半大小",
                 "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分",
                 "mlb_ml": "MLB 獨贏", "mlb_runline": "MLB 讓分盤", "mlb_total": "MLB 大小分", "mlb_ml_high": "MLB 高賠獨贏",
+                "cpbl_team": "中華職棒隊伍", "cpbl_total": "中華職棒大小",
                 "nhl_ml": "冰球獨贏(含加時)", "nhl_ml_reg": "冰球獨贏(不含加時)", "nhl_spread_ot": "冰球讓盤(含加時)", "nhl_spread_reg": "冰球讓盤(不含加時)", 
                 "nhl_total_ot": "冰球大小(含加時)", "nhl_total_reg": "冰球大小(不含加時)", "khl_team": "俄冰隊伍", "khl_total": "俄冰大小分",
                 "soccer_team": "足球隊伍", "soccer_total": "足球大小分", "soccer_ml": "足球獨贏", "soccer_btts": "足球兩隊進球",
-                "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", "cba_team": "中籃隊伍","jbl_team": "日籃讓盤", "jbl_total": "日籃大小", "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小", "nbl_team": "澳籃隊伍",
+                "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", "cba_team": "中籃隊伍", "cba_total": "中籃大小", "jbl_team": "日籃讓盤", "jbl_total": "日籃大小", "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小", "nbl_team": "澳籃隊伍",
                 "lol_team": "電競隊伍", "lol_total": "電競大小"
             };
 
