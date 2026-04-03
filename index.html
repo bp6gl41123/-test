@@ -545,7 +545,7 @@
     window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
         var radar = document.getElementById('momentumRadarPage');
-        var screenWidth = window._deviceWidth || window.innerWidth;
+        var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
 
         // 🎯 核心黑科技：偵測「實體翻轉手機」(判斷寬度是否大於高度)
@@ -647,7 +647,7 @@
 
 <script>
 (function() {
-    if ((window._deviceWidth || window.innerWidth) < 1024) {
+    if (window.innerWidth < 1024) {
         document.documentElement.style.visibility = 'hidden';
     }
 })();

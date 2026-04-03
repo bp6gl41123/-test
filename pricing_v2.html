@@ -2037,7 +2037,7 @@ function handleEnter(btn) {
 <script>
 // 立即執行：手機版先隱藏 body，等縮放完再顯示，消除擠壓閃爍
 (function() {
-    if ((window._deviceWidth || window.innerWidth) < 768) {
+    if (window.innerWidth < 768) {
         document.documentElement.style.visibility = 'hidden';
     }
 })();
@@ -2047,7 +2047,7 @@ function handleEnter(btn) {
 (function() {
     function scalePricing() {
         // 1. 取得當前視窗寬度
-        var screenWidth = (window._deviceWidth || window.innerWidth);
+        var screenWidth = window.innerWidth;
         var screenHeight = window.innerHeight;
         
         // 2. 提升門檻：只要寬度小於 1024px (涵蓋所有手機橫打) 就啟動縮放

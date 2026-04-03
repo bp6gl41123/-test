@@ -122,7 +122,7 @@ window.toggleUserPocket = function(expertName, btnElement, sportKey) {
     
     // 1. 點擊邏輯
     floatBtn.addEventListener('click', function() {
-        if ((window._deviceWidth || window.innerWidth) < 1024) {
+        if (window.innerWidth < 1024) {
             // 🎯 只要按鈕滑出來了，或是變數是 true，點擊就直接開視窗！
             if (floatBtn.style.left === '0px' || pocketExpanded) {
                 window.openPocketModal();
@@ -289,7 +289,7 @@ window.openPocketModal = () => {
         }
         overlay.classList.add('show');
         // 手機版強制縮小上半部
-        if ((window._deviceWidth || window.innerWidth) < 1024) {
+        if (window.innerWidth < 1024) {
             const strategyDiv = overlay.querySelector('.pocket-modal-content > div:not(.pocket-modal-header):not(.pocket-modal-footer)');
             if (strategyDiv) {
                 strategyDiv.style.padding = '6px 12px 4px';
@@ -340,7 +340,7 @@ window.openPocketModal = () => {
 
     // 手機版縮放同步
     function syncPocketBtnScale() {
-        if ((window._deviceWidth || window.innerWidth) < 1024) {
+        if (window.innerWidth < 1024) {
             const scale = window.innerWidth / 980;
             const w = Math.round(75 * scale);
             floatBtn.style.right = 'auto';
@@ -379,13 +379,13 @@ window.openPocketModal = () => {
             if (recruitBtn) recruitBtn.classList.remove('is-comparing');
         }
         // 手機版：交給 checkScrollPosition 控制，不用 is-comparing
-        if ((window._deviceWidth || window.innerWidth) < 1024) {
+        if (window.innerWidth < 1024) {
             if (pocketBtn) pocketBtn.classList.remove('is-comparing');
             if (recruitBtn) recruitBtn.classList.remove('is-comparing');
         }
     };
 // 手機版：偵測是否在上半部，自動露出按鈕
-    if ((window._deviceWidth || window.innerWidth) < 1024) {
+    if (window.innerWidth < 1024) {
         function checkScrollPosition() {
             if (window.innerWidth >= 1024) return;
 
