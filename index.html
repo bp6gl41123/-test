@@ -14,19 +14,15 @@
     <meta charset="UTF-8">
     
 <meta id="viewportMeta" name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script>
-        (function() {
-            // 偵測訪客是不是用 LINE 內建瀏覽器打開的
-            var isLineApp = (navigator.userAgent.indexOf("Line") > -1);
-            
-            // 如果「不是」在 LINE 裡面 (代表是用 Chrome/Safari 等外部預設瀏覽器開啟)
-            // 且螢幕寬度小於 1024 (代表他是在手機上)
-            if (!isLineApp && window.innerWidth < 1024) {
-                // 強制把視角拉遠，變成 1440px 的電腦版視野
-                document.getElementById('viewportMeta').setAttribute('content', 'width=1440, user-scalable=yes');
-            }
-        })();
-    </script>
+    // 🎯 統一基準：所有手機（含LINE）鎖死 viewport=980，不受字體影響
+    (function() {
+        if (window.innerWidth < 1024) {
+            document.getElementById('viewportMeta').setAttribute('content', 'width=980, user-scalable=yes');
+        }
+    })();
+</script>
 
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
