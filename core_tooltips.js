@@ -137,7 +137,7 @@ window.getPickTooltipHtml = function(name) {
     let btnText = isSaved ? '⭐ 已存寶庫' : '➕ 收錄寶庫';
     let btnClass = isSaved ? 'pocket-add-btn saved' : 'pocket-add-btn';
     
-    return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); if(typeof window.tooltipGateTrigger === 'function' && window.tooltipGateTrigger()) return; window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
+    return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
 };
 
 window.toggleMobileTooltip = function(iconElement) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { if (el !== iconElement.nextElementSibling) el.classList.remove('show-mobile'); }); iconElement.nextElementSibling.classList.toggle('show-mobile'); };

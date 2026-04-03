@@ -119,10 +119,11 @@ if (!document.getElementById('pickTooltipStyle')) {
 
         .pick-tooltip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: #fbbf24 transparent transparent transparent; }
 
-        .pick-tooltip.show-mobile { visibility: visible; opacity: 1; bottom: 145%; }
+        .pick-tooltip-container:hover .pick-tooltip, .pick-tooltip.show-mobile { visibility: visible; opacity: 1; bottom: 145%; }
+        .pk-column:hover { z-index: 10; } 
         .pk-column .pick-tooltip { bottom: auto; top: 130%; }
         .pk-column .pick-tooltip::after { top: auto; bottom: 100%; border-color: transparent transparent #fbbf24 transparent; }
-        .pk-column .pick-tooltip.show-mobile { bottom: auto; top: 145%; }
+        .pk-column .pick-tooltip-container:hover .pick-tooltip, .pk-column .pick-tooltip.show-mobile { bottom: auto; top: 145%; }
 
         @keyframes scatterFlyIn {
             0% { opacity: 0; transform: translate(var(--rx), var(--ry)) rotate(var(--rr)) scale(0.5); }
