@@ -589,15 +589,33 @@
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
-        // 📱 手機版與電腦版統一：viewport 已鎖死 980，不需要 Transform 縮放
-        if (radar && radar.style.display !== 'none') {
-            document.body.style.backgroundColor = '#060b14';
-        } else {
-            document.body.style.backgroundColor = '#f4f7f9';
-        }
+        // 📱 手機版邏輯 (<1024 且為直向時)
+        if (screenWidth < 1024) { 
+            var scale = screenWidth / 980;
+            var targetH = Math.round((screenHeight + 100) / scale) + 'px'; 
+            
+            if (content && content.style.display !== 'none') {
+                content.style.transformOrigin = 'top left';
+                content.style.transform = 'scale(' + scale + ')';
+                content.style.width = '980px';
+                content.style.height = targetH;
+            }
+            if (radar && radar.style.display !== 'none') {
+                radar.style.transformOrigin = 'top left';
+                radar.style.transform = 'scale(' + scale + ')';
+                radar.style.width = '980px';
+                radar.style.height = targetH;
+                document.body.style.backgroundColor = '#060b14';
+            } else {
+                document.body.style.backgroundColor = '#f4f7f9';
+            }
+            
+            document.body.style.overflowX = 'hidden';
+            document.documentElement.style.overflowX = 'hidden';
 
-        // 💻 電腦版邏輯
-        if (screenWidth >= 1024) {
+        // 💻 電腦版邏輯 (>=1024)
+        } else {
+
             // 🚨 揪出凶手並修正：絕對不能用 '' 空字串！必須強迫鎖死 100% 滿版！
             if (content) { 
                 content.style.transform = 'none'; 
