@@ -8,6 +8,20 @@
 
 
 <style>
+@media (min-width: 1024px) {
+    /* 針對 Firefox 瀏覽器 */
+    html, body {
+        scrollbar-width: none !important;
+    }
+    /* 針對 Chrome, Safari, Edge 瀏覽器 */
+    html::-webkit-scrollbar, 
+    body::-webkit-scrollbar {
+        display: none !important;
+        width: 0px !important;
+    }
+}
+
+
 html, body { overflow: auto !important; }
     :root {
         --surface: #0d1825;
@@ -1353,10 +1367,11 @@ html, body { overflow: auto !important; }
     <p style="color:#e2e8f0; font-size:22px; margin:0 0 16px;">🔑 已訂閱？輸入版大給你的專屬金鑰</p>
     <div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">
         <input type="password" id="passcodeInput" style="padding:14px 20px; border-radius:8px; border:1px solid #38bdf8; background:rgba(13,24,37,0.9); color:#f0f6ff; font-size:18px; width:280px; outline:none;" placeholder="輸入專屬金鑰">
-        <button onclick="window.parent.checkPasscode()" style="padding:14px 26px; background:linear-gradient(135deg,#f59e0b,#fcd34d); color:#060b14; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:20px;">進入寶殿 👑</button>
+        <button id="enterBtn" onclick="handleEnter(this)" style="padding:14px 26px; background:linear-gradient(135deg,#f59e0b,#fcd34d); color:#060b14; border:none; border-radius:8px; font-weight:900; cursor:pointer; font-size:20px; transition: transform 0.1s, filter 0.1s;">進入寶殿 👑</button>
     </div>
     <p id="errorMsg" style="color:#ef4444; font-size:15px; margin-top:12px; display:none;">❌ 密鑰錯誤或已過期</p>
-    <p style="margin-top:12px; margin-bottom:0;"><a href="https://lin.ee/MaTQnpA" target="_blank" style="color:#34d399; font-size:20px; text-decoration:underline;">👉 尚未訂閱？私訊官方Line</a></p>
+    <p style="margin-top:12px; margin-bottom:0;"><a href="javascript:void(0)" onclick="window.open(getDynamicLine(), '_blank')" style="color:#34d399; font-size:20px; text-decoration:underline;">👉 尚未訂閱？私訊官方Line</a></p>
+</div>
 </div>
    
 
@@ -1443,7 +1458,7 @@ html, body { overflow: auto !important; }
                 
             </ul> 
 
-<button class="cta-btn" onclick="window.open('https://lin.ee/MaTQnpA','_blank')" style="margin-top: 16px;">氣宇非凡</button>
+<button class="cta-btn" onclick="window.open(getDynamicLine(), '_blank')" style="margin-top: 16px;">氣宇非凡</button>
         </div>
 
         <!-- 月付方案 -->
@@ -1480,7 +1495,7 @@ html, body { overflow: auto !important; }
                     <span class="feature-check">✓</span>輕鬆掌握全站好手
                 </li>
             </ul>
-<button class="cta-btn" onclick="window.open('https://lin.ee/MaTQnpA','_blank')" style="margin-top: 16px;">加入仕紳</button>
+<button class="cta-btn" onclick="window.open(getDynamicLine(), '_blank')" style="margin-top: 16px;">加入仕紳</button>
         </div>
 
         <!-- 年付方案 -->
@@ -1521,7 +1536,7 @@ html, body { overflow: auto !important; }
                     <div style="flex: 1; line-height: 1.5;">支援二級市場溢價交易，自由轉售變現。</div>
                 </li>
             </ul>
-<button class="cta-btn" onclick="window.open('https://lin.ee/MaTQnpA','_blank')" style="margin-top: 16px;">加盟授權</button>
+<button class="cta-btn" onclick="window.open(getDynamicLine(), '_blank')" style="margin-top: 16px;">加盟授權</button>
         </div>
 
         <!-- 元老方案（一次付時出現） -->
@@ -1546,7 +1561,7 @@ html, body { overflow: auto !important; }
                 <div class="price-annual-note" style="height: auto; margin: 4px 0 0 0;"><span class="quota-flash" id="elder-quota" style="color: #fcd34d;">50位/剩35位</span></div>
             </div>
 
-            <button class="cta-btn" style="background: linear-gradient(135deg, #d97706, #f59e0b); color: white; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); margin-top: 16px;" onclick="window.open('https://lin.ee/MaTQnpA','_blank')">位居元老</button>
+            <button class="cta-btn" style="background: linear-gradient(135deg, #d97706, #f59e0b); color: white; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); margin-top: 16px;" onclick="window.open(getDynamicLine(), '_blank')">位居元老</button>
             <div class="features-title">包含功能</div>
             <ul class="feature-list">
                 <li class="feature-item included">
@@ -1568,7 +1583,32 @@ html, body { overflow: auto !important; }
 </div>
 
 <script>
+window._deviceWidth = Math.round(window.screen.width / (window.devicePixelRatio || 1));
+
+    // 🎯 新增：向母層 auth.js 索取含推薦碼的動態網址
+function handleEnter(btn) {
+        btn.disabled = true;
+        btn.textContent = '驗證中...';
+        btn.style.filter = 'brightness(0.8)';
+        btn.style.transform = 'scale(0.95)';
+
+        window.parent.checkPasscode().finally(() => {
+            btn.disabled = false;
+            btn.textContent = '進入寶殿 👑';
+            btn.style.filter = '';
+            btn.style.transform = '';
+        });
+    }
+
+    const getDynamicLine = () => {
+        if (window.parent && typeof window.parent.getDynamicLineUrl === 'function') {
+            return window.parent.getDynamicLineUrl();
+        }
+        return 'https://line.me/R/ti/p/@yhd0256r'; 
+    };
+
     let isAnnual = false;
+
     let _toggleLocked = false;
 
     function switchBilling() {
@@ -1997,7 +2037,7 @@ html, body { overflow: auto !important; }
 <script>
 // 立即執行：手機版先隱藏 body，等縮放完再顯示，消除擠壓閃爍
 (function() {
-    if (window.innerWidth < 768) {
+    if ((window._deviceWidth || window.innerWidth) < 768) {
         document.documentElement.style.visibility = 'hidden';
     }
 })();
@@ -2007,7 +2047,7 @@ html, body { overflow: auto !important; }
 (function() {
     function scalePricing() {
         // 1. 取得當前視窗寬度
-        var screenWidth = window.innerWidth;
+        var screenWidth = (window._deviceWidth || window.innerWidth);
         var screenHeight = window.innerHeight;
         
         // 2. 提升門檻：只要寬度小於 1024px (涵蓋所有手機橫打) 就啟動縮放

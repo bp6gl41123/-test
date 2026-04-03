@@ -167,7 +167,7 @@ window.toggleRecruit = function(expertName, btnElement, sportKey) {
     
     // 1. 點擊邏輯
     floatBtn.addEventListener('click', function() {
-        if (window.innerWidth < 1024) {
+        if ((window._deviceWidth || window.innerWidth) < 1024) {
             // 🎯 只要按鈕滑出來了，或是變數是 true，點擊就直接開視窗！
             if (floatBtn.style.left === '0px' || recruitExpanded) {
                 window.openRecruitModal();
@@ -217,8 +217,8 @@ window.updateRecruitWidget = () => {
         if (window.userRecruit.length > 0) { 
             floatBtn.style.display = 'flex'; 
             /* 🎯 字體再次放大：將圖示升級至 24px，文字升級至 19px 極粗體 */
-const isMobile = window.innerWidth < 1024;
-const scale = isMobile ? window.innerWidth / 980 : 1;
+const isMobile = (window._deviceWidth || window.innerWidth) < 1024;
+const scale = isMobile ? (window._deviceWidth || window.innerWidth) / 980 : 1;
 const emojiSize = Math.round(20 * scale) + 'px';
 const textSize = Math.round(16 * scale) + 'px';
 floatBtn.innerHTML = `
@@ -322,7 +322,7 @@ window.openRecruitModal = () => {
         tooltip.innerHTML = `<div style="background:#fff; border-radius:8px; overflow:hidden;">${cardHtml}</div>`;
         
         // 💡 只有這裡做「雙軌分流」：手機置中縮小，電腦跟隨滑鼠
-        if (window.innerWidth < 1024) {
+        if ((window._deviceWidth || window.innerWidth) < 1024) {
             // 手機版：強制螢幕正中央，並縮小至 65%
             tooltip.style.left = '50%';
             tooltip.style.top = '50%';
@@ -347,8 +347,8 @@ window.openRecruitModal = () => {
 
     // 手機版縮放同步
     function syncRecruitBtnScale() {
-        if (window.innerWidth < 1024) {
-            const scale = window.innerWidth / 980;
+        if ((window._deviceWidth || window.innerWidth) < 1024) {
+            const scale = (window._deviceWidth || window.innerWidth) / 980;
             const w = Math.round(75 * scale);
             floatBtn.style.width = w + 'px';
             floatBtn.style.height = Math.round(270 * scale) + 'px';
