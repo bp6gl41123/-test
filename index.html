@@ -21,9 +21,9 @@
             
             // 如果「不是」在 LINE 裡面 (代表是用 Chrome/Safari 等外部預設瀏覽器開啟)
             // 且螢幕寬度小於 1024 (代表他是在手機上)
-            if (window.innerWidth < 1024) {
-    document.getElementById('viewportMeta').setAttribute('content', 'width=980, user-scalable=yes');
-}
+            if (!isLineApp && window.innerWidth < 1024) {
+                // 強制把視角拉遠，變成 1440px 的電腦版視野
+                document.getElementById('viewportMeta').setAttribute('content', 'width=1440, user-scalable=yes');
             }
         })();
     </script>
