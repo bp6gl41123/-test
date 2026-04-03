@@ -271,7 +271,12 @@ function showNewDoor() {
             .qiju-modal-logo { background: linear-gradient(135deg, #fde047 0%, #b45309 100%); border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#111; font-weight:900; border: 3px solid #78350f; box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.4); margin: 0 auto; }
             .qiju-modal-title { color: #fbbf24; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0 0 8px; }
             .qiju-modal-desc { color: #94a3b8; font-weight: bold; }
-            .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: 1px solid #22c55e; border-radius: 8px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: 0.2s; }
+            
+.qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: 1px solid #22c55e; border-radius: 8px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: 0.2s; position: relative; overflow: hidden; }
+            .qiju-modal-btn-line::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2), transparent); animation: qiju-shimmer 3s infinite; z-index: 0; }
+            @keyframes qiju-shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+            .qiju-modal-btn-line:hover::before { animation: qiju-shimmer 0.6s ease-in-out; }
+
             .qiju-modal-divider { display: flex; align-items: center; }
             .qiju-modal-divider-line { flex: 1; height: 2px; border-bottom: 1px solid #111; }
             .qiju-modal-divider-text { color: #64748b; font-weight: 900; }
@@ -335,12 +340,12 @@ function showNewDoor() {
     modal.innerHTML = `
         <div class="qiju-modal-box">
             <div class="qiju-modal-deco"></div>
-            <div class="qiju-modal-logo">齊</div>
+            <div class="qiju-modal-logo">聚</div>
             <h2 class="qiju-modal-title">齊聚眾選 戰情中心</h2>
             <p class="qiju-modal-desc">您的體驗已達上限・請進行身分驗證</p>
             
             <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
-                使用 LINE 一鍵快速登入 (送試用)
+                <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入 (送試用)</span>
             </button>
             
             <div class="qiju-modal-divider">
