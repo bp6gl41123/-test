@@ -13,7 +13,7 @@
 
     <meta charset="UTF-8">
     
-<meta id="viewportMeta" name="viewport" content="width=device-width, initial-scale=1.0">
+<meta id="viewportMeta" name="viewport" content="width=980, user-scalable=yes">
     
 <script>
     // 🎯 全域基準寬度：用實體螢幕像素換算，完全不受字體大小影響
@@ -589,35 +589,15 @@
         lastWidth = screenWidth;
         lastHeight = screenHeight;
 
-        // 📱 手機版邏輯 (<1024 且為直向時)
-        if (screenWidth < 1024) { 
-            var scale = screenWidth / 980;
-            // 確保高度絕對能填滿被收起的網址列空間 (加上 100px 緩衝值，杜絕滑動白邊)
-            var targetH = Math.round((screenHeight + 100) / scale) + 'px'; 
-            
-            if (content && content.style.display !== 'none') {
-                content.style.transformOrigin = 'top left';
-                content.style.transform = 'scale(' + scale + ')';
-                content.style.width = '980px';
-                content.style.height = targetH;
-            }
-            if (radar && radar.style.display !== 'none') {
-                radar.style.transformOrigin = 'top left';
-                radar.style.transform = 'scale(' + scale + ')';
-                radar.style.width = '980px';
-                radar.style.height = targetH;
-                // 🚨 終極防線：用 CSS 強制將網頁底色塗黑，這樣就算高度計算有毫秒延遲，也不會閃現白邊！
-                document.body.style.backgroundColor = '#060b14';
-            } else {
-                // 如果戰情室關閉，恢復主頁底色
-                document.body.style.backgroundColor = '#f4f7f9';
-            }
-            
-            document.body.style.overflowX = 'hidden';
-            document.documentElement.style.overflowX = 'hidden';
-
-        // 💻 電腦版邏輯 (>=1024，包含手機橫放被判定為 1440 寬度時)
+        // 📱 手機版與電腦版統一：viewport 已鎖死 980，不需要 Transform 縮放
+        if (radar && radar.style.display !== 'none') {
+            document.body.style.backgroundColor = '#060b14';
         } else {
+            document.body.style.backgroundColor = '#f4f7f9';
+        }
+
+        // 💻 電腦版邏輯
+        if (screenWidth >= 1024) {
             // 🚨 揪出凶手並修正：絕對不能用 '' 空字串！必須強迫鎖死 100% 滿版！
             if (content) { 
                 content.style.transform = 'none'; 
@@ -645,13 +625,6 @@
 })();
 </script>
 
-<script>
-(function() {
-    if (window.innerWidth < 1024) {
-        document.documentElement.style.visibility = 'hidden';
-    }
-})();
-</script>
 
 
 <div id="momentumRadarPage" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060b14; z-index: 10000; overflow-y: auto; padding: 40px 20px; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif;">
