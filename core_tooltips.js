@@ -10,7 +10,11 @@ window.filterPickText = function(rawText, sportKey) {
 
     if (sportKey !== "") {
         const itemNames = {
-            "nba_main": "NBA主推", "mlb_main": "MLB主推",
+            // 👑 主推專區 (新增主推大小)
+            "nba_main": "NBA主推(隊伍)", "nba_total_main": "NBA主推(大小)",
+            "mlb_main": "MLB主推(隊伍)", "mlb_total_main": "MLB主推(大小)",
+
+            // 🏀 一般賽事區
             "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分",
             "mlb_ml": "MLB 獨贏(正常)", "mlb_runline": "MLB 讓分盤", "mlb_total": "MLB 大小分", "mlb_ml_high": "MLB 高賠獨贏",
             "nhl_ml": "冰球獨贏(含加時)", "nhl_ml_reg": "冰球獨贏(不含加時)", "nhl_spread_ot": "冰球讓盤(含加時)", "nhl_spread_reg": "冰球讓盤(不含加時)",
@@ -19,7 +23,9 @@ window.filterPickText = function(rawText, sportKey) {
             "soccer_team": "足球隊伍", "soccer_total": "足球大小分", "soccer_ml": "足球獨贏", "soccer_btts": "足球兩隊進球",
 
             // === 🌏 亞洲與歐籃 ===
-            "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", "cba_team": "中籃隊伍", "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小", "nbl_team": "澳籃隊伍",
+            "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", 
+            "cba_team": "中籃隊伍", "cba_total": "中籃大小", // 👈 新增 CBA 大小
+            "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小", "nbl_team": "澳籃隊伍",
             "jbl_team": "日籃讓盤", "jbl_total": "日籃大小",
             "lol_team": "電競隊伍", "lol_total": "電競大小"
         };
@@ -131,7 +137,7 @@ window.getPickTooltipHtml = function(name) {
     let btnText = isSaved ? '⭐ 已存寶庫' : '➕ 收錄寶庫';
     let btnClass = isSaved ? 'pocket-add-btn saved' : 'pocket-add-btn';
     
-    return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
+    return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); if(typeof window.tooltipGateTrigger === 'function' && window.tooltipGateTrigger()) return; window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
 };
 
 window.toggleMobileTooltip = function(iconElement) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { if (el !== iconElement.nextElementSibling) el.classList.remove('show-mobile'); }); iconElement.nextElementSibling.classList.toggle('show-mobile'); };

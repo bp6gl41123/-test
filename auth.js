@@ -170,35 +170,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (完整保留)
+/* 💣 地雷防禦系統 (泡泡框專屬觸發版)
 /* ========================================== */
-document.addEventListener('click', (e) => {
-    if (!isRestrictedMode || hasLockedDown) return;
-    if (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal')) return;
 
-    validClickCount++;
-    if (validClickCount === 1) {
-        armMovementTrap();
-    } else if (validClickCount > 1) {
-        e.preventDefault();  
-        e.stopPropagation(); 
-        triggerLockdown();
-    }
-}, true); 
-
-function armMovementTrap() {
-    setTimeout(() => {
-        if (hasLockedDown) return; 
-        const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
-        const detonateTrap = (e) => {
-            if (hasLockedDown) return;
-            if (e.target && e.target.closest && (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal'))) return;
-            triggerLockdown();
-            trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
-        };
-        trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
-    }, 800); 
-}
+// 由 core_tooltips.js 的泡泡框點擊時呼叫
+window.tooltipGateTrigger = function() {
+    if (!isRestrictedMode || hasLockedDown) return false;
+    triggerLockdown();
+    return true;
+};
 
 function triggerLockdown() {
     if (hasLockedDown) return; 
