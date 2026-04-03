@@ -545,7 +545,7 @@
     window.scalePage = function(force) {
         var content = document.getElementById('mainContent');
         var radar = document.getElementById('momentumRadarPage');
-        var screenWidth = window.innerWidth;
+        var screenWidth = Math.min(window.screen.width, window.innerWidth);
         var screenHeight = window.innerHeight;
 
         // 🎯 核心黑科技：偵測「實體翻轉手機」(判斷寬度是否大於高度)
