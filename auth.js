@@ -241,14 +241,13 @@ function showMetaLoginPrompt() {
 function handleMetaOpenUrl() {
     const ref = localStorage.getItem('qiJu_ref');
     const author = localStorage.getItem('qiJu_author');
-    let url = window.location.href.split('?')[0];
+    let url = 'https://bp6gl41123.github.io/-test';        /* 跳外部連結 以後要換主網頁 */
     let params = [];
     if (author) params.push('author=' + author);
     if (ref) params.push('ref=' + ref);
     if (params.length) url += '?' + params.join('&');
     window.location.href = url;
 }
-
 
 
 function triggerLockdown() {
