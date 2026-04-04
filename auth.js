@@ -4,7 +4,7 @@
 /* ========================================== */
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
-const BROWSE_TIME_LIMIT = 999999999;   /*const BROWSE_TIME_LIMIT = 5000;    */
+const BROWSE_TIME_LIMIT = 5000;   /*const BROWSE_TIME_LIMIT = 5000;    */
 
 let isRestrictedMode = false; 
 let validClickCount = 0;      
