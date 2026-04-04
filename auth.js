@@ -10,7 +10,8 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
+const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
+const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Threads/i.test(navigator.userAgent);
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
@@ -155,17 +156,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } else {
         // 情況 B：未登入 LINE 的新客
-        trackVisitorDays(); // 照常記錄他來了幾天
-        isRestrictedMode = false; // 🚫 絕對禁止地雷通電，保護小白！
+        trackVisitorDays();
+        isRestrictedMode = false;
 
-        // 讓他看 5 秒乾淨畫面
         const mainContent = document.getElementById('mainContent');
         if (mainContent) mainContent.style.display = 'block'; 
         if (typeof window.init === 'function') window.init(); 
 
-        // 5 秒後砸出第一扇門 (重金屬黑金窗)
-        console.log("🚪 未登入訪客，5秒後召喚第一扇門 (黑金登入窗)");
-        setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
+        if (isMeta) {
+            // Meta 平台：不跳第一道門，泡泡框時段引爆另外處理
+            console.log("📱 Meta 平台訪客，跳過第一道門");
+        } else {
+            // 一般訪客：5 秒後跳第一道門
+            console.log("🚪 未登入訪客，5秒後召喚第一扇門");
+            setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
+        }
     }
 });
 
@@ -174,17 +179,55 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ========================================== */
 function isInActiveHours() {
     const now = new Date();
-    const hour = now.getHours();
-    return hour >= 22 || hour < 9; // 22:00 ~ 隔天 09:00
+    const twHour = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' })).getHours();
+    return twHour >= 22 || twHour < 9; // 台灣時間 22:00 ~ 隔天 09:00
 }
 
 // 由 core_tooltips.js 的泡泡框點擊時呼叫
 window.tooltipGateTrigger = function() {
+
+    // Meta 平台：時段內點泡泡框 → 跳出 LINE 登入提示
+    if (isMeta) {
+        if (!isInActiveHours()) return false; // 非時段，正常顯示
+        showMetaLoginPrompt();
+        return true;
+    }
+
+    // 一般用戶：試用期到 + 時段內 → 引爆第二道門
     if (!isRestrictedMode || hasLockedDown) return false;
-    if (!isInActiveHours()) return false; // 非時段內，不引爆
+    if (!isInActiveHours()) return false;
     triggerLockdown();
     return true;
 };
+
+// Meta 平台專屬：登入提示視窗
+function showMetaLoginPrompt() {
+    if (document.getElementById('meta-login-prompt')) return;
+
+    const prompt = document.createElement('div');
+    prompt.id = 'meta-login-prompt';
+    prompt.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:2147483647;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;`;
+
+    prompt.innerHTML = `
+        <div style="background:#fff;border-radius:20px;border:1px solid #e8e0cc;box-shadow:0 20px 60px rgba(0,0,0,0.15);padding:40px 28px 32px;max-width:360px;width:88%;text-align:center;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#d4a017,#f5c842,#d4a017);"></div>
+            <div style="width:68px;height:68px;border-radius:50%;background:#1a0e00;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#d4a017;border:3px solid #b48608;box-shadow:0 6px 18px rgba(0,0,0,0.4);margin:0 auto 20px;">聚</div>
+            <h2 style="font-size:20px;font-weight:900;color:#1a1a1a;margin:0 0 12px;letter-spacing:1px;">專家推薦內容</h2>
+            <p style="font-size:14px;color:#64748b;line-height:1.7;margin:0 0 28px;">此內容為專家推薦<br>必須登入 LINE 才能繼續瀏覽</p>
+            <button onclick="handleMetaLineLogin()" style="width:100%;padding:16px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.4);border-bottom:2px solid #025c28;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.3);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
+                使用 LINE 一鍵快速登入
+            </button>
+            <p style="font-size:12px;color:#94a3b8;margin:14px 0 0;">登入後即享免費試用資格</p>
+        </div>
+    `;
+
+    document.body.appendChild(prompt);
+    setTimeout(() => { prompt.style.opacity = '1'; }, 50);
+}
+
+function handleMetaLineLogin() {
+    window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
+}
 
 
 
