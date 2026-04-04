@@ -1,4 +1,4 @@
-setTimeout(() => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;font-size:12px;z-index:999999999;padding:10px;word-break:break-all;'; d.innerText = navigator.userAgent; document.body.appendChild(d); }, 1000);
+
 
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
@@ -13,7 +13,7 @@ let validClickCount = 0;
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
 const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
-const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Threads/i.test(navigator.userAgent);
+const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Barcelona/i.test(navigator.userAgent);
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
