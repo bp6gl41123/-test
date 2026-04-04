@@ -4,7 +4,7 @@
 /* ========================================== */
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
-const BROWSE_TIME_LIMIT = 4999;   /*const BROWSE_TIME_LIMIT = 5000;    */
+const BROWSE_TIME_LIMIT = 999999999;   /*const BROWSE_TIME_LIMIT = 5000;    */
 
 let isRestrictedMode = false; 
 let validClickCount = 0;      
@@ -291,9 +291,9 @@ css.innerHTML = `
             .qiju-benefit-banner { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: #fffbea; border: 1px solid #f0d060; text-align: center; }
             .qiju-benefit-icon { font-size: 20px; display: block; margin-bottom: 4px; }
             .qiju-benefit-text { color: #7a5500; font-weight: 600; font-size: 13px; }
-            .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; position: relative; overflow: hidden; }
-            .qiju-modal-btn-line::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: qiju-shimmer 3s infinite; z-index: 0; }
-            @keyframes qiju-shimmer { 0% { left: -100%; } 100% { left: 150%; } }
+            .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-top: 1px solid rgba(255,255,255,0.4); border-bottom: 2px solid #025c28; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #025c28, 0 6px 15px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; }
+            .qiju-modal-btn-line .line-dot { width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.4); flex-shrink: 0; animation: qiju-dot-pulse 2s ease-in-out infinite; }
+            @keyframes qiju-dot-pulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.4); } 50% { box-shadow: 0 0 0 5px rgba(255,255,255,0.15); } }
 
             /* 電腦版 */
             .env-desktop .qiju-modal-box { width: 90%; max-width: 420px; padding: 40px 25px; }
@@ -338,7 +338,8 @@ css.innerHTML = `
                 <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
             </div>
             <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
-                <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入</span>
+                <div class="line-dot"></div>
+                <span>使用 LINE 一鍵快速登入</span>
             </button>
         </div>
     `;
