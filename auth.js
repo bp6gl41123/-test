@@ -297,6 +297,11 @@ css.innerHTML = `
             .qiju-benefit-icon { font-size: 20px; display: block; margin-bottom: 4px; }
             .qiju-benefit-text { color: #7a5500; font-weight: 600; font-size: 13px; }
             .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-top: 1px solid rgba(255,255,255,0.4); border-bottom: 2px solid #025c28; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #025c28, 0 6px 15px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; }
+.qiju-modal-btn-open { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%); color: #06C755; border: 2px solid #06C755; border-bottom: 3px solid #048b3b; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #048b3b, 0 6px 15px rgba(6,199,85,0.15); transition: 0.2s; font-family: "PingFang TC","Microsoft JhengHei",sans-serif; }
+            .qiju-modal-open-hint { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 8px; }
+            .env-desktop .qiju-modal-btn-open { padding: 16px; font-size: 16px; }
+            .env-line-mobile .qiju-modal-btn-open { padding: 14px; font-size: 15px; }
+           
             .qiju-modal-btn-line .line-dot { width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.4); flex-shrink: 0; animation: qiju-dot-pulse 2s ease-in-out infinite; }
             @keyframes qiju-dot-pulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.4); } 50% { box-shadow: 0 0 0 5px rgba(255,255,255,0.15); } }
 
@@ -374,15 +379,28 @@ css.innerHTML = `
                 <span class="qiju-benefit-icon">👑</span>
                 <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
             </div>
+            ${/Line\//i.test(navigator.userAgent) ? `
             <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
                 <div class="line-dot"></div>
                 <span>使用 LINE 一鍵快速登入</span>
             </button>
+            ` : `
+            <button class="qiju-modal-btn-open" onclick="handleOpenInLine()">
+                📲 在 LINE 中開啟以快速登入
+            </button>
+            <p class="qiju-modal-open-hint">點擊後將跳轉至 LINE app 開啟本頁</p>
+            `}
         </div>
     `;
 
     document.body.appendChild(modal);
     setTimeout(() => { modal.style.opacity = '1'; }, 50);
+}
+
+// 📲 非 LINE 環境：在 LINE 中開啟
+function handleOpenInLine() {
+    const currentUrl = encodeURIComponent(window.location.href);
+    window.location.href = `https://line.me/R/ti/p/@yhd0256r`;
 }
 
 
