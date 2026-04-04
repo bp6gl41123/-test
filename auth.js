@@ -213,23 +213,23 @@ function showMetaLoginPrompt() {
     prompt.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:2147483647;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;`;
 
     prompt.innerHTML = `
-        <div style="background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);width:92%;max-width:680px;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
-            <div style="background:linear-gradient(135deg,#1a0e00,#3a2000);padding:32px 40px;display:flex;align-items:center;gap:22px;">
-                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f5c842,#c8860a);display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;color:#fff;flex-shrink:0;border:4px solid #e8c040;">聚</div>
+        <div style="background:#fff;border-radius:40px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);width:94%;max-width:900px;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
+            <div style="background:linear-gradient(135deg,#1a0e00,#3a2000);padding:48px 60px;display:flex;align-items:center;gap:32px;">
+                <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#f5c842,#c8860a);display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:900;color:#fff;flex-shrink:0;border:6px solid #e8c040;">聚</div>
                 <div>
-                    <div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;">齊聚眾選 多人預測系統</div>
-                    <div style="font-size:22px;color:rgba(255,255,255,0.65);">專家推薦 · 會員限定內容</div>
+                    <div style="font-size:40px;font-weight:900;color:#fff;margin-bottom:8px;">齊聚眾選 多人預測系統</div>
+                    <div style="font-size:32px;color:rgba(255,255,255,0.65);">專家推薦 · 會員限定內容</div>
                 </div>
             </div>
-            <div style="padding:34px 40px;">
-                <div style="font-size:26px;font-weight:900;color:#1a1a1a;margin-bottom:8px;">🔒 此為專家推薦內容</div>
-                <div style="font-size:20px;color:#94a3b8;margin-bottom:24px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
-                <div style="background:#fffbea;border:1px solid #f0d060;border-radius:14px;padding:22px 24px;margin-bottom:24px;">
-                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
-                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
-                    <div style="display:flex;align-items:flex-start;gap:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">3</div>登入後即享免費試用 ✅</div>
+            <div style="padding:50px 60px;">
+                <div style="font-size:40px;font-weight:900;color:#1a1a1a;margin-bottom:12px;">🔒 此為專家推薦內容</div>
+                <div style="font-size:30px;color:#94a3b8;margin-bottom:36px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
+                <div style="background:#fffbea;border:1px solid #f0d060;border-radius:20px;padding:32px 36px;margin-bottom:36px;">
+                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
+                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
+                    <div style="display:flex;align-items:flex-start;gap:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">3</div>登入後即享免費試用 ✅</div>
                 </div>
-                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:26px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:16px;font-size:24px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 LINE 開啟 瀏覽全站專家推薦</button>
+                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 LINE 開啟 瀏覽全站專家推薦</button>
             </div>
         </div>
     `;
