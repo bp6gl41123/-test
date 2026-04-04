@@ -196,8 +196,12 @@ window.tooltipGateTrigger = function() {
         // 強制關閉泡泡框並套上模糊
         document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile'));
         document.querySelectorAll('.pick-tooltip').forEach(el => {
-            el.style.filter = 'blur(6px)';
-            el.style.transition = 'filter 0.3s';
+            el.style.filter = 'blur(10px)';
+            el.style.transition = 'filter 0s';
+            setTimeout(() => {
+                el.style.transition = 'filter 0.8s';
+                el.style.filter = 'blur(0px)';
+            }, 50);
         });
         showMetaLoginPrompt();
         return true;
