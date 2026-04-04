@@ -213,15 +213,24 @@ function showMetaLoginPrompt() {
     prompt.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:2147483647;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;`;
 
     prompt.innerHTML = `
-        <div style="background:#fff;border-radius:20px;border:1px solid #e8e0cc;box-shadow:0 20px 60px rgba(0,0,0,0.15);padding:40px 28px 32px;max-width:360px;width:88%;text-align:center;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;position:relative;overflow:hidden;">
-            <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#d4a017,#f5c842,#d4a017);"></div>
-            <div style="width:68px;height:68px;border-radius:50%;background:#1a0e00;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#d4a017;border:3px solid #b48608;box-shadow:0 6px 18px rgba(0,0,0,0.4);margin:0 auto 20px;">聚</div>
-            <h2 style="font-size:20px;font-weight:900;color:#1a1a1a;margin:0 0 12px;letter-spacing:1px;">專家推薦內容</h2>
-            <p style="font-size:14px;color:#64748b;line-height:1.7;margin:0 0 28px;">此內容為專家推薦<br>必須登入 LINE 才能繼續瀏覽</p>
-            <button onclick="handleMetaLineLogin()" style="width:100%;padding:16px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.4);border-bottom:2px solid #025c28;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.3);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
-                使用 LINE 一鍵快速登入
-            </button>
-            <p style="font-size:12px;color:#94a3b8;margin:14px 0 0;">登入後即享免費試用資格</p>
+        <div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);width:88%;max-width:420px;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
+            <div style="background:linear-gradient(135deg,#1a0e00,#3a2000);padding:22px 28px;display:flex;align-items:center;gap:16px;">
+                <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f5c842,#c8860a);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;flex-shrink:0;border:3px solid #e8c040;">聚</div>
+                <div>
+                    <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px;">齊聚眾選 多人預測系統</div>
+                    <div style="font-size:16px;color:rgba(255,255,255,0.65);">專家推薦 · 會員限定內容</div>
+                </div>
+            </div>
+            <div style="padding:24px 28px;">
+                <div style="font-size:18px;font-weight:900;color:#1a1a1a;margin-bottom:6px;">🔒 此為專家推薦內容</div>
+                <div style="font-size:14px;color:#94a3b8;margin-bottom:18px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
+                <div style="background:#fffbea;border:1px solid #f0d060;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+                    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:15px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>點右上角 ⋯ → 選「在瀏覽器中開啟」</div>
+                    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:15px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
+                    <div style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;">3</div>登入後即享免費試用 ✅</div>
+                </div>
+                <button onclick="handleMetaCopyUrl()" style="width:100%;padding:18px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:12px;font-size:17px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">📋 一鍵複製網址，貼到 LINE 開啟</button>
+            </div>
         </div>
     `;
 
@@ -229,8 +238,20 @@ function showMetaLoginPrompt() {
     setTimeout(() => { prompt.style.opacity = '1'; }, 50);
 }
 
-function handleMetaLineLogin() {
-    window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
+function handleMetaCopyUrl() {
+    const ref = localStorage.getItem('qiJu_ref');
+    const author = localStorage.getItem('qiJu_author');
+    let url = window.location.href.split('?')[0];
+    let params = [];
+    if (author) params.push('author=' + author);
+    if (ref) params.push('ref=' + ref);
+    if (params.length) url += '?' + params.join('&');
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.querySelector('#meta-login-prompt button');
+        if (btn) { btn.innerText = '✅ 已複製！請貼到 LINE 開啟'; btn.style.background = '#1e293b'; }
+    }).catch(() => {
+        prompt('請手動複製此網址：', url);
+    });
 }
 
 
