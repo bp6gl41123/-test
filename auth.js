@@ -288,7 +288,7 @@ css.innerHTML = `
             .qiju-modal-deco { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #d4a017, #f5c842, #d4a017); }
             .qiju-modal-logo { background: #1a0e00; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#d4a017; font-weight:900; border: 3px solid #b48608; box-shadow: 0 6px 18px rgba(0,0,0,0.4); margin: 0 auto; }
             .qiju-modal-title { color: #1a1a1a; font-weight: 900; margin: 0 0 20px; }
-            .qiju-benefit-banner { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: #fffbea; border: 1px solid #f0d060; text-align: center; }
+            .qiju-benefit-banner { margin-bottom: 18px; padding: 12px 14px; text-align: center; }
             .qiju-benefit-icon { font-size: 20px; display: block; margin-bottom: 4px; }
             .qiju-benefit-text { color: #7a5500; font-weight: 600; font-size: 13px; }
             .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-top: 1px solid rgba(255,255,255,0.4); border-bottom: 2px solid #025c28; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #025c28, 0 6px 15px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; }
