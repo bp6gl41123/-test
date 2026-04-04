@@ -72,9 +72,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return; 
     }
 
-    // 預設隱藏舊門 (付費牆) - 💡 修正重複宣告
-    const authGate = document.getElementById('authGate');
-    if (authGate) authGate.style.display = 'none';
+    // Meta 環境：泡泡框從渲染開始就模糊
+    if (isMeta) {
+        const s = document.createElement('style');
+        s.innerHTML = `.pick-tooltip { filter: blur(10px) !important; user-select: none !important; }`;
+        document.head.appendChild(s);
+    }
 
     trackReferrals(); 
 
