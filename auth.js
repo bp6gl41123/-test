@@ -170,35 +170,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (完整保留)
+/* 💣 地雷防禦系統 (只剩泡泡框引爆，限時 22:00～09:00)
 /* ========================================== */
-document.addEventListener('click', (e) => {
-    if (!isRestrictedMode || hasLockedDown) return;
-    if (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal')) return;
-
-    validClickCount++;
-    if (validClickCount === 1) {
-        armMovementTrap();
-    } else if (validClickCount > 1) {
-        e.preventDefault();  
-        e.stopPropagation(); 
-        triggerLockdown();
-    }
-}, true); 
-
-function armMovementTrap() {
-    setTimeout(() => {
-        if (hasLockedDown) return; 
-        const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
-        const detonateTrap = (e) => {
-            if (hasLockedDown) return;
-            if (e.target && e.target.closest && (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal'))) return;
-            triggerLockdown();
-            trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
-        };
-        trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
-    }, 800); 
+function isInActiveHours() {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= 22 || hour < 9; // 22:00 ~ 隔天 09:00
 }
+
+// 由 core_tooltips.js 的泡泡框點擊時呼叫
+window.tooltipGateTrigger = function() {
+    if (!isRestrictedMode || hasLockedDown) return false;
+    if (!isInActiveHours()) return false; // 非時段內，不引爆
+    triggerLockdown();
+    return true;
+};
+
+
 
 function triggerLockdown() {
     if (hasLockedDown) return; 
@@ -399,13 +387,6 @@ function handleOpenInLine() {
 // 🚨 升級版：LINE 登入過場動畫 (自帶破謊雷達，動態放大)
 function handleTransitionLogin(type) {
     if (type === 'line') {
-        // 偵測 Threads，直接跳 LIFF Deep Link
-        const isThreads = /Threads/i.test(navigator.userAgent);
-        if (isThreads) {
-            window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
-            return;
-        }
-
         // 🎯 啟動微型破謊雷達：決定放大倍率
         let scale = 1; // 預設 1 倍 (電腦版、LINE 內建瀏覽器)
         const screenW = window.screen.width;
