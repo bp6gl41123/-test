@@ -180,9 +180,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* 💣 地雷防禦系統 (只剩泡泡框引爆，限時 22:00～09:00)
 /* ========================================== */
 function isInActiveHours() {
-    const now = new Date();
-    const twHour = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' })).getHours();
-    return twHour >= 22 || twHour < 9; // 台灣時間 22:00 ~ 隔天 09:00
+    try {
+        const now = new Date();
+        const twHour = (now.getUTCHours() + 8) % 24;
+        return twHour >= 22 || twHour < 9;
+    } catch (e) {
+        return false;
+    }
 }
 
 // 由 core_tooltips.js 的泡泡框點擊時呼叫
