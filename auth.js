@@ -1,5 +1,4 @@
-setTimeout(() => { alert(navigator.userAgent); }, 1000);
-
+setTimeout(() => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;font-size:12px;z-index:999999999;padding:10px;word-break:break-all;'; d.innerText = navigator.userAgent; document.body.appendChild(d); }, 1000);
 
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
