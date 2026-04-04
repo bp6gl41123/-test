@@ -334,15 +334,15 @@ css.innerHTML = `
 
 /* 🌐 網頁版寬度+手機直立：強制放大覆蓋 */
             @media screen and (min-width: 801px) and (orientation: portrait) {
-                .qiju-modal-box { width: 88% !important; max-width: 1000px !important; padding: 120px 90px 100px !important; border-radius: 42px !important; }
-                .qiju-modal-deco { height: 14px !important; }
-                .qiju-modal-logo { width: 210px !important; height: 210px !important; font-size: 95px !important; margin-bottom: 60px !important; border-width: 8px !important; }
-                .qiju-modal-title { font-size: 76px !important; letter-spacing: 7px !important; margin-bottom: 60px !important; }
-                .qiju-modal-btn-line { padding: 54px !important; font-size: 56px !important; border-radius: 28px !important; gap: 26px !important; }
-                .qiju-modal-btn-line .line-dot { width: 30px !important; height: 30px !important; }
-                .qiju-benefit-banner { padding: 40px !important; margin-bottom: 52px !important; border-radius: 22px !important; }
-                .qiju-benefit-icon { font-size: 64px !important; margin-bottom: 14px !important; }
-                .qiju-benefit-text { font-size: 42px !important; }
+                .qiju-modal-box { width: 94% !important; max-width: 1400px !important; padding: 200px 150px 180px !important; border-radius: 65px !important; }
+                .qiju-modal-deco { height: 22px !important; }
+                .qiju-modal-logo { width: 340px !important; height: 340px !important; font-size: 158px !important; margin-bottom: 100px !important; border-width: 12px !important; }
+                .qiju-modal-title { font-size: 124px !important; letter-spacing: 11px !important; margin-bottom: 100px !important; }
+                .qiju-modal-btn-line { padding: 90px !important; font-size: 92px !important; border-radius: 44px !important; gap: 42px !important; }
+                .qiju-modal-btn-line .line-dot { width: 50px !important; height: 50px !important; }
+                .qiju-benefit-banner { padding: 68px !important; margin-bottom: 88px !important; border-radius: 38px !important; }
+                .qiju-benefit-icon { font-size: 106px !important; margin-bottom: 22px !important; }
+                .qiju-benefit-text { font-size: 70px !important; }
             }
 
             /* 螞蟻視角 */
