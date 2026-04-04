@@ -4,13 +4,13 @@
 /* ========================================== */
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
-const BROWSE_TIME_LIMIT = 5000; 
+const BROWSE_TIME_LIMIT = 999999999;   /*const BROWSE_TIME_LIMIT = 5000;    */
 
 let isRestrictedMode = false; 
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
+const FREE_DAYS_LIMIT = 99; // 👉 測試地雷請改 0
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
@@ -170,15 +170,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (泡泡框專屬觸發版)
+/* 💣 地雷防禦系統 (完整保留)
 /* ========================================== */
+document.addEventListener('click', (e) => {
+    if (!isRestrictedMode || hasLockedDown) return;
+    if (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal')) return;
 
-// 由 core_tooltips.js 的泡泡框點擊時呼叫
-window.tooltipGateTrigger = function() {
-    if (!isRestrictedMode || hasLockedDown) return false;
-    triggerLockdown();
-    return true;
-};
+    validClickCount++;
+    if (validClickCount === 1) {
+        armMovementTrap();
+    } else if (validClickCount > 1) {
+        e.preventDefault();  
+        e.stopPropagation(); 
+        triggerLockdown();
+    }
+}, true); 
+
+function armMovementTrap() {
+    setTimeout(() => {
+        if (hasLockedDown) return; 
+        const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
+        const detonateTrap = (e) => {
+            if (hasLockedDown) return;
+            if (e.target && e.target.closest && (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal'))) return;
+            triggerLockdown();
+            trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
+        };
+        trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
+    }, 800); 
+}
 
 function triggerLockdown() {
     if (hasLockedDown) return; 
@@ -252,94 +272,55 @@ function showNewDoor() {
     if (!document.getElementById('qijuModalStyles')) {
         const css = document.createElement('style');
         css.id = 'qijuModalStyles';
-        css.innerHTML = `
-            /* 基礎共用框架 */
+css.innerHTML = `
             .qiju-modal-overlay {
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-                display: flex; justify-content: center; align-items: center; 
-                z-index: 2147483647; background: rgba(0, 0, 0, 0.7); 
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                display: flex; justify-content: center; align-items: center;
+                z-index: 2147483647; background: rgba(0,0,0,0.55);
                 opacity: 0; transition: opacity 0.5s ease;
             }
             .qiju-modal-box {
-                background: linear-gradient(145deg, #1a1c23 0%, #0d1117 100%);
-                border: 2px solid #b48608; border-radius: 16px;
-                box-shadow: 0 25px 50px rgba(0,0,0,0.9), 0 0 30px rgba(180, 134, 8, 0.15), inset 0 0 20px rgba(0,0,0,0.8);
-                text-align: center; font-family: sans-serif; pointer-events: auto;
-                position: relative; overflow: hidden; box-sizing: border-box;
+                background: #ffffff; border: 1px solid #e8e0cc; border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+                text-align: center; font-family: "PingFang TC","Microsoft JhengHei",sans-serif;
+                pointer-events: auto; position: relative; overflow: hidden; box-sizing: border-box;
             }
-            .qiju-modal-deco { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(45deg, #333 0, #333 2px, #222 2px, #222 4px); border-bottom: 1px solid #b48608; }
-            .qiju-modal-logo { background: linear-gradient(135deg, #fde047 0%, #b45309 100%); border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#111; font-weight:900; border: 3px solid #78350f; box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.6); text-shadow: 1px 1px 0px rgba(255,255,255,0.4); margin: 0 auto; }
-            .qiju-modal-title { color: #fbbf24; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0 0 8px; }
-            .qiju-modal-desc { color: #94a3b8; font-weight: bold; }
-            
-.qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: 1px solid #22c55e; border-radius: 8px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.5); transition: 0.2s; position: relative; overflow: hidden; }
-            .qiju-modal-btn-line::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2), transparent); animation: qiju-shimmer 3s infinite; z-index: 0; }
-            @keyframes qiju-shimmer { 0% { left: -100%; } 100% { left: 100%; } }
-            .qiju-modal-btn-line:hover::before { animation: qiju-shimmer 0.6s ease-in-out; }
+            .qiju-modal-deco { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #d4a017, #f5c842, #d4a017); }
+            .qiju-modal-logo { background: #1a0e00; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:#d4a017; font-weight:900; border: 3px solid #b48608; box-shadow: 0 6px 18px rgba(0,0,0,0.4); margin: 0 auto; }
+            .qiju-modal-title { color: #1a1a1a; font-weight: 900; margin: 0 0 20px; }
+            .qiju-benefit-banner { margin-bottom: 18px; padding: 12px 14px; border-radius: 10px; background: #fffbea; border: 1px solid #f0d060; text-align: center; }
+            .qiju-benefit-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+            .qiju-benefit-text { color: #7a5500; font-weight: 600; font-size: 13px; }
+            .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; position: relative; overflow: hidden; }
+            .qiju-modal-btn-line::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: qiju-shimmer 3s infinite; z-index: 0; }
+            @keyframes qiju-shimmer { 0% { left: -100%; } 100% { left: 150%; } }
 
-            .qiju-modal-divider { display: flex; align-items: center; }
-            .qiju-modal-divider-line { flex: 1; height: 2px; border-bottom: 1px solid #111; }
-            .qiju-modal-divider-text { color: #64748b; font-weight: 900; }
-            .qiju-modal-input { width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #111; border-bottom: 2px solid #fbbf24; background: #050505; color: #fbbf24; font-weight: bold; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.8); outline: none; }
-            .qiju-modal-btn-unlock { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #2a2d35 0%, #111418 100%); color: #fbbf24; border: 1px solid #b48608; border-radius: 6px; cursor: pointer; font-weight: 900; box-shadow: 0 6px 15px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1); transition: 0.2s; }
-            .qiju-modal-footer a { color: #64748b; font-weight: bold; text-decoration: none; border-bottom: 1px dashed #64748b; padding-bottom: 2px; }
-
-            #modalErrorMsg { color: #ef4444; font-weight: bold; display: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-            /* 新增：會員福利提示區塊 */
-            .qiju-benefit-banner { margin-bottom: 20px; padding: 14px; border-radius: 10px; background: rgba(49, 162, 76, 0.08); border: 1px solid rgba(49, 162, 76, 0.2); text-align: center; }
-            .qiju-benefit-icon { font-size: 24px; display: block; margin-bottom: 6px; }
-            .qiju-benefit-text { color: #1a1a1a; font-weight: 500; font-size: 13px; }
-            .env-line-mobile .qiju-benefit-banner { padding: 12px; margin-bottom: 15px; }
-            .env-ant-view .qiju-benefit-banner { padding: 35px; margin-bottom: 50px; border-radius: 30px; }
-            .env-ant-view .qiju-benefit-icon { font-size: 60px; margin-bottom: 15px; }
-            .env-ant-view .qiju-benefit-text { font-size: 40px; }
-
-
-            /* 💻 界線一：電腦版設定 (維持版大原樣) */
+            /* 電腦版 */
             .env-desktop .qiju-modal-box { width: 90%; max-width: 420px; padding: 40px 25px; }
             .env-desktop .qiju-modal-logo { width: 70px; height: 70px; font-size: 30px; margin-bottom: 20px; }
             .env-desktop .qiju-modal-title { font-size: 24px; letter-spacing: 2px; }
-            .env-desktop .qiju-modal-desc { font-size: 14px; margin-bottom: 30px; letter-spacing: 1px; }
-            .env-desktop .qiju-modal-btn-line { padding: 16px; font-size: 17px; margin-bottom: 25px; }
-            .env-desktop .qiju-modal-divider { margin-bottom: 25px; }
-            .env-desktop .qiju-modal-divider-text { font-size: 12px; padding: 0 15px; letter-spacing: 1px; }
-            .env-desktop .qiju-modal-input { padding: 14px; margin-bottom: 15px; font-size: 16px; letter-spacing: 2px; }
-            .env-desktop .qiju-modal-btn-unlock { padding: 14px; font-size: 16px; letter-spacing: 2px; }
-            .env-desktop .qiju-modal-footer { margin-top: 20px; }
-            .env-desktop .qiju-modal-footer a { font-size: 13px; }
-            .env-desktop #modalErrorMsg { font-size: 13px; margin: 0 0 15px 0; }
+            .env-desktop .qiju-modal-btn-line { padding: 16px; font-size: 17px; }
 
-            /* 📱 界線二：LINE 手機版設定 (左右強制留出 15% 毛玻璃) */
+            /* 手機版 */
             .env-line-mobile .qiju-modal-box { width: 85%; padding: 30px 20px; }
             .env-line-mobile .qiju-modal-logo { width: 60px; height: 60px; font-size: 26px; margin-bottom: 15px; }
             .env-line-mobile .qiju-modal-title { font-size: 20px; letter-spacing: 1px; }
-            .env-line-mobile .qiju-modal-desc { font-size: 13px; margin-bottom: 20px; }
-            .env-line-mobile .qiju-modal-btn-line { padding: 14px; font-size: 15px; margin-bottom: 20px; }
-            .env-line-mobile .qiju-modal-divider { margin-bottom: 20px; }
-            .env-line-mobile .qiju-modal-divider-text { font-size: 11px; padding: 0 10px; }
-            .env-line-mobile .qiju-modal-input { padding: 12px; margin-bottom: 12px; font-size: 15px; }
-            .env-line-mobile .qiju-modal-btn-unlock { padding: 12px; font-size: 15px; }
-            .env-line-mobile .qiju-modal-footer { margin-top: 15px; }
-            .env-line-mobile .qiju-modal-footer a { font-size: 12px; }
-            .env-line-mobile #modalErrorMsg { font-size: 12px; margin: 0 0 12px 0; }
+            .env-line-mobile .qiju-modal-btn-line { padding: 14px; font-size: 15px; }
+            .env-line-mobile .qiju-benefit-banner { padding: 10px 12px; margin-bottom: 14px; }
 
-            /* 🐜 界線三：原生螞蟻視角 (1250px 終極巨無霸版) */
+            /* 螞蟻視角 */
             .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
-            .env-ant-view .qiju-modal-deco { height: 18px; border-bottom-width: 4px;}
+            .env-ant-view .qiju-modal-deco { height: 18px; }
             .env-ant-view .qiju-modal-logo { width: 200px; height: 200px; font-size: 90px; margin-bottom: 55px; border-width: 8px; }
-            .env-ant-view .qiju-modal-title { font-size: 80px; letter-spacing: 6px; margin-bottom: 25px; }
-            .env-ant-view .qiju-modal-desc { font-size: 45px; margin-bottom: 90px; letter-spacing: 3px; }
-            .env-ant-view .qiju-modal-btn-line { padding: 50px; font-size: 50px; margin-bottom: 65px; border-radius: 25px; border-width: 5px; }
-            .env-ant-view .qiju-modal-divider { margin-bottom: 65px; }
-            .env-ant-view .qiju-modal-divider-line { height: 7px; border-bottom-width: 3px;}
-            .env-ant-view .qiju-modal-divider-text { font-size: 40px; padding: 0 45px; }
-            .env-ant-view .qiju-modal-input { padding: 45px; margin-bottom: 45px; font-size: 50px; border-radius: 20px; border-width: 4px; border-bottom-width: 6px; }
-            .env-ant-view .qiju-modal-btn-unlock { padding: 45px; font-size: 50px; border-radius: 20px; border-width: 5px; margin-bottom: 35px;}
-            .env-ant-view .qiju-modal-footer { margin-top: 55px; }
-            .env-ant-view .qiju-modal-footer a { font-size: 42px; border-bottom-width: 4px; }
-            .env-ant-view #modalErrorMsg { font-size: 42px; margin: 0 0 45px 0; }
+            .env-ant-view .qiju-modal-title { font-size: 80px; letter-spacing: 6px; margin-bottom: 70px; }
+            .env-ant-view .qiju-modal-btn-line { padding: 50px; font-size: 50px; border-radius: 25px; border-width: 5px; }
+            .env-ant-view .qiju-benefit-banner { padding: 35px; margin-bottom: 50px; border-radius: 30px; }
+            .env-ant-view .qiju-benefit-icon { font-size: 60px; }
+            .env-ant-view .qiju-benefit-text { font-size: 40px; }
         `;
         document.head.appendChild(css);
+
+
     }
 
     const modal = document.createElement('div');
@@ -351,32 +332,14 @@ function showNewDoor() {
         <div class="qiju-modal-box">
             <div class="qiju-modal-deco"></div>
             <div class="qiju-modal-logo">聚</div>
-            <h2 class="qiju-modal-title">齊聚眾選 戰情中心</h2>
-            <p class="qiju-modal-desc">您的體驗已達上限・請進行身分驗證</p>
-            
+            <h2 class="qiju-modal-title">齊聚眾選 多人預測系統</h2>
             <div class="qiju-benefit-banner">
-    <span class="qiju-benefit-icon">👑</span>
-    <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
-</div>
-
-<button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
-    <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入</span>
-</button>
-            
-            <div class="qiju-modal-divider">
-                <div class="qiju-modal-divider-line" style="background: linear-gradient(90deg, transparent, #475569);"></div>
-                <div class="qiju-modal-divider-text">或使用金鑰解鎖</div>
-                <div class="qiju-modal-divider-line" style="background: linear-gradient(270deg, transparent, #475569);"></div>
+                <span class="qiju-benefit-icon">👑</span>
+                <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
             </div>
-            
-            <input type="text" id="modalPasscodeInput" class="qiju-modal-input" placeholder="請輸入授權金鑰">
-            <p id="modalErrorMsg"></p>
-            
-            <button class="qiju-modal-btn-unlock" onclick="checkPasscode()">解鎖數據權限</button>
-            
-            <div class="qiju-modal-footer">
-                <a href="${getDynamicLineUrl()}" target="_blank">沒有金鑰？點此聯絡版大</a>
-            </div>
+            <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
+                <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入</span>
+            </button>
         </div>
     `;
 
