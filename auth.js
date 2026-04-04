@@ -332,6 +332,15 @@ css.innerHTML = `
             .env-mobile-web .qiju-benefit-icon { font-size: 32px; }
             .env-mobile-web .qiju-benefit-text { font-size: 22px; }
 
+/* 🌐 網頁版寬度+手機直立：強制放大覆蓋 */
+            @media screen and (min-width: 801px) and (orientation: portrait) {
+                .qiju-modal-box { padding: 55px 40px 45px !important; }
+                .qiju-modal-logo { width: 110px !important; height: 110px !important; font-size: 48px !important; margin-bottom: 28px !important; }
+                .qiju-modal-title { font-size: 38px !important; letter-spacing: 3px !important; }
+                .qiju-modal-btn-line { padding: 26px !important; font-size: 28px !important; border-radius: 16px !important; }
+                .qiju-benefit-icon { font-size: 32px !important; }
+                .qiju-benefit-text { font-size: 22px !important; }
+            }
 
             /* 螞蟻視角 */
             .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
