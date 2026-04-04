@@ -379,17 +379,10 @@ css.innerHTML = `
                 <span class="qiju-benefit-icon">👑</span>
                 <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
             </div>
-            ${/Line\//i.test(navigator.userAgent) ? `
             <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
                 <div class="line-dot"></div>
                 <span>使用 LINE 一鍵快速登入</span>
             </button>
-            ` : `
-            <button class="qiju-modal-btn-open" onclick="handleOpenInLine()">
-                📲 在 LINE 中開啟以快速登入
-            </button>
-            <p class="qiju-modal-open-hint">點擊後將跳轉至 LINE app 開啟本頁</p>
-            `}
         </div>
     `;
 
@@ -399,8 +392,7 @@ css.innerHTML = `
 
 // 📲 非 LINE 環境：在 LINE 中開啟
 function handleOpenInLine() {
-    const currentUrl = encodeURIComponent(window.location.href);
-    window.location.href = `https://line.me/R/ti/p/@yhd0256r`;
+    window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
 }
 
 
