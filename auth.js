@@ -399,6 +399,13 @@ function handleOpenInLine() {
 // 🚨 升級版：LINE 登入過場動畫 (自帶破謊雷達，動態放大)
 function handleTransitionLogin(type) {
     if (type === 'line') {
+        // 偵測 Threads，直接跳 LIFF Deep Link
+        const isThreads = /Threads/i.test(navigator.userAgent);
+        if (isThreads) {
+            window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
+            return;
+        }
+
         // 🎯 啟動微型破謊雷達：決定放大倍率
         let scale = 1; // 預設 1 倍 (電腦版、LINE 內建瀏覽器)
         const screenW = window.screen.width;
