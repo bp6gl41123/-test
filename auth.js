@@ -334,15 +334,15 @@ css.innerHTML = `
 
 /* 🌐 網頁版寬度+手機直立：強制放大覆蓋 */
             @media screen and (min-width: 801px) and (orientation: portrait) {
-                .qiju-modal-box { width: 85% !important; max-width: 900px !important; padding: 100px 75px 85px !important; border-radius: 36px !important; }
-                .qiju-modal-deco { height: 12px !important; }
-                .qiju-modal-logo { width: 180px !important; height: 180px !important; font-size: 80px !important; margin-bottom: 50px !important; border-width: 7px !important; }
-                .qiju-modal-title { font-size: 64px !important; letter-spacing: 6px !important; margin-bottom: 50px !important; }
-                .qiju-modal-btn-line { padding: 46px !important; font-size: 48px !important; border-radius: 24px !important; gap: 22px !important; }
-                .qiju-modal-btn-line .line-dot { width: 26px !important; height: 26px !important; }
-                .qiju-benefit-banner { padding: 34px !important; margin-bottom: 44px !important; border-radius: 18px !important; }
-                .qiju-benefit-icon { font-size: 54px !important; margin-bottom: 12px !important; }
-                .qiju-benefit-text { font-size: 36px !important; }
+                .qiju-modal-box { width: 88% !important; max-width: 1000px !important; padding: 120px 90px 100px !important; border-radius: 42px !important; }
+                .qiju-modal-deco { height: 14px !important; }
+                .qiju-modal-logo { width: 210px !important; height: 210px !important; font-size: 95px !important; margin-bottom: 60px !important; border-width: 8px !important; }
+                .qiju-modal-title { font-size: 76px !important; letter-spacing: 7px !important; margin-bottom: 60px !important; }
+                .qiju-modal-btn-line { padding: 54px !important; font-size: 56px !important; border-radius: 28px !important; gap: 26px !important; }
+                .qiju-modal-btn-line .line-dot { width: 30px !important; height: 30px !important; }
+                .qiju-benefit-banner { padding: 40px !important; margin-bottom: 52px !important; border-radius: 22px !important; }
+                .qiju-benefit-icon { font-size: 64px !important; margin-bottom: 14px !important; }
+                .qiju-benefit-text { font-size: 42px !important; }
             }
 
             /* 螞蟻視角 */
