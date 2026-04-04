@@ -421,11 +421,6 @@ css.innerHTML = `
     setTimeout(() => { modal.style.opacity = '1'; }, 50);
 }
 
-// 📲 非 LINE 環境：在 LINE 中開啟
-function handleOpenInLine() {
-    window.location.href = `https://liff.line.me/2009615655-TqsOx6OE`;
-}
-
 
 // 🚨 升級版：LINE 登入過場動畫 (自帶破謊雷達，動態放大)
 function handleTransitionLogin(type) {
