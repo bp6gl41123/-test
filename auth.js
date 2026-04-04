@@ -314,21 +314,23 @@ css.innerHTML = `
             .env-line-mobile .qiju-benefit-banner { padding: 10px 12px; margin-bottom: 14px; }
 
 /* 📱 原生手機瀏覽器 */
-            .env-mobile-native .qiju-modal-box { width: 88%; padding: 36px 24px 28px; }
-            .env-mobile-native .qiju-modal-logo { width: 80px; height: 80px; font-size: 34px; margin-bottom: 18px; }
-            .env-mobile-native .qiju-modal-title { font-size: 26px; letter-spacing: 2px; }
-            .env-mobile-native .qiju-modal-btn-line { padding: 18px; font-size: 19px; }
-            .env-mobile-native .qiju-benefit-banner { padding: 12px; margin-bottom: 16px; }
-            .env-mobile-native .qiju-benefit-text { font-size: 15px; }
+            .env-mobile-native .qiju-modal-box { width: 88%; max-width: 600px; padding: 55px 40px 45px; }
+            .env-mobile-native .qiju-modal-logo { width: 110px; height: 110px; font-size: 48px; margin-bottom: 28px; }
+            .env-mobile-native .qiju-modal-title { font-size: 38px; letter-spacing: 3px; }
+            .env-mobile-native .qiju-modal-btn-line { padding: 26px; font-size: 28px; border-radius: 16px; }
+            .env-mobile-native .qiju-benefit-banner { padding: 18px; margin-bottom: 24px; }
+            .env-mobile-native .qiju-benefit-icon { font-size: 32px; }
+            .env-mobile-native .qiju-benefit-text { font-size: 22px; }
 
 
 /* 📱 網頁寬+手機直立 (Chrome手機版) */
-            .env-mobile-web .qiju-modal-box { width: 75%; max-width: 480px; padding: 36px 28px 28px; }
-            .env-mobile-web .qiju-modal-logo { width: 80px; height: 80px; font-size: 34px; margin-bottom: 18px; }
-            .env-mobile-web .qiju-modal-title { font-size: 26px; letter-spacing: 2px; }
-            .env-mobile-web .qiju-modal-btn-line { padding: 18px; font-size: 19px; }
-            .env-mobile-web .qiju-benefit-banner { padding: 12px; margin-bottom: 16px; }
-            .env-mobile-web .qiju-benefit-text { font-size: 15px; }
+            .env-mobile-web .qiju-modal-box { width: 88%; max-width: 600px; padding: 55px 40px 45px; }
+            .env-mobile-web .qiju-modal-logo { width: 110px; height: 110px; font-size: 48px; margin-bottom: 28px; }
+            .env-mobile-web .qiju-modal-title { font-size: 38px; letter-spacing: 3px; }
+            .env-mobile-web .qiju-modal-btn-line { padding: 26px; font-size: 28px; border-radius: 16px; }
+            .env-mobile-web .qiju-benefit-banner { padding: 18px; margin-bottom: 24px; }
+            .env-mobile-web .qiju-benefit-icon { font-size: 32px; }
+            .env-mobile-web .qiju-benefit-text { font-size: 22px; }
 
 
             /* 螞蟻視角 */
