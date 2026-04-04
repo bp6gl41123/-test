@@ -262,7 +262,7 @@ function showNewDoor() {
         if (isLineApp) {
             envClass = 'env-line-mobile'; // LINE 內建瀏覽器 → 正常縮放
         } else if (windowW > 800 && isPortrait) {
-            envClass = 'env-line-mobile'; // 網頁寬但手機直立 → 同步手機版
+            envClass = 'env-mobile-web'; // 網頁寬+手機直立 → 專屬尺寸
         } else if (windowW > 800) {
             envClass = 'env-ant-view'; // 原生瀏覽器畫布異常大 → 超大版
         } else {
@@ -320,6 +320,16 @@ css.innerHTML = `
             .env-mobile-native .qiju-modal-btn-line { padding: 18px; font-size: 19px; }
             .env-mobile-native .qiju-benefit-banner { padding: 12px; margin-bottom: 16px; }
             .env-mobile-native .qiju-benefit-text { font-size: 15px; }
+
+
+/* 📱 網頁寬+手機直立 (Chrome手機版) */
+            .env-mobile-web .qiju-modal-box { width: 75%; max-width: 480px; padding: 36px 28px 28px; }
+            .env-mobile-web .qiju-modal-logo { width: 80px; height: 80px; font-size: 34px; margin-bottom: 18px; }
+            .env-mobile-web .qiju-modal-title { font-size: 26px; letter-spacing: 2px; }
+            .env-mobile-web .qiju-modal-btn-line { padding: 18px; font-size: 19px; }
+            .env-mobile-web .qiju-benefit-banner { padding: 12px; margin-bottom: 16px; }
+            .env-mobile-web .qiju-benefit-text { font-size: 15px; }
+
 
             /* 螞蟻視角 */
             .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
