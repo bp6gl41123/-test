@@ -257,11 +257,13 @@ function showNewDoor() {
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobileDevice) {
-        // 如果是手機/平板
-        if (windowW > 800) {
-            envClass = 'env-ant-view'; // 畫布大於 800 👉 原生瀏覽器騙局 (放大)
+        const isLineApp = /Line\//i.test(navigator.userAgent);
+        if (isLineApp) {
+            envClass = 'env-line-mobile'; // LINE 內建瀏覽器 → 正常縮放
+        } else if (windowW > 800) {
+            envClass = 'env-ant-view'; // 原生瀏覽器但畫布異常大 → 超大版
         } else {
-            envClass = 'env-line-mobile'; // 畫布正常 👉 LINE 內建瀏覽器 (正常縮放)
+            envClass = 'env-mobile-native'; // 原生手機瀏覽器 → 放大版
         }
     } else {
         // 如果是電腦 (不管螢幕多小、有沒有開 F12)，強制鎖死電腦版外觀
@@ -307,6 +309,14 @@ css.innerHTML = `
             .env-line-mobile .qiju-modal-title { font-size: 20px; letter-spacing: 1px; }
             .env-line-mobile .qiju-modal-btn-line { padding: 14px; font-size: 15px; }
             .env-line-mobile .qiju-benefit-banner { padding: 10px 12px; margin-bottom: 14px; }
+
+/* 📱 原生手機瀏覽器 */
+            .env-mobile-native .qiju-modal-box { width: 88%; padding: 36px 24px 28px; }
+            .env-mobile-native .qiju-modal-logo { width: 80px; height: 80px; font-size: 34px; margin-bottom: 18px; }
+            .env-mobile-native .qiju-modal-title { font-size: 26px; letter-spacing: 2px; }
+            .env-mobile-native .qiju-modal-btn-line { padding: 18px; font-size: 19px; }
+            .env-mobile-native .qiju-benefit-banner { padding: 12px; margin-bottom: 16px; }
+            .env-mobile-native .qiju-benefit-text { font-size: 15px; }
 
             /* 螞蟻視角 */
             .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
