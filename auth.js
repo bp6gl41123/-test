@@ -225,10 +225,10 @@ function showMetaLoginPrompt() {
                 <div style="font-size:40px;font-weight:900;color:#1a1a1a;margin-bottom:12px;">🔒 解鎖專家推薦內容</div>
                 <div style="font-size:30px;color:#94a3b8;margin-bottom:36px;line-height:1.6;">加入官方 LINE 帳號，即可解鎖全站專家推薦</div>
                 <div style="background:#fffbea;border:1px solid #f0d060;border-radius:20px;padding:32px 36px;margin-bottom:36px;">
-                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>點下方按鈕加入官方 LINE</div>
-                    <div style="display:flex;align-items:flex-start;gap:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>即可瀏覽全站專家推薦內容</div>
+                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>瀏覽全站專家推薦</div>
+                    <div style="display:flex;align-items:flex-start;gap:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>點擊下方按鈕加入官方 LINE</div>
                 </div>
-                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 聯絡官方 LINE 即可解鎖全站</button>
+                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 開啟官方 LINE 即可解鎖全站內容</button>
             </div>
         </div>
     `;
@@ -238,7 +238,8 @@ function showMetaLoginPrompt() {
 }
 
 function handleMetaOpenUrl() {
-    window.location.href = 'https://line.me/R/ti/p/@yhd0256r';
+    const message = encodeURIComponent('版大請幫我解鎖全站內容');
+    window.location.href = `https://line.me/R/oaMessage/@yhd0256r/?${message}`;
 }
 
 
