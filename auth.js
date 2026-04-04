@@ -334,12 +334,15 @@ css.innerHTML = `
 
 /* 🌐 網頁版寬度+手機直立：強制放大覆蓋 */
             @media screen and (min-width: 801px) and (orientation: portrait) {
-                .qiju-modal-box { padding: 55px 40px 45px !important; }
-                .qiju-modal-logo { width: 110px !important; height: 110px !important; font-size: 48px !important; margin-bottom: 28px !important; }
-                .qiju-modal-title { font-size: 38px !important; letter-spacing: 3px !important; }
-                .qiju-modal-btn-line { padding: 26px !important; font-size: 28px !important; border-radius: 16px !important; }
-                .qiju-benefit-icon { font-size: 32px !important; }
-                .qiju-benefit-text { font-size: 22px !important; }
+                .qiju-modal-box { width: 80% !important; max-width: 700px !important; padding: 70px 55px 60px !important; border-radius: 28px !important; }
+                .qiju-modal-deco { height: 8px !important; }
+                .qiju-modal-logo { width: 130px !important; height: 130px !important; font-size: 58px !important; margin-bottom: 35px !important; border-width: 5px !important; }
+                .qiju-modal-title { font-size: 46px !important; letter-spacing: 4px !important; margin-bottom: 35px !important; }
+                .qiju-modal-btn-line { padding: 32px !important; font-size: 34px !important; border-radius: 18px !important; gap: 16px !important; }
+                .qiju-modal-btn-line .line-dot { width: 18px !important; height: 18px !important; }
+                .qiju-benefit-banner { padding: 24px !important; margin-bottom: 30px !important; border-radius: 14px !important; }
+                .qiju-benefit-icon { font-size: 38px !important; margin-bottom: 8px !important; }
+                .qiju-benefit-text { font-size: 26px !important; }
             }
 
             /* 螞蟻視角 */
