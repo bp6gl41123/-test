@@ -225,11 +225,11 @@ function showMetaLoginPrompt() {
                 <div style="font-size:26px;font-weight:900;color:#1a1a1a;margin-bottom:8px;">🔒 此為專家推薦內容</div>
                 <div style="font-size:20px;color:#94a3b8;margin-bottom:24px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
                 <div style="background:#fffbea;border:1px solid #f0d060;border-radius:14px;padding:22px 24px;margin-bottom:24px;">
-                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>點右上角 ⋯ → 選「在瀏覽器中開啟」</div>
+                    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
                     <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
                     <div style="display:flex;align-items:flex-start;gap:14px;font-size:22px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;margin-top:2px;">3</div>登入後即享免費試用 ✅</div>
                 </div>
-                <button onclick="handleMetaCopyUrl()" style="width:100%;padding:26px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:16px;font-size:24px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">📋 一鍵複製網址，貼到 LINE 開啟</button>
+                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:26px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:16px;font-size:24px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 LINE 開啟 瀏覽全站專家推薦</button>
             </div>
         </div>
     `;
@@ -238,7 +238,7 @@ function showMetaLoginPrompt() {
     setTimeout(() => { prompt.style.opacity = '1'; }, 50);
 }
 
-function handleMetaCopyUrl() {
+function handleMetaOpenUrl() {
     const ref = localStorage.getItem('qiJu_ref');
     const author = localStorage.getItem('qiJu_author');
     let url = window.location.href.split('?')[0];
@@ -246,12 +246,7 @@ function handleMetaCopyUrl() {
     if (author) params.push('author=' + author);
     if (ref) params.push('ref=' + ref);
     if (params.length) url += '?' + params.join('&');
-    navigator.clipboard.writeText(url).then(() => {
-        const btn = document.querySelector('#meta-login-prompt button');
-        if (btn) { btn.innerText = '✅ 已複製！請貼到 LINE 開啟'; btn.style.background = '#1e293b'; }
-    }).catch(() => {
-        prompt('請手動複製此網址：', url);
-    });
+    window.location.href = url;
 }
 
 
