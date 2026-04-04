@@ -319,7 +319,7 @@ css.innerHTML = `
             .env-mobile-native .qiju-benefit-text { font-size: 15px; }
 
             /* 螞蟻視角 */
-            .env-ant-view .qiju-modal-box { width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
+            .env-ant-view .qiju-modal-box { width: 85%; max-width: 1250px; padding: 110px 80px; border-radius: 45px; border-width: 6px; }
             .env-ant-view .qiju-modal-deco { height: 18px; }
             .env-ant-view .qiju-modal-logo { width: 200px; height: 200px; font-size: 90px; margin-bottom: 55px; border-width: 8px; }
             .env-ant-view .qiju-modal-title { font-size: 80px; letter-spacing: 6px; margin-bottom: 70px; }
