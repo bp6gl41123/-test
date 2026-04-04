@@ -225,7 +225,7 @@ function showMetaLoginPrompt() {
                 <div style="font-size:40px;font-weight:900;color:#1a1a1a;margin-bottom:12px;">🔒 此為專家推薦內容</div>
                 <div style="font-size:30px;color:#94a3b8;margin-bottom:36px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
                 <div style="background:#fffbea;border:1px solid #f0d060;border-radius:20px;padding:32px 36px;margin-bottom:36px;">
-                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
+                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>點右上角 ⋯ → 選「在瀏覽器中開啟」</div>
                     <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
                     
                 </div>
@@ -239,14 +239,7 @@ function showMetaLoginPrompt() {
 }
 
 function handleMetaOpenUrl() {
-    const ref = localStorage.getItem('qiJu_ref');
-    const author = localStorage.getItem('qiJu_author');
-    let url = 'https://sports.fu6rm4.tw/';
-    let params = [];
-    if (author) params.push('author=' + author);
-    if (ref) params.push('ref=' + ref);
-    if (params.length) url += '?' + params.join('&');
-window.open(url, '_blank');
+    window.location.href = 'https://line.me/R/ti/p/@yhd0256r';
 }
 
 
