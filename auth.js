@@ -1,5 +1,3 @@
-
-
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
 /* ==== (高科技重金屬奢華版 UI + 精準漏斗攔截邏輯) ==== */
@@ -12,8 +10,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
-const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Barcelona/i.test(navigator.userAgent);
+const FREE_DAYS_LIMIT = 0; // 👉 測試地雷請改 0
 
 // 🌟 推廣雷達 (完整保留)
 async function trackReferrals() {
@@ -158,97 +155,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } else {
         // 情況 B：未登入 LINE 的新客
-        trackVisitorDays();
-        isRestrictedMode = false;
+        trackVisitorDays(); // 照常記錄他來了幾天
+        isRestrictedMode = false; // 🚫 絕對禁止地雷通電，保護小白！
 
+        // 讓他看 5 秒乾淨畫面
         const mainContent = document.getElementById('mainContent');
         if (mainContent) mainContent.style.display = 'block'; 
         if (typeof window.init === 'function') window.init(); 
 
-        if (isMeta) {
-            // Meta 平台：不跳第一道門，泡泡框時段引爆另外處理
-            console.log("📱 Meta 平台訪客，跳過第一道門");
-        } else {
-            // 一般訪客：5 秒後跳第一道門
-            console.log("🚪 未登入訪客，5秒後召喚第一扇門");
-            setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
-        }
+        // 5 秒後砸出第一扇門 (重金屬黑金窗)
+        console.log("🚪 未登入訪客，5秒後召喚第一扇門 (黑金登入窗)");
+        setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
     }
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (只剩泡泡框引爆，限時 22:00～09:00)
+/* 💣 地雷防禦系統 (完整保留)
 /* ========================================== */
-function isInActiveHours() {
-    try {
-        const now = new Date();
-        const twHour = (now.getUTCHours() + 8) % 24;
-        return twHour >= 22 || twHour < 9;
-    } catch (e) {
-        return false;
+document.addEventListener('click', (e) => {
+    if (!isRestrictedMode || hasLockedDown) return;
+    if (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal')) return;
+
+    validClickCount++;
+    if (validClickCount === 1) {
+        armMovementTrap();
+    } else if (validClickCount > 1) {
+        e.preventDefault();  
+        e.stopPropagation(); 
+        triggerLockdown();
     }
+}, true); 
+
+function armMovementTrap() {
+    setTimeout(() => {
+        if (hasLockedDown) return; 
+        const trapEvents = ['mousemove', 'scroll', 'touchmove', 'keydown'];
+        const detonateTrap = (e) => {
+            if (hasLockedDown) return;
+            if (e.target && e.target.closest && (e.target.closest('#authGate') || e.target.closest('#premium-auth-modal'))) return;
+            triggerLockdown();
+            trapEvents.forEach(evt => document.removeEventListener(evt, detonateTrap, true));
+        };
+        trapEvents.forEach(evt => document.addEventListener(evt, detonateTrap, true));
+    }, 800); 
 }
-
-// 由 core_tooltips.js 的泡泡框點擊時呼叫
-window.tooltipGateTrigger = function() {
-
-    // Meta 平台：直接跳出 LINE 登入提示（暫時移除時間限制測試）
-    if (isMeta) {
-        showMetaLoginPrompt();
-        return true;
-    }
-
-    // 一般用戶：試用期到 → 引爆第二道門
-    if (!isRestrictedMode || hasLockedDown) return false;
-    triggerLockdown();
-    return true;
-};
-
-// Meta 平台專屬：登入提示視窗
-function showMetaLoginPrompt() {
-    if (document.getElementById('meta-login-prompt')) return;
-
-    const prompt = document.createElement('div');
-    prompt.id = 'meta-login-prompt';
-    prompt.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:2147483647;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;`;
-
-    prompt.innerHTML = `
-        <div style="background:#fff;border-radius:40px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.2);width:94%;max-width:900px;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
-            <div style="background:linear-gradient(135deg,#1a0e00,#3a2000);padding:48px 60px;display:flex;align-items:center;gap:32px;">
-                <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#f5c842,#c8860a);display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:900;color:#fff;flex-shrink:0;border:6px solid #e8c040;">聚</div>
-                <div>
-                    <div style="font-size:40px;font-weight:900;color:#fff;margin-bottom:8px;">齊聚眾選 多人預測系統</div>
-                    <div style="font-size:32px;color:rgba(255,255,255,0.65);">專家推薦 · 會員限定內容</div>
-                </div>
-            </div>
-            <div style="padding:50px 60px;">
-                <div style="font-size:40px;font-weight:900;color:#1a1a1a;margin-bottom:12px;">🔒 此為專家推薦內容</div>
-                <div style="font-size:30px;color:#94a3b8;margin-bottom:36px;line-height:1.6;">需登入 LINE 才能查看，請依以下步驟操作</div>
-                <div style="background:#fffbea;border:1px solid #f0d060;border-radius:20px;padding:32px 36px;margin-bottom:36px;">
-                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
-                    <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
-                    
-                </div>
-                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 LINE 開啟 瀏覽全站專家推薦</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(prompt);
-    setTimeout(() => { prompt.style.opacity = '1'; }, 50);
-}
-
-function handleMetaOpenUrl() {
-    const ref = localStorage.getItem('qiJu_ref');
-    const author = localStorage.getItem('qiJu_author');
-    let url = 'https://sports.fu6rm4.tw/';
-    let params = [];
-    if (author) params.push('author=' + author);
-    if (ref) params.push('ref=' + ref);
-    if (params.length) url += '?' + params.join('&');
-window.open(url, '_blank');
-}
-
 
 function triggerLockdown() {
     if (hasLockedDown) return; 
@@ -347,11 +297,6 @@ css.innerHTML = `
             .qiju-benefit-icon { font-size: 20px; display: block; margin-bottom: 4px; }
             .qiju-benefit-text { color: #7a5500; font-weight: 600; font-size: 13px; }
             .qiju-modal-btn-line { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #06C755 0%, #048b3b 100%); color: white; border: none; border-top: 1px solid rgba(255,255,255,0.4); border-bottom: 2px solid #025c28; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #025c28, 0 6px 15px rgba(6,199,85,0.3); text-shadow: 0 1px 2px rgba(0,0,0,0.3); transition: 0.2s; }
-.qiju-modal-btn-open { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 100%); color: #06C755; border: 2px solid #06C755; border-bottom: 3px solid #048b3b; border-radius: 12px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 0 #048b3b, 0 6px 15px rgba(6,199,85,0.15); transition: 0.2s; font-family: "PingFang TC","Microsoft JhengHei",sans-serif; }
-            .qiju-modal-open-hint { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 8px; }
-            .env-desktop .qiju-modal-btn-open { padding: 16px; font-size: 16px; }
-            .env-line-mobile .qiju-modal-btn-open { padding: 14px; font-size: 15px; }
-           
             .qiju-modal-btn-line .line-dot { width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.4); flex-shrink: 0; animation: qiju-dot-pulse 2s ease-in-out infinite; }
             @keyframes qiju-dot-pulse { 0%, 100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.4); } 50% { box-shadow: 0 0 0 5px rgba(255,255,255,0.15); } }
 
