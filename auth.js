@@ -227,7 +227,7 @@ function showMetaLoginPrompt() {
                 <div style="background:#fffbea;border:1px solid #f0d060;border-radius:20px;padding:32px 36px;margin-bottom:36px;">
                     <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>LINE 開啟 可瀏覽全站內容</div>
                     <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>進入網站後點 LINE 登入</div>
-                    <div style="display:flex;align-items:flex-start;gap:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">3</div>登入後即享免費試用 ✅</div>
+                    
                 </div>
                 <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 LINE 開啟 瀏覽全站專家推薦</button>
             </div>
@@ -241,7 +241,7 @@ function showMetaLoginPrompt() {
 function handleMetaOpenUrl() {
     const ref = localStorage.getItem('qiJu_ref');
     const author = localStorage.getItem('qiJu_author');
-    let url = 'https://bp6gl41123.github.io/-test';        /* 跳外部連結 以後要換主網頁 */
+    let url = 'https://sports.fu6rm4.tw/';
     let params = [];
     if (author) params.push('author=' + author);
     if (ref) params.push('ref=' + ref);
