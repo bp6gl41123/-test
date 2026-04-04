@@ -192,16 +192,14 @@ function isInActiveHours() {
 // 由 core_tooltips.js 的泡泡框點擊時呼叫
 window.tooltipGateTrigger = function() {
 
-    // Meta 平台：時段內點泡泡框 → 跳出 LINE 登入提示
+    // Meta 平台：直接跳出 LINE 登入提示（暫時移除時間限制測試）
     if (isMeta) {
-        if (!isInActiveHours()) return false; // 非時段，正常顯示
         showMetaLoginPrompt();
         return true;
     }
 
-    // 一般用戶：試用期到 + 時段內 → 引爆第二道門
+    // 一般用戶：試用期到 → 引爆第二道門
     if (!isRestrictedMode || hasLockedDown) return false;
-    if (!isInActiveHours()) return false;
     triggerLockdown();
     return true;
 };
