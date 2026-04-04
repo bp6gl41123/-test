@@ -283,7 +283,17 @@ function showNewDoor() {
             .qiju-modal-input { width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #111; border-bottom: 2px solid #fbbf24; background: #050505; color: #fbbf24; font-weight: bold; text-align: center; box-shadow: inset 0 4px 10px rgba(0,0,0,0.8); outline: none; }
             .qiju-modal-btn-unlock { width: 100%; box-sizing: border-box; background: linear-gradient(180deg, #2a2d35 0%, #111418 100%); color: #fbbf24; border: 1px solid #b48608; border-radius: 6px; cursor: pointer; font-weight: 900; box-shadow: 0 6px 15px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1); transition: 0.2s; }
             .qiju-modal-footer a { color: #64748b; font-weight: bold; text-decoration: none; border-bottom: 1px dashed #64748b; padding-bottom: 2px; }
+
             #modalErrorMsg { color: #ef4444; font-weight: bold; display: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+            /* 新增：會員福利提示區塊 */
+            .qiju-benefit-banner { margin-bottom: 20px; padding: 14px; border-radius: 10px; background: rgba(49, 162, 76, 0.08); border: 1px solid rgba(49, 162, 76, 0.2); text-align: center; }
+            .qiju-benefit-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+            .qiju-benefit-text { color: #1a1a1a; font-weight: 500; font-size: 13px; }
+            .env-line-mobile .qiju-benefit-banner { padding: 12px; margin-bottom: 15px; }
+            .env-ant-view .qiju-benefit-banner { padding: 35px; margin-bottom: 50px; border-radius: 30px; }
+            .env-ant-view .qiju-benefit-icon { font-size: 60px; margin-bottom: 15px; }
+            .env-ant-view .qiju-benefit-text { font-size: 40px; }
+
 
             /* 💻 界線一：電腦版設定 (維持版大原樣) */
             .env-desktop .qiju-modal-box { width: 90%; max-width: 420px; padding: 40px 25px; }
@@ -344,9 +354,14 @@ function showNewDoor() {
             <h2 class="qiju-modal-title">齊聚眾選 戰情中心</h2>
             <p class="qiju-modal-desc">您的體驗已達上限・請進行身分驗證</p>
             
-            <button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
-                <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入 (送試用)</span>
-            </button>
+            <div class="qiju-benefit-banner">
+    <span class="qiju-benefit-icon">👑</span>
+    <div class="qiju-benefit-text">LINE 登入享受 會員待遇 解鎖全站</div>
+</div>
+
+<button class="qiju-modal-btn-line" onclick="handleTransitionLogin('line')">
+    <span style="position: relative; z-index: 2;">使用 LINE 一鍵快速登入</span>
+</button>
             
             <div class="qiju-modal-divider">
                 <div class="qiju-modal-divider-line" style="background: linear-gradient(90deg, transparent, #475569);"></div>
