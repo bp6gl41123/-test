@@ -334,14 +334,14 @@ css.innerHTML = `
 
 /* 🌐 網頁版寬度+手機直立：強制放大覆蓋 */
             @media screen and (min-width: 801px) and (orientation: portrait) {
-                .qiju-modal-box { width: 90% !important; max-width: 1200px !important; padding: 170px 130px 150px !important; border-radius: 55px !important; }
+                .qiju-modal-box { width: 94% !important; max-width: 1300px !important; padding: 130px 130px 110px !important; border-radius: 55px !important; }
                 .qiju-modal-deco { height: 18px !important; }
-                .qiju-modal-logo { width: 290px !important; height: 290px !important; font-size: 132px !important; margin-bottom: 84px !important; border-width: 10px !important; }
-                .qiju-modal-title { font-size: 104px !important; letter-spacing: 9px !important; margin-bottom: 84px !important; }
-                .qiju-modal-btn-line { padding: 76px !important; font-size: 78px !important; border-radius: 38px !important; gap: 36px !important; }
+                .qiju-modal-logo { width: 290px !important; height: 290px !important; font-size: 132px !important; margin-bottom: 64px !important; border-width: 10px !important; }
+                .qiju-modal-title { font-size: 104px !important; letter-spacing: 9px !important; margin-bottom: 64px !important; }
+                .qiju-modal-btn-line { padding: 60px 76px !important; font-size: 78px !important; border-radius: 38px !important; gap: 36px !important; }
                 .qiju-modal-btn-line .line-dot { width: 42px !important; height: 42px !important; }
-                .qiju-benefit-banner { padding: 58px !important; margin-bottom: 74px !important; border-radius: 32px !important; }
-                .qiju-benefit-icon { font-size: 90px !important; margin-bottom: 18px !important; }
+                .qiju-benefit-banner { padding: 40px !important; margin-bottom: 56px !important; border-radius: 32px !important; }
+                .qiju-benefit-icon { font-size: 90px !important; margin-bottom: 14px !important; }
                 .qiju-benefit-text { font-size: 60px !important; }
             }
 
