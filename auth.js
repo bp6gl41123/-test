@@ -192,8 +192,13 @@ function isInActiveHours() {
 // 由 core_tooltips.js 的泡泡框點擊時呼叫
 window.tooltipGateTrigger = function() {
 
-    // Meta 平台：直接跳出 LINE 登入提示（暫時移除時間限制測試）
     if (isMeta) {
+        // 強制關閉泡泡框並套上模糊
+        document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile'));
+        document.querySelectorAll('.pick-tooltip').forEach(el => {
+            el.style.filter = 'blur(6px)';
+            el.style.transition = 'filter 0.3s';
+        });
         showMetaLoginPrompt();
         return true;
     }
@@ -228,7 +233,7 @@ function showMetaLoginPrompt() {
                     <div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">1</div>瀏覽全站專家推薦</div>
                     <div style="display:flex;align-items:flex-start;gap:20px;font-size:32px;color:#5a3e00;line-height:1.6;"><div style="background:#d4a017;color:#fff;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;flex-shrink:0;margin-top:2px;">2</div>點擊下方按鈕加入官方 LINE</div>
                 </div>
-                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 開啟官方 LINE 即可解鎖全站內容</button>
+                <button onclick="handleMetaOpenUrl()" style="width:100%;padding:40px;background:linear-gradient(180deg,#06C755,#048b3b);color:#fff;border:none;border-top:1px solid rgba(255,255,255,0.3);border-bottom:2px solid #025c28;border-radius:24px;font-size:36px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #025c28,0 6px 15px rgba(6,199,85,0.25);font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">🟢 敲一下官方LINE 即可解鎖全站</button>
             </div>
         </div>
     `;
