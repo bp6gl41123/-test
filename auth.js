@@ -278,7 +278,7 @@ function triggerLockdown() {
     const mainContent = document.getElementById('mainContent');
     
     if (authGate) {
-        authGate.style.display = 'flex'; 
+        authGate.style.display = 'block'; 
         authGate.classList.add('scatter-fly-in');  
         document.body.style.overflow = 'hidden'; 
         document.body.style.userSelect = 'none'; 
