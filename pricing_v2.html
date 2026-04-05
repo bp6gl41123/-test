@@ -7,14 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@200;300;400;500&family=DM+Sans:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
 <style>
-/* ── 隱藏捲軸（電腦版）── */
+/* ── 捲軸隱藏 ── */
 @media (min-width: 1024px) {
   html, body { scrollbar-width: none !important; }
   html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0px !important; }
 }
-
 html, body { overflow: auto !important; }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -25,7 +23,7 @@ body {
   overflow-y: hidden;
 }
 
-/* ── 主容器 ── */
+/* ── 整體框架 ── */
 .gate {
   display: grid;
   grid-template-columns: 256px 1fr;
@@ -35,54 +33,32 @@ body {
 }
 .gate::before {
   content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent, #c9a84c, #e8cc7a, #c9a84c, transparent);
   z-index: 2;
 }
 
 /* ── 左側欄 ── */
-.sb {
-  background: #080705;
-  border-right: 1px solid #1e1a12;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
-}
-.sb-hdr {
-  padding: 20px 20px 14px;
-  border-bottom: 1px solid #1e1a12;
-}
-.sb-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
+.sb { background: #080705; border-right: 1px solid #1e1a12; display: flex; flex-direction: column; position: relative; z-index: 1; }
+.sb-hdr { padding: 20px 20px 14px; border-bottom: 1px solid #1e1a12; }
+.sb-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
 /* 金色圓形聚字 */
 .logo-coin {
-  width: 34px; height: 34px;
-  border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #f5d060, #c9a020 55%, #8a6800 100%);
   box-shadow: inset 0 2px 4px rgba(255,240,150,0.6), inset 0 -2px 4px rgba(80,50,0,0.5), 0 2px 6px rgba(0,0,0,0.4);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; position: relative; overflow: hidden;
 }
 .logo-coin::before {
-  content: '';
-  position: absolute; top: 3px; left: 5px;
-  width: 12px; height: 8px;
-  background: rgba(255,255,255,0.25);
+  content: ''; position: absolute; top: 3px; left: 5px;
+  width: 12px; height: 8px; background: rgba(255,255,255,0.25);
   border-radius: 50%; transform: rotate(-30deg);
 }
 .logo-coin span {
-  font-family: 'Noto Sans TC', sans-serif;
-  font-size: 15px; font-weight: 900; color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-  position: relative; z-index: 1;
+  font-family: 'Noto Sans TC', sans-serif; font-size: 15px; font-weight: 900;
+  color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); position: relative; z-index: 1;
 }
 
 .logo-text { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #8a7a60; font-weight: 300; }
@@ -90,13 +66,7 @@ body {
 
 /* 方案列表 */
 .pl { flex: 1; padding: 8px 0; }
-.pi {
-  padding: 12px 20px;
-  cursor: pointer;
-  border-left: 2px solid transparent;
-  transition: all 0.2s;
-  position: relative;
-}
+.pi { padding: 12px 20px; cursor: pointer; border-left: 2px solid transparent; transition: all 0.2s; position: relative; }
 .pi:hover { background: #0d0b08; border-left-color: rgba(201,168,76,0.3); }
 .pi.on { background: #111009; border-left-color: #c9a84c; }
 .pi.on .pn { color: #f5ead0; }
@@ -105,73 +75,40 @@ body {
 .pn { font-size: 11px; letter-spacing: 1px; color: #9a8a72; transition: color 0.2s; text-transform: uppercase; }
 .pp { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #6a5a48; transition: color 0.2s; }
 .ps { font-size: 10px; color: #6a5a48; font-weight: 300; }
-.pi-badge {
-  font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
-  padding: 1px 6px; position: absolute; right: 12px; top: 12px;
-}
+.pi-badge { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 6px; position: absolute; right: 12px; top: 12px; }
 .badge-gold { background: #c9a84c; color: #080705; font-weight: 500; }
 .badge-amber { background: #d4a017; color: #080705; font-weight: 500; }
 .psep { height: 1px; background: #1a1710; margin: 2px 20px; }
 
-/* 底部金鑰 */
+/* 金鑰區 */
 .sb-ft { padding: 13px 18px; border-top: 1px solid #1e1a12; }
 .kl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #6a5a48; margin-bottom: 5px; }
-.ki {
-  width: 100%; background: #0d0b08; border: 1px solid #2a2418;
-  color: #e8ddd0; padding: 7px 9px;
-  font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 300;
-  outline: none; letter-spacing: 1px; margin-bottom: 5px;
-}
+.ki { width: 100%; background: #0d0b08; border: 1px solid #2a2418; color: #e8ddd0; padding: 7px 9px; font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 300; outline: none; letter-spacing: 1px; margin-bottom: 5px; }
 .ki::placeholder { color: #4a4032; }
-.kb {
-  width: 100%; padding: 8px;
-  background: linear-gradient(135deg, #b8942a, #d4a840);
-  border: none; color: #fff;
-  font-family: 'Jost', sans-serif; font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; cursor: pointer;
-}
+.kb { width: 100%; padding: 8px; background: linear-gradient(135deg, #b8942a, #d4a840); border: none; color: #fff; font-family: 'Jost', sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 .sor { text-align: center; font-size: 9px; color: #4a4032; letter-spacing: 2px; margin: 6px 0; text-transform: uppercase; }
-.lbtn {
-  width: 100%; padding: 7px; background: transparent;
-  border: 1px solid #2a2418; color: #6a5a48;
-  font-family: 'Jost', sans-serif; font-size: 9px;
-  letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
-}
+.lbtn { width: 100%; padding: 7px; background: transparent; border: 1px solid #2a2418; color: #6a5a48; font-family: 'Jost', sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
-/* ── 右側內容區 ── */
+/* ── 右側 ── */
 .det { position: relative; overflow: hidden; flex: 1; }
 .pnl { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; }
 .pnl.active { display: block; }
 
-/* ══════════════════════════════
-   P0：日卡 — 雜誌編輯式
-══════════════════════════════ */
-.p0 {
-  font-family: 'DM Sans', sans-serif;
-  background: #fff; min-height: 100%;
-  display: grid; grid-template-columns: 1fr 1px 1fr;
-}
+/* ══ P0 日卡 雜誌 ══ */
+.p0 { font-family: 'DM Sans', sans-serif; background: #fff; min-height: 100%; display: grid; grid-template-columns: 1fr 1px 1fr; }
 .p0l { padding: 38px 32px; border-top: 3px solid #111; }
 .p0r { padding: 38px 28px; border-top: 3px solid #c9a84c; background: #faf9f6; }
 .p0-rule { background: #e8e0d0; }
-
 .p0-hl { font-family: 'DM Serif Display', serif; font-size: 26px; line-height: 1.2; color: #111; margin-bottom: 14px; }
 .p0-hl em { font-style: italic; color: #c9a84c; }
-
 .p0-cmp { background: #faf6ec; border-left: 3px solid #c9a84c; padding: 12px 16px; margin-bottom: 18px; }
 .p0-c1 { font-size: 11px; color: #bbb; margin-bottom: 5px; text-decoration: line-through; }
 .p0-c2 { font-size: 13px; font-weight: 600; color: #1a1612; }
 .p0-c2 em { color: #c9a84c; font-style: normal; }
-
 .p0-pl { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
 .p0-price { font-family: 'DM Serif Display', serif; font-size: 44px; color: #111; line-height: 1; margin-bottom: 3px; }
 .p0-psub { font-size: 10px; color: #bbb; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 22px; }
-.p0-btn {
-  display: inline-block; background: #111; color: #fff;
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  padding: 12px 26px; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
-}
-
+.p0-btn { display: inline-block; background: #111; color: #fff; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 12px 26px; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; }
 .p0-rl { font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: #c9a84c; margin-bottom: 16px; }
 .p0-stat { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
 .p0-sb { background: #f9f8f5; border: 1px solid #e8e0d0; padding: 14px; text-align: center; }
@@ -181,15 +118,8 @@ body {
 .p0-fl li { font-size: 11px; color: #888; padding: 5px 0; border-bottom: 1px solid #f0ebe0; display: flex; gap: 8px; font-weight: 300; }
 .p0-fl li::before { content: '—'; color: #c9a84c; flex-shrink: 0; }
 
-/* ══════════════════════════════
-   P1：週卡 — 私人銀行式
-══════════════════════════════ */
-.p1 {
-  font-family: 'Jost', sans-serif;
-  background: #f9f8f5; padding: 40px 48px;
-  min-height: 100%; color: #1a1612;
-  display: flex; flex-direction: column;
-}
+/* ══ P1 週卡 私人銀行 ══ */
+.p1 { font-family: 'Jost', sans-serif; background: #f9f8f5; padding: 40px 48px; min-height: 100%; color: #1a1612; display: flex; flex-direction: column; }
 .p1-amt { font-family: 'Libre Baskerville', serif; font-size: 52px; font-weight: 700; color: #1a1612; line-height: 1; letter-spacing: -2px; margin-bottom: 4px; }
 .p1-amt span { font-size: 16px; font-weight: 400; color: #c4b48e; letter-spacing: 0; }
 .p1-per { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #b8a882; margin-bottom: 28px; }
@@ -199,22 +129,11 @@ body {
 .p1-rl { font-size: 11px; color: #8a7a5e; letter-spacing: 1px; font-weight: 300; }
 .p1-rv { font-family: 'Libre Baskerville', serif; font-size: 12px; color: #1a1612; font-style: italic; }
 .p1-btn-wrap { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-.p1-main-btn {
-  width: 100%; padding: 14px;
-  background: #1a1612; color: #f5ead0;
-  font-family: 'Jost', sans-serif; font-size: 11px;
-  letter-spacing: 3px; text-transform: uppercase; border: none; cursor: pointer;
-}
+.p1-main-btn { width: 100%; padding: 14px; background: #1a1612; color: #f5ead0; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; border: none; cursor: pointer; }
 .p1-note { font-size: 10px; color: #c4b48e; letter-spacing: 2px; text-transform: uppercase; text-align: center; }
 
-/* ══════════════════════════════
-   P2：月卡 — 法律備忘錄式
-══════════════════════════════ */
-.p2 {
-  font-family: 'Jost', sans-serif;
-  background: #f8f7f3; padding: 40px 48px;
-  min-height: 100%; color: #1a1612;
-}
+/* ══ P2 月卡 法律 ══ */
+.p2 { font-family: 'Jost', sans-serif; background: #f8f7f3; padding: 40px 48px; min-height: 100%; color: #1a1612; }
 .p2-tb { text-align: center; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid #d4c9a8; }
 .p2-mt { font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 500; color: #1a1612; letter-spacing: 1px; margin-bottom: 8px; }
 .p2-ul { width: 44px; height: 1px; background: #c9a84c; margin: 0 auto; }
@@ -230,72 +149,41 @@ body {
 .p2-cp { font-family: 'EB Garamond', serif; font-size: 34px; font-weight: 500; color: #1a1612; line-height: 1; margin-bottom: 3px; }
 .p2-cn { font-size: 11px; color: #9a8a72; letter-spacing: 1px; }
 .p2-seal { display: flex; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #d4c9a8; }
-.p2-btn {
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: #1a1612; background: transparent; border: 1px solid #1a1612;
-  padding: 12px 28px; cursor: pointer; font-family: 'Jost', sans-serif;
-}
+.p2-btn { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #1a1612; background: transparent; border: 1px solid #1a1612; padding: 12px 28px; cursor: pointer; font-family: 'Jost', sans-serif; }
 
-/* ══════════════════════════════
-   P3：元老 — 拍賣行式
-══════════════════════════════ */
-.p3 {
-  font-family: 'DM Sans', sans-serif;
-  background: #0f0e0c; color: #e8ddd0;
-  padding: 38px; min-height: 100%;
-  display: flex; flex-direction: column;
-}
+/* ══ P3 元老 拍賣行 ══ */
+.p3 { font-family: 'DM Sans', sans-serif; background: #0f0e0c; color: #e8ddd0; padding: 38px; min-height: 100%; display: flex; flex-direction: column; }
 .p3-live { display: flex; align-items: center; gap: 8px; margin-bottom: 22px; }
 .p3-dot { width: 6px; height: 6px; background: #c9a84c; border-radius: 50%; animation: blink 1.5s infinite; flex-shrink: 0; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 .p3-live-t { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #c9a84c; }
-
 .p3-frame { border: 1px solid #2a2418; padding: 24px; margin-bottom: 22px; position: relative; text-align: center; }
 .p3-frame::before { content: ''; position: absolute; top: 7px; left: 7px; right: 7px; bottom: 7px; border: 1px solid #2a2418; }
 .p3-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #f0e8d8; margin-bottom: 4px; }
 .p3-lot { font-size: 9px; color: #9a8a70; letter-spacing: 2px; text-transform: uppercase; }
 .p3-orn { width: 16px; height: 1px; background: #c9a84c; margin: 12px auto; }
 .p3-desc { font-size: 12px; color: #c8b89e; line-height: 1.8; font-weight: 300; font-style: italic; }
-
 .p3-est { display: grid; grid-template-columns: 1fr 1px 1fr; border: 1px solid #2a2418; margin-bottom: 16px; }
 .p3-eb { padding: 16px 18px; text-align: center; }
 .p3-er { background: #2a2418; }
 .p3-el { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #9a8a70; margin-bottom: 5px; }
 .p3-ev { font-family: 'Playfair Display', serif; font-size: 22px; color: #f0e8d8; }
 .p3-en { font-size: 10px; color: #8a7a60; letter-spacing: 1px; margin-top: 3px; }
-
 .p3-slots { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .p3-sdot { width: 6px; height: 6px; border-radius: 50%; background: #d4a017; animation: blink 1.5s infinite; flex-shrink: 0; }
 .p3-st { font-size: 13px; color: #e8d090; font-weight: 500; }
 .p3-bar { height: 3px; background: #2a2418; border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
 .p3-fill { height: 100%; width: 30%; background: linear-gradient(90deg, #d4a017, #f0c040); }
-
 .p3-feats { margin-bottom: 20px; }
 .p3-feat { font-size: 12px; color: #c8b89e; padding: 7px 0; border-bottom: 1px solid #2a2418; display: flex; align-items: center; gap: 8px; }
 .p3-feat::before { content: ''; width: 3px; height: 3px; background: #d4a017; border-radius: 50%; flex-shrink: 0; }
-
 .p3-cta { margin-top: auto; border-top: 1px solid #2a2418; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .p3-cn { font-size: 11px; color: #9a8a70; font-weight: 300; font-style: italic; }
-.p3-btn {
-  background: #c9a84c; color: #0f0e0c;
-  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-  border: none; padding: 13px 24px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-weight: 600; white-space: nowrap;
-}
+.p3-btn { background: #c9a84c; color: #0f0e0c; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; border: none; padding: 13px 24px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; white-space: nowrap; }
 
-/* ══════════════════════════════
-   P4：加盟 — 私邀函式
-══════════════════════════════ */
-.p4 {
-  font-family: 'Jost', sans-serif;
-  background: #fcfbf8; padding: 34px 44px;
-  min-height: 100%; color: #1a1612; position: relative;
-}
-.p4::before {
-  content: ''; position: absolute;
-  top: 9px; left: 9px; right: 9px; bottom: 9px;
-  border: 1px solid #f0ebe0; pointer-events: none;
-}
+/* ══ P4 加盟 私邀函 ══ */
+.p4 { font-family: 'Jost', sans-serif; background: #fcfbf8; padding: 34px 44px; min-height: 100%; color: #1a1612; position: relative; }
+.p4::before { content: ''; position: absolute; top: 9px; left: 9px; right: 9px; bottom: 9px; border: 1px solid #f0ebe0; pointer-events: none; }
 .p4-crest { text-align: center; margin-bottom: 22px; }
 .p4-line { height: 1px; background: linear-gradient(to right, transparent, #c9a84c, transparent); margin-bottom: 12px; }
 .p4-ct { font-family: 'Cormorant Garamond', serif; font-size: 10px; letter-spacing: 6px; text-transform: uppercase; color: #c9a84c; font-weight: 300; }
@@ -311,39 +199,17 @@ body {
 .p4-close { font-family: 'Cormorant Garamond', serif; font-size: 13px; font-style: italic; color: #6a5e4e; line-height: 1.8; margin-bottom: 22px; font-weight: 300; }
 .p4-sig { border-top: 1px solid #e8e0d0; padding-top: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
 .p4-sl { font-family: 'Cormorant Garamond', serif; font-style: italic; color: #8a7a5e; font-size: 12px; line-height: 1.6; }
-.p4-btn {
-  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-  color: #c9a84c; border: 1px solid #e8d8b0; padding: 8px 14px;
-  background: none; cursor: pointer; font-family: 'Jost', sans-serif;
-}
+.p4-btn { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; border: 1px solid #e8d8b0; padding: 8px 14px; background: none; cursor: pointer; font-family: 'Jost', sans-serif; }
 
-/* ── 後台管理面板 ── */
-#admin-panel {
-  display: none; position: fixed; top: 0; right: 0;
-  width: 400px; height: 100vh;
-  background: #0d1825; border-left: 2px solid #38bdf8;
-  overflow-y: auto; z-index: 9999; padding: 20px;
-  font-family: 'Noto Sans TC', sans-serif;
-}
-
-/* ── 手機版響應（<1024px 縮放） ── */
-@media (max-width: 1024px) {
-  .gate { grid-template-columns: 200px 1fr; }
-  .pi { padding: 10px 14px; }
-  .pn { font-size: 10px; }
-  .pp { font-size: 13px; }
-  .ps { font-size: 9px; }
-  .p0 { grid-template-columns: 1fr; }
-  .p0rule { display: none; }
-  .p0r { border-top: none; border-left: 3px solid #c9a84c; }
-}
+/* ── 後台面板 ── */
+#admin-panel { display: none; position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: #0d1825; border-left: 2px solid #38bdf8; overflow-y: auto; z-index: 9999; padding: 20px; font-family: 'Noto Sans TC', sans-serif; }
 </style>
 </head>
 <body>
 
 <div class="gate">
 
-  <!-- ════════════════ 左側欄 ════════════════ -->
+  <!-- ══ 左側欄 ══ -->
   <div class="sb">
     <div class="sb-hdr">
       <div class="sb-logo">
@@ -354,7 +220,6 @@ body {
     </div>
 
     <div class="pl">
-      <!-- 日卡 -->
       <div class="pi on" id="tab0" onclick="switchTab(0)">
         <div class="ptop">
           <div class="pn">☀️ 日卡</div>
@@ -364,7 +229,6 @@ body {
       </div>
       <div class="psep"></div>
 
-      <!-- 週卡 -->
       <div class="pi" id="tab1" onclick="switchTab(1)">
         <div class="ptop">
           <div class="pn">⚡ 君子週卡</div>
@@ -374,7 +238,6 @@ body {
       </div>
       <div class="psep"></div>
 
-      <!-- 月卡 -->
       <div class="pi" id="tab2" onclick="switchTab(2)">
         <span class="pi-badge badge-gold">最受歡迎</span>
         <div class="ptop">
@@ -385,7 +248,6 @@ body {
       </div>
       <div class="psep"></div>
 
-      <!-- 元老 -->
       <div class="pi" id="tab3" onclick="switchTab(3)">
         <span class="pi-badge badge-amber">隱藏版</span>
         <div class="ptop">
@@ -396,7 +258,6 @@ body {
       </div>
       <div class="psep"></div>
 
-      <!-- 加盟 -->
       <div class="pi" id="tab4" onclick="switchTab(4)">
         <div class="ptop">
           <div class="pn">🚀 加盟授權</div>
@@ -406,21 +267,21 @@ body {
       </div>
     </div>
 
-    <!-- 金鑰 + LINE -->
+    <!-- 金鑰 -->
     <div class="sb-ft">
       <div class="kl">已有金鑰？</div>
       <input type="password" class="ki" id="passcodeInput" placeholder="輸入專屬金鑰">
-      <button class="kb" id="enterBtn" onclick="handleEnter(this)">驗證 · 立即解鎖</button>
+      <button class="kb" id="enterBtn" onclick="handleEnter(this)">進入寶殿 👑</button>
       <p id="errorMsg" style="color:#ef4444;font-size:10px;margin:4px 0 0;display:none;">❌ 密鑰錯誤或已過期</p>
       <div class="sor">或</div>
       <button class="lbtn" onclick="window.open(getDynamicLine(),'_blank')">私訊官方 LINE 購買</button>
     </div>
   </div>
 
-  <!-- ════════════════ 右側內容 ════════════════ -->
+  <!-- ══ 右側內容 ══ -->
   <div class="det">
 
-    <!-- P0：日卡 雜誌編輯 -->
+    <!-- P0 日卡 -->
     <div class="pnl active" id="pnl0">
       <div class="p0">
         <div class="p0l">
@@ -451,19 +312,19 @@ body {
       </div>
     </div>
 
-    <!-- P1：週卡 私人銀行 -->
+    <!-- P1 週卡 -->
     <div class="pnl" id="pnl1">
       <div class="p1">
         <div class="p1-amt" id="weekly-price">1,960<span> 元</span></div>
         <div class="p1-per" id="weekly-daily">每週 · 首購贈整週 · 日均僅需 $140</div>
         <div class="p1-dv"></div>
-        <div class="p1-rows" id="card-weekly">
+        <div class="p1-rows">
           <div class="p1-row"><span class="p1-rl">覆蓋好手</span><span class="p1-rv">38 位 · 全站存取</span></div>
           <div class="p1-row"><span class="p1-rl">賽事範圍</span><span class="p1-rv">籃 · 棒 · 冰 · 足</span></div>
           <div class="p1-row"><span class="p1-rl">首購優惠</span><span class="p1-rv">買一週 · 送一週</span></div>
-          <div class="p1-row feature-item"><span class="p1-rl">功能一</span><span class="p1-rv">短期靈活試水溫</span></div>
-          <div class="p1-row feature-item"><span class="p1-rl">功能二</span><span class="p1-rv">首購直接送整週</span></div>
-          <div class="p1-row feature-item"><span class="p1-rl">功能三</span><span class="p1-rv">完整功能不打折</span></div>
+          <div class="p1-row" id="weekly-f1-row"><span class="p1-rl">功能</span><span class="p1-rv weekly-feat">短期靈活試水溫</span></div>
+          <div class="p1-row" id="weekly-f2-row"><span class="p1-rl">功能</span><span class="p1-rv weekly-feat">首購直接送整週</span></div>
+          <div class="p1-row" id="weekly-f3-row"><span class="p1-rl">功能</span><span class="p1-rv weekly-feat">完整功能不打折</span></div>
         </div>
         <div class="p1-btn-wrap">
           <button class="p1-main-btn" onclick="window.open(getDynamicLine(),'_blank')">氣宇非凡 · 立即訂閱</button>
@@ -472,19 +333,19 @@ body {
       </div>
     </div>
 
-    <!-- P2：月卡 法律備忘錄 -->
+    <!-- P2 月卡 -->
     <div class="pnl" id="pnl2">
       <div class="p2">
         <div class="p2-tb">
-          <div class="p2-mt" id="card-monthly">仕紳月卡</div>
+          <div class="p2-mt" id="monthly-name">仕紳月卡</div>
           <div class="p2-ul"></div>
         </div>
         <div class="p2-intro">「本協議確立訂閱方與服務方之間的權利義務關係，以及所有相關服務之存取條件。」</div>
         <div class="p2-terms">
-          <div class="p2-term"><span class="p2-tn">I.</span><span class="p2-tt">訂閱方享有 <strong>38 位頂尖分析師</strong> 之完整存取權限，涵蓋籃球、棒球、冰球及足球四大賽事。</span></div>
-          <div class="p2-term"><span class="p2-tn">II.</span><span class="p2-tt">首次訂閱即贈送 <strong>等值一個月</strong> 之免費使用期，買一月送一月，自動生效。</span></div>
-          <div class="p2-term"><span class="p2-tn">III.</span><span class="p2-tt">服務方保證 <strong>穩定追蹤當月完整賽程</strong>，每日不間斷資料更新與分析。</span></div>
-          <div class="p2-term"><span class="p2-tn">IV.</span><span class="p2-tt">訂閱方得隨時申請調整，服務方承諾 <strong>24 小時內</strong> 響應，輕鬆掌握全站好手。</span></div>
+          <div class="p2-term"><span class="p2-tn">I.</span><span class="p2-tt monthly-feat">訂閱方享有 <strong>38 位頂尖分析師</strong> 之完整存取權限，涵蓋籃球、棒球、冰球及足球四大賽事。</span></div>
+          <div class="p2-term"><span class="p2-tn">II.</span><span class="p2-tt monthly-feat">首次訂閱即贈送 <strong>等值一個月</strong> 之免費使用期，買一月送一月，自動生效。</span></div>
+          <div class="p2-term"><span class="p2-tn">III.</span><span class="p2-tt monthly-feat">服務方保證 <strong>穩定追蹤當月完整賽程</strong>，每日不間斷資料更新與分析。</span></div>
+          <div class="p2-term"><span class="p2-tn">IV.</span><span class="p2-tt monthly-feat">訂閱方得隨時申請調整，服務方承諾 <strong>24 小時內</strong> 響應，輕鬆掌握全站好手。</span></div>
         </div>
         <div class="p2-pc">
           <div class="p2-cl">約定服務報酬</div>
@@ -497,7 +358,7 @@ body {
       </div>
     </div>
 
-    <!-- P3：元老 拍賣行 -->
+    <!-- P3 元老 -->
     <div class="pnl" id="pnl3">
       <div class="p3">
         <div class="p3-live"><span class="p3-dot"></span><span class="p3-live-t">限量席位拍售進行中</span></div>
@@ -505,7 +366,7 @@ body {
           <div class="p3-title">元老級永久席位</div>
           <div class="p3-lot">Lot 001 · 隱藏版 · 僅此一批</div>
           <div class="p3-orn"></div>
-          <div class="p3-desc">「此席位為本站創立以來最低定價之永久會籍，<br>一旦額滿，同等條件將永遠不再復現。」</div>
+          <div class="p3-desc">「此席位為本站創立以來最低定價之永久會籍，一旦額滿，同等條件將永遠不再復現。」</div>
         </div>
         <div class="p3-est">
           <div class="p3-eb">
@@ -525,11 +386,11 @@ body {
           <span class="p3-st">50 位 · 目前剩餘 <span id="elder-quota">35</span> 席</span>
         </div>
         <div class="p3-bar"><div class="p3-fill"></div></div>
-        <div class="p3-feats" id="card-elder">
-          <div class="p3-feat feature-item">限時方案 · 首批額滿即永久結束</div>
-          <div class="p3-feat feature-item">全站功能不受限 · 等同月卡完整服務</div>
-          <div class="p3-feat feature-item">終生保證 · 續約絕不漲價</div>
-          <div class="p3-feat feature-item">原價 $5,800 月卡服務</div>
+        <div class="p3-feats">
+          <div class="p3-feat elder-feat">限時方案 · 首批額滿即永久結束</div>
+          <div class="p3-feat elder-feat">全站功能不受限 · 等同月卡完整服務</div>
+          <div class="p3-feat elder-feat">終生保證 · 續約絕不漲價</div>
+          <div class="p3-feat elder-feat">原價 $5,800 月卡服務</div>
         </div>
         <div class="p3-cta">
           <div class="p3-cn">額滿即永久下架 · 不接受候補</div>
@@ -538,7 +399,7 @@ body {
       </div>
     </div>
 
-    <!-- P4：加盟 私邀函 -->
+    <!-- P4 加盟 -->
     <div class="pnl" id="pnl4">
       <div class="p4">
         <div class="p4-crest">
@@ -556,9 +417,9 @@ body {
         <div class="p4-box">
           <div class="p4-bt">授權條件摘要</div>
           <div class="p4-row"><span>授權費用</span><span id="annual-price">$69,800 / 年</span></div>
-          <div class="p4-row"><span>分潤上限</span><span>最高 70%</span></div>
-          <div class="p4-row"><span>工具權限</span><span>全站無限使用</span></div>
-          <div class="p4-row"><span>二級市場</span><span>可溢價自由轉售</span></div>
+          <div class="p4-row"><span>分潤上限</span><span class="annual-feat">最高 70%</span></div>
+          <div class="p4-row"><span>工具權限</span><span class="annual-feat">全站無限使用</span></div>
+          <div class="p4-row"><span>二級市場</span><span class="annual-feat">可溢價自由轉售</span></div>
           <div class="p4-row"><span>席位數量</span><span>全台僅 5 席</span></div>
         </div>
         <div class="p4-close">「請您在考慮清楚後再作決定，<br>我們不催促，但席位一旦額滿將立即關閉申請通道。」</div>
@@ -569,15 +430,15 @@ body {
       </div>
     </div>
 
-  </div><!-- /det -->
-</div><!-- /gate -->
+  </div>
+</div>
 
 
-<!-- ════════════════ 後台管理面板 ════════════════ -->
+<!-- ══ 後台管理面板 ══ -->
 <div id="admin-panel" style="display:none;position:fixed;top:0;right:0;width:400px;height:100vh;background:#0d1825;border-left:2px solid #38bdf8;overflow-y:auto;z-index:9999;padding:20px;font-family:'Noto Sans TC',sans-serif;">
   <div style="position:sticky;top:0;background:#0d1825;padding-bottom:15px;border-bottom:2px solid #38bdf8;margin-bottom:15px;z-index:100;">
     <div style="color:#38bdf8;font-size:18px;font-weight:900;margin-bottom:12px;">📊 後台管理</div>
-    <button onclick="saveAdminData()" style="width:100%;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;font-weight:900;cursor:pointer;font-size:16px;margin-bottom:8px;">💾 保存修改</button>
+    <button onclick="saveAdminData()" style="width:100%;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:6px;font-weight:900;cursor:pointer;font-size:16px;margin-bottom:8px;box-shadow:0 4px 15px rgba(16,185,129,0.3);">💾 保存修改</button>
     <button onclick="resetAdminData()" style="width:100%;padding:10px;background:#6b7280;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;margin-bottom:8px;">🔄 重置</button>
     <button onclick="toggleAdminPanel()" style="width:100%;padding:10px;background:#374151;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px;">✕ 關閉</button>
   </div>
@@ -605,15 +466,15 @@ body {
       <input type="text" id="admin-monthly-name" placeholder="名稱（如 仕紳月卡）" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
       <input type="text" id="admin-monthly-price" placeholder="價格（如 5800）" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
       <input type="text" id="admin-monthly-daily" placeholder="副標（如 每月計費·日均$97）" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
-      <div style="font-size:11px;color:#64748b;margin-bottom:6px;font-weight:700;">條款（I~IV）</div>
+      <div style="font-size:11px;color:#64748b;margin-bottom:6px;font-weight:700;">條款 I ～ IV</div>
       <input type="text" id="admin-monthly-f1" placeholder="條款I" style="width:100%;padding:6px;margin-bottom:6px;background:#0d1825;border:1px solid #38bdf8;color:#f0f6ff;border-radius:3px;font-size:12px;">
       <input type="text" id="admin-monthly-f2" placeholder="條款II" style="width:100%;padding:6px;margin-bottom:6px;background:#0d1825;border:1px solid #38bdf8;color:#f0f6ff;border-radius:3px;font-size:12px;">
       <input type="text" id="admin-monthly-f3" placeholder="條款III" style="width:100%;padding:6px;margin-bottom:6px;background:#0d1825;border:1px solid #38bdf8;color:#f0f6ff;border-radius:3px;font-size:12px;">
       <input type="text" id="admin-monthly-f4" placeholder="條款IV" style="width:100%;padding:6px;margin-bottom:8px;background:#0d1825;border:1px solid #38bdf8;color:#f0f6ff;border-radius:3px;font-size:12px;">
     </div>
-    <!-- 加盟 -->
+    <!-- 加盟（原 annual）-->
     <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #1a2d45;">
-      <div style="color:#fcd34d;font-weight:700;margin-bottom:10px;">🚀 加盟</div>
+      <div style="color:#fcd34d;font-weight:700;margin-bottom:10px;">🚀 加盟授權</div>
       <input type="text" id="admin-annual-name" placeholder="名稱" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
       <input type="text" id="admin-annual-price" placeholder="價格（如 69800）" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
       <input type="text" id="admin-annual-daily" placeholder="副標" style="width:100%;padding:8px;margin-bottom:8px;background:#1a2d45;border:1px solid #38bdf8;color:#f0f6ff;border-radius:4px;">
@@ -640,9 +501,9 @@ body {
 </div>
 
 
-<!-- ════════════════ JavaScript ════════════════ -->
+<!-- ══ JavaScript ══ -->
 <script>
-/* ── Tab 切換 ── */
+/* Tab 切換 */
 function switchTab(i) {
   for (var j = 0; j < 5; j++) {
     document.getElementById('tab' + j).classList.remove('on');
@@ -652,34 +513,37 @@ function switchTab(i) {
   document.getElementById('pnl' + i).classList.add('active');
 }
 
-/* ── 金鑰驗證（呼叫父層 auth.js）── */
+/* 金鑰驗證 — 呼叫父層 auth.js checkPasscode()，id/恢復文字與原版完全一致 */
 function handleEnter(btn) {
   btn.disabled = true;
   btn.textContent = '驗證中...';
   btn.style.filter = 'brightness(0.8)';
   btn.style.transform = 'scale(0.95)';
-  window.parent.checkPasscode().finally(() => {
+  window.parent.checkPasscode().finally(function() {
     btn.disabled = false;
-    btn.textContent = '驗證 · 立即解鎖';
+    btn.textContent = '進入寶殿 👑';
     btn.style.filter = '';
     btn.style.transform = '';
   });
 }
 
-/* Enter 鍵觸發 */
+/* Enter 鍵也能觸發 */
 document.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleEnter(document.getElementById('enterBtn'));
+  if (e.key === 'Enter') {
+    var btn = document.getElementById('enterBtn');
+    if (btn && !btn.disabled) handleEnter(btn);
+  }
 });
 
-/* ── 動態 LINE 網址（帶推薦碼）── */
-window.getDynamicLine = function() {
+/* 動態 LINE 網址（帶推薦碼），fallback 與原版一致 */
+const getDynamicLine = function() {
   if (window.parent && typeof window.parent.getDynamicLineUrl === 'function') {
     return window.parent.getDynamicLineUrl();
   }
   return 'https://line.me/R/ti/p/@yhd0256r';
 };
 
-/* ── 後台管理系統 ── */
+/* ── 後台管理 ── */
 function setupAdminPanel() {
   document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && e.shiftKey && e.code === 'KeyA') toggleAdminPanel();
@@ -693,7 +557,9 @@ function toggleAdminPanel() {
 
 function loadAdminData() {
   var saved = localStorage.getItem('pricing-data');
-  if (saved) applyAdminData(JSON.parse(saved));
+  if (saved) {
+    try { applyAdminData(JSON.parse(saved)); } catch(e) {}
+  }
 }
 
 function saveAdminData() {
@@ -705,38 +571,38 @@ function saveAdminData() {
 
 function getAdminFormData() {
   return {
-    daily_price:    document.getElementById('admin-daily-price').value,
-    daily_daily:    document.getElementById('admin-daily-daily').value,
-    daily_btn:      document.getElementById('admin-daily-btn').value,
-    weekly_price:   document.getElementById('admin-weekly-price').value,
-    weekly_daily:   document.getElementById('admin-weekly-daily').value,
+    daily_price:  document.getElementById('admin-daily-price').value,
+    daily_daily:  document.getElementById('admin-daily-daily').value,
+    daily_btn:    document.getElementById('admin-daily-btn').value,
+    weekly_price: document.getElementById('admin-weekly-price').value,
+    weekly_daily: document.getElementById('admin-weekly-daily').value,
     weekly_features: [
       document.getElementById('admin-weekly-f1').value,
       document.getElementById('admin-weekly-f2').value,
       document.getElementById('admin-weekly-f3').value,
     ],
-    monthly_name:   document.getElementById('admin-monthly-name').value,
-    monthly_price:  document.getElementById('admin-monthly-price').value,
-    monthly_daily:  document.getElementById('admin-monthly-daily').value,
+    monthly_name:  document.getElementById('admin-monthly-name').value,
+    monthly_price: document.getElementById('admin-monthly-price').value,
+    monthly_daily: document.getElementById('admin-monthly-daily').value,
     monthly_features: [
       document.getElementById('admin-monthly-f1').value,
       document.getElementById('admin-monthly-f2').value,
       document.getElementById('admin-monthly-f3').value,
       document.getElementById('admin-monthly-f4').value,
     ],
-    annual_name:    document.getElementById('admin-annual-name').value,
-    annual_price:   document.getElementById('admin-annual-price').value,
-    annual_daily:   document.getElementById('admin-annual-daily').value,
+    annual_name:  document.getElementById('admin-annual-name').value,
+    annual_price: document.getElementById('admin-annual-price').value,
+    annual_daily: document.getElementById('admin-annual-daily').value,
     annual_features: [
       document.getElementById('admin-annual-f1').value,
       document.getElementById('admin-annual-f2').value,
       document.getElementById('admin-annual-f3').value,
       document.getElementById('admin-annual-f4').value,
     ],
-    elder_name:     document.getElementById('admin-elder-name').value,
-    elder_price:    document.getElementById('admin-elder-price').value,
-    elder_daily:    document.getElementById('admin-elder-daily').value,
-    elder_quota:    document.getElementById('admin-elder-quota').value,
+    elder_name:  document.getElementById('admin-elder-name').value,
+    elder_price: document.getElementById('admin-elder-price').value,
+    elder_daily: document.getElementById('admin-elder-daily').value,
+    elder_quota: document.getElementById('admin-elder-quota').value,
     elder_features: [
       document.getElementById('admin-elder-f1').value,
       document.getElementById('admin-elder-f2').value,
@@ -757,57 +623,56 @@ function applyAdminData(data) {
     document.getElementById('sidebar-daily-sub').textContent = data.daily_daily;
   }
   if (data.daily_btn) {
-    var db = document.querySelector('#pnl0 .p0-btn');
+    var db = document.getElementById('daily-btn');
     if (db) db.textContent = data.daily_btn;
   }
 
   /* 週卡 */
   if (data.weekly_price) {
     var wp = document.getElementById('weekly-price');
-    if (wp) wp.innerHTML = data.weekly_price + '<span> 元</span>';
-    document.getElementById('sidebar-weekly-price').textContent = '$' + data.weekly_price;
+    if (wp) wp.innerHTML = data.weekly_price.toLocaleString ? Number(data.weekly_price).toLocaleString() + '<span> 元</span>' : data.weekly_price + '<span> 元</span>';
+    document.getElementById('sidebar-weekly-price').textContent = '$' + Number(data.weekly_price).toLocaleString();
   }
   if (data.weekly_daily) {
     document.getElementById('weekly-daily').textContent = data.weekly_daily;
     document.getElementById('sidebar-weekly-sub').textContent = data.weekly_daily;
   }
   if (data.weekly_features) {
-    var wrows = document.querySelectorAll('#card-weekly .feature-item');
-    wrows.forEach(function(row, i) {
-      if (data.weekly_features[i]) {
-        row.querySelector('.p1-rv').textContent = data.weekly_features[i];
-      }
-    });
+    var wf = document.querySelectorAll('.weekly-feat');
+    wf.forEach(function(el, i) { if (data.weekly_features[i]) el.textContent = data.weekly_features[i]; });
   }
 
   /* 月卡 */
   if (data.monthly_name) {
-    document.getElementById('card-monthly').textContent = data.monthly_name;
+    var mn = document.getElementById('monthly-name');
+    if (mn) mn.textContent = data.monthly_name;
   }
   if (data.monthly_price) {
-    document.getElementById('monthly-price').textContent = '$' + data.monthly_price;
-    document.getElementById('sidebar-monthly-price').textContent = '$' + data.monthly_price;
+    document.getElementById('monthly-price').textContent = '$' + Number(data.monthly_price).toLocaleString();
+    document.getElementById('sidebar-monthly-price').textContent = '$' + Number(data.monthly_price).toLocaleString();
   }
   if (data.monthly_daily) {
     document.getElementById('monthly-daily').textContent = data.monthly_daily;
   }
   if (data.monthly_features) {
-    var mterms = document.querySelectorAll('#pnl2 .p2-tt');
-    mterms.forEach(function(el, i) {
-      if (data.monthly_features[i]) el.innerHTML = data.monthly_features[i];
-    });
+    var mf = document.querySelectorAll('.monthly-feat');
+    mf.forEach(function(el, i) { if (data.monthly_features[i]) el.innerHTML = data.monthly_features[i]; });
   }
 
   /* 加盟 */
   if (data.annual_price) {
-    document.getElementById('annual-price').textContent = '$' + data.annual_price + ' / 年';
-    document.getElementById('sidebar-annual-price').textContent = '$' + data.annual_price;
+    document.getElementById('annual-price').textContent = '$' + Number(data.annual_price).toLocaleString() + ' / 年';
+    document.getElementById('sidebar-annual-price').textContent = '$' + Number(data.annual_price).toLocaleString();
+  }
+  if (data.annual_features) {
+    var af = document.querySelectorAll('.annual-feat');
+    af.forEach(function(el, i) { if (data.annual_features[i]) el.textContent = data.annual_features[i]; });
   }
 
   /* 元老 */
   if (data.elder_price) {
-    document.getElementById('elder-price').textContent = '$' + data.elder_price;
-    document.getElementById('sidebar-elder-price').textContent = '$' + data.elder_price;
+    document.getElementById('elder-price').textContent = '$' + Number(data.elder_price).toLocaleString();
+    document.getElementById('sidebar-elder-price').textContent = '$' + Number(data.elder_price).toLocaleString();
   }
   if (data.elder_daily) {
     document.getElementById('elder-daily').textContent = data.elder_daily;
@@ -817,10 +682,8 @@ function applyAdminData(data) {
     document.getElementById('sidebar-elder-sub').textContent = '50席僅剩' + data.elder_quota + ' · 日均$66';
   }
   if (data.elder_features) {
-    var efeats = document.querySelectorAll('#card-elder .feature-item');
-    efeats.forEach(function(el, i) {
-      if (data.elder_features[i]) el.textContent = data.elder_features[i];
-    });
+    var ef = document.querySelectorAll('.elder-feat');
+    ef.forEach(function(el, i) { if (data.elder_features[i]) el.textContent = data.elder_features[i]; });
   }
 }
 
@@ -831,14 +694,14 @@ function resetAdminData() {
   }
 }
 
-/* ── 初始化 ── */
+/* 初始化：順序與原版一致 loadAdminData → setupAdminPanel */
 window.addEventListener('load', function() {
   loadAdminData();
   setupAdminPanel();
 });
 </script>
 
-<!-- ── 手機版縮放（<1024px）── -->
+<!-- 手機版：先隱藏 body 避免縮放閃爍 -->
 <script>
 (function() {
   if (window.innerWidth < 768) {
@@ -847,6 +710,7 @@ window.addEventListener('load', function() {
 })();
 </script>
 
+<!-- 手機版縮放邏輯（<1024px → 980px 虛擬畫布），與原版完全一致 -->
 <script>
 (function() {
   function scalePricing() {
@@ -856,35 +720,35 @@ window.addEventListener('load', function() {
       var targetWidth = 980;
       var scale = screenWidth / targetWidth;
       document.body.style.transformOrigin = 'top left';
-      document.body.style.transform = 'scale(' + scale + ')';
-      document.body.style.width  = targetWidth + 'px';
-      document.body.style.height = (screenHeight / scale) + 'px';
+      document.body.style.transform  = 'scale(' + scale + ')';
+      document.body.style.width      = targetWidth + 'px';
+      document.body.style.height     = (screenHeight / scale) + 'px';
       document.documentElement.style.overflowX = 'hidden';
-      document.body.style.overflowX = 'hidden';
+      document.body.style.overflowX  = 'hidden';
     } else {
-      document.body.style.transform = '';
-      document.body.style.width  = '';
-      document.body.style.height = '';
+      document.body.style.transform  = '';
+      document.body.style.width      = '';
+      document.body.style.height     = '';
       document.documentElement.style.overflowX = 'auto';
-      document.body.style.overflowX = 'auto';
+      document.body.style.overflowX  = 'auto';
     }
     document.documentElement.style.visibility = 'visible';
   }
-  window.addEventListener('load', scalePricing);
+  window.addEventListener('load',   scalePricing);
   window.addEventListener('resize', scalePricing);
-  window.addEventListener('orientationchange', function() {
-    setTimeout(scalePricing, 200);
-  });
+  window.addEventListener('orientationchange', function() { setTimeout(scalePricing, 200); });
   scalePricing();
 })();
 </script>
 
-<!-- ── 電腦版鎖寬（pointer:fine）── -->
+<!-- 電腦版（pointer:fine）鎖最小寬度 1400px，與原版一致 -->
 <script>
-if (window.matchMedia('(pointer: fine)').matches && window.self === window.top) {
-  document.body.style.minWidth = '1200px';
-  document.body.style.overflowX = 'auto';
-}
+(function() {
+  if (window.matchMedia('(pointer: fine)').matches && window.self === window.top) {
+    document.body.style.minWidth  = '1400px';
+    document.body.style.overflowX = 'auto';
+  }
+})();
 </script>
 
 </body>
