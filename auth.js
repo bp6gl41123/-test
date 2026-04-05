@@ -196,19 +196,20 @@ function isInActiveHours() {
 window.tooltipGateTrigger = function() {
 
     if (isMeta) {
-        // 強制關閉泡泡框並套上模糊
-        document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile'));
         document.querySelectorAll('.pick-tooltip').forEach(el => {
             el.style.filter = 'blur(10px)';
         });
-        showMetaLoginPrompt();
-        return true;
+        setTimeout(() => { showMetaLoginPrompt(); }, 400);
+        return false; // 先讓泡泡框顯示出來（模糊）
     }
 
     // 一般用戶：試用期到 → 引爆第二道門
     if (!isRestrictedMode || hasLockedDown) return false;
-    triggerLockdown();
-    return true;
+    document.querySelectorAll('.pick-tooltip').forEach(el => {
+        el.style.filter = 'blur(10px)';
+    });
+    setTimeout(() => { triggerLockdown(); }, 400);
+    return false; // 先讓泡泡框顯示出來（模糊）
 };
 
 // Meta 平台專屬：登入提示視窗
