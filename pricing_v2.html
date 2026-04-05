@@ -61,8 +61,8 @@ body {
   color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); position: relative; z-index: 1;
 }
 
-.logo-text { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #8a7a60; font-weight: 300; }
-.sb-desc { font-size: 12px; color: #6a5a48; font-weight: 300; }
+.logo-text { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: #8a7a60; font-weight: 300; }
+.sb-desc { font-size: 10px; color: #6a5a48; font-weight: 300; }
 
 /* 方案列表 */
 .pl { flex: 1; padding: 8px 0; }
@@ -72,9 +72,9 @@ body {
 .pi.on .pn { color: #f5ead0; }
 .pi.on .pp { color: #c9a84c; }
 .ptop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-.pn { font-size: 13px; letter-spacing: 1px; color: #9a8a72; transition: color 0.2s; text-transform: uppercase; }
-.pp { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: #6a5a48; transition: color 0.2s; }
-.ps { font-size: 12px; color: #6a5a48; font-weight: 300; }
+.pn { font-size: 11px; letter-spacing: 1px; color: #9a8a72; transition: color 0.2s; text-transform: uppercase; }
+.pp { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #6a5a48; transition: color 0.2s; }
+.ps { font-size: 10px; color: #6a5a48; font-weight: 300; }
 .pi-badge { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 6px; position: absolute; right: 12px; top: 12px; }
 .badge-gold { background: #c9a84c; color: #080705; font-weight: 500; }
 .badge-amber { background: #d4a017; color: #080705; font-weight: 500; }
@@ -82,16 +82,16 @@ body {
 
 /* 金鑰區 */
 .sb-ft { padding: 13px 18px; border-top: 1px solid #1e1a12; }
-.kl { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #6a5a48; margin-bottom: 5px; }
-.ki { width: 100%; background: #0d0b08; border: 1px solid #2a2418; color: #e8ddd0; padding: 9px 11px; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300; outline: none; letter-spacing: 1px; margin-bottom: 5px; }
+.kl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #6a5a48; margin-bottom: 5px; }
+.ki { width: 100%; background: #0d0b08; border: 1px solid #2a2418; color: #e8ddd0; padding: 7px 9px; font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 300; outline: none; letter-spacing: 1px; margin-bottom: 5px; }
 .ki::placeholder { color: #4a4032; }
-.kb { width: 100%; padding: 10px; background: linear-gradient(135deg, #b8942a, #d4a840); border: none; color: #fff; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-.sor { text-align: center; font-size: 11px; color: #4a4032; letter-spacing: 2px; margin: 6px 0; text-transform: uppercase; }
-.lbtn { width: 100%; padding: 9px; background: transparent; border: 1px solid #2a2418; color: #6a5a48; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.kb { width: 100%; padding: 8px; background: linear-gradient(135deg, #b8942a, #d4a840); border: none; color: #fff; font-family: 'Jost', sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.sor { text-align: center; font-size: 9px; color: #4a4032; letter-spacing: 2px; margin: 6px 0; text-transform: uppercase; }
+.lbtn { width: 100%; padding: 7px; background: transparent; border: 1px solid #2a2418; color: #6a5a48; font-family: 'Jost', sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
 /* ── 右側 ── */
-.det { flex: 1; min-width: 0; }
-.pnl { display: none; }
+.det { position: relative; overflow: hidden; flex: 1; }
+.pnl { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; }
 .pnl.active { display: block; }
 
 /* ══ P0 日卡 雜誌 ══ */
