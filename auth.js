@@ -174,7 +174,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             // 一般訪客：5 秒後跳第一道門
             console.log("🚪 未登入訪客，5秒後召喚第一扇門");
-            setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
+            const doorTimer = setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
+
+            // 點擊後滑動 → 提早跳出登入視窗
+            const earlyTrigger = () => {
+                if (document.getElementById('premium-auth-modal')) return;
+                clearTimeout(doorTimer);
+                showNewDoor();
+                document.removeEventListener('mousemove', onMove, true);
+                document.removeEventListener('touchmove', onMove, true);
+                document.removeEventListener('click', onClick, true);
+            };
+            let clicked = false;
+            const onMove = () => { if (clicked) earlyTrigger(); };
+            const onClick = () => { clicked = true; };
+            document.addEventListener('click', onClick, true);
+            document.addEventListener('mousemove', onMove, true);
+            document.addEventListener('touchmove', onMove, true);
         }
     }
 });
