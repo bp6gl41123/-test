@@ -7,12 +7,13 @@
 
 const LIFF_ID = '2009615655-TqsOx6OE'; 
 const BROWSE_TIME_LIMIT = 5000;   /*const BROWSE_TIME_LIMIT = 5000;    */
+let globalDoorTimer = null;
 
 let isRestrictedMode = false; 
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
+const FREE_DAYS_LIMIT = 7;  /* 👉 測試地雷請改 0 */
 const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Barcelona/i.test(navigator.userAgent);
 
 // 🌟 推廣雷達 (完整保留)
@@ -140,7 +141,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const liff = await loadLiffSdk();
         await liff.init({ liffId: LIFF_ID });
-        if (liff.isLoggedIn()) liffLoggedIn = true;
+        if (liff.isLoggedIn()) {
+            liffLoggedIn = true;
+            // ✅ 記錄登入成功事件
+            try {
+                const profile = await liff.getProfile();
+                fetch('/api/track-login-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'login_success',
+                        line_user_id: profile.userId
+                    })
+                }).catch(() => {});
+            } catch(e) {}
+        }
     } catch (err) {
         console.error('⚠️ LIFF 初始化失敗，忽略錯誤繼續');
     }
@@ -149,21 +164,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 🎯 終極防禦判斷 (落實兩段式邏輯)
     // ==========================================
     if (liffLoggedIn) {
-        // 情況 A：他有 LINE 登入過，開始檢查試用期
-        const isTrialExpired = trackVisitorDays(); 
+    // 情況 A：LINE 登入成功，交給後端資料庫判斷試用期
+    try {
+        const profile = await liff.getProfile();
+        const ref = localStorage.getItem('qiJu_ref') || null;
 
-        if (isTrialExpired) {
-            // 🚨 試用期過期！通電開啟地雷模式 (等待點擊/滑動引爆第二門)
-            isRestrictedMode = true;
-            console.log("💣 LINE登入者試用期滿，地雷模式已開啟！(等待滑鼠引爆)");
-            
-            const mainContent = document.getElementById('mainContent');
-            if (mainContent) mainContent.style.display = 'block'; 
-            if (typeof window.init === 'function') window.init();
-        } else {
-            // 試用期內，放行
+        const checkRes = await fetch('/api/apicheck-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                line_user_id: profile.userId,
+                ref_code: ref
+            })
+        });
+        const checkData = await checkRes.json();
+
+        if (checkData.status === 'active_free' || checkData.status === 'active_paid') {
+            // ✅ 試用期內或付費用戶 → 放行
             fullUnlockSystem();
+        } else {
+            // ❌ 試用期結束 → 鎖定
+            isRestrictedMode = true;
+            console.log("💣 資料庫確認試用期滿，地雷模式已開啟！");
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) mainContent.style.display = 'block';
+            if (typeof window.init === 'function') window.init();
+
+            // ✅ 新增：立刻把泡泡框全部模糊，不等用戶點擊
+            setTimeout(() => {
+                document.querySelectorAll('.pick-tooltip').forEach(el => {
+                    el.style.filter = 'blur(10px)';
+                    el.style.pointerEvents = 'none';
+                });
+            }, 1000); // 等1秒讓頁面先渲染完
         }
+    } catch(e) {
+        // API 失敗時，保守放行避免誤傷
+        console.error('apicheck-user 失敗，保守放行', e);
+        fullUnlockSystem();
+    }
 
     } else {
         // 情況 B：未登入 LINE 的新客
@@ -178,37 +217,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Meta 平台：不跳第一道門，泡泡框時段引爆另外處理
             console.log("📱 Meta 平台訪客，跳過第一道門");
         } else {
-            // 一般訪客：5 秒後跳第一道門
-            console.log("🚪 未登入訪客，5秒後召喚第一扇門");
-            const doorTimer = setTimeout(() => { showNewDoor(); }, BROWSE_TIME_LIMIT);
-
-            // 點擊後滑動 → 提早跳出登入視窗
-            const earlyTrigger = () => {
+            // 一般訪客：點擊一次才觸發登入視窗
+            console.log("🚪 未登入訪客，等待第一次點擊");
+            
+            const onFirstClick = () => {
                 if (document.getElementById('premium-auth-modal')) return;
-                clearTimeout(doorTimer);
                 showNewDoor();
-                document.removeEventListener('mousemove', onMove, true);
-                document.removeEventListener('touchmove', onMove, true);
-                document.removeEventListener('click', onClick, true);
+                document.removeEventListener('click', onFirstClick, true);
             };
-            let clicked = false;
-            const onMove = () => { if (clicked) earlyTrigger(); };
-            const onClick = () => { clicked = true; };
-            document.addEventListener('click', onClick, true);
-            document.addEventListener('mousemove', onMove, true);
-            document.addEventListener('touchmove', onMove, true);
+            document.addEventListener('click', onFirstClick, true);
         }
     }
 });
 
 /* ========================================== */
-/* 💣 地雷防禦系統 (只剩泡泡框引爆，限時 22:00～09:00)
+/* 💣 地雷防禦系統 (只剩泡泡框引爆，限時 22:00～10:00)
 /* ========================================== */
 function isInActiveHours() {
     try {
         const now = new Date();
         const twHour = (now.getUTCHours() + 8) % 24;
-        return twHour >= 22 || twHour < 9;
+        return twHour >= 22 || twHour < 10;
     } catch (e) {
         return false;
     }
@@ -227,6 +256,10 @@ window.tooltipGateTrigger = function() {
 
     // 一般用戶：試用期到 → 引爆第二道門
     if (!isRestrictedMode || hasLockedDown) return false;
+
+    // ⏰ 台灣時間 22:00～10:00 才觸發地雷
+    if (!isInActiveHours()) return true; // 非時段內，正常顯示泡泡框
+
     document.querySelectorAll('.pick-tooltip').forEach(el => {
         el.style.filter = 'blur(10px)';
     });
@@ -467,6 +500,12 @@ css.innerHTML = `
 // 🚨 升級版：LINE 登入過場動畫 (自帶破謊雷達，動態放大)
 function handleTransitionLogin(type) {
     if (type === 'line') {
+// ✅ 記錄點擊登入事件
+        fetch('/api/track-login-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_type: 'click' })
+        }).catch(() => {});
         // 🎯 啟動微型破謊雷達：決定放大倍率
         let scale = 1; // 預設 1 倍 (電腦版、LINE 內建瀏覽器)
         const screenW = window.screen.width;
@@ -571,6 +610,12 @@ async function checkPasscode() {
 }
 
 function fullUnlockSystem() {
+    // ✅ 清除計時器，防止登入後還跳視窗
+    if (globalDoorTimer) {
+        clearTimeout(globalDoorTimer);
+        globalDoorTimer = null;
+    }
+
     const modal = document.getElementById('premium-auth-modal');
     if (modal) modal.remove();
     
