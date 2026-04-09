@@ -229,7 +229,7 @@ function isInActiveHours() {
     try {
         const now = new Date();
         const twHour = (now.getUTCHours() + 8) % 24;
-        return twHour >= 22 || twHour < 12;
+        return true;              /* return twHour >= 22 || twHour < 10; */
     } catch (e) {
         return false;
     }
@@ -250,7 +250,7 @@ window.tooltipGateTrigger = function() {
     if (!isRestrictedMode || hasLockedDown) return false;
 
     // ⏰ 台灣時間 22:00～10:00 才觸發地雷
-    if (!isInActiveHours()) return true; // 非時段內，正常顯示泡泡框
+    if (!isInActiveHours()) return true;     // 非時段內，正常顯示泡泡框
 
     document.querySelectorAll('.pick-tooltip').forEach(el => {
         el.style.filter = 'blur(10px)';
