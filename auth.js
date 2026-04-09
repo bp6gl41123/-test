@@ -13,7 +13,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
+const FREE_DAYS_LIMIT = 7;  /* 👉 測試地雷請改 0 */
 const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Barcelona/i.test(navigator.userAgent);
 
 // 🌟 推廣雷達 (完整保留)
@@ -189,14 +189,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mainContent = document.getElementById('mainContent');
             if (mainContent) mainContent.style.display = 'block';
             if (typeof window.init === 'function') window.init();
-
-            // ✅ 新增：立刻把泡泡框全部模糊，不等用戶點擊
-            setTimeout(() => {
-                document.querySelectorAll('.pick-tooltip').forEach(el => {
-                    el.style.filter = 'blur(10px)';
-                    el.style.pointerEvents = 'none';
-                });
-            }, 1000); // 等1秒讓頁面先渲染完
         }
     } catch(e) {
         // API 失敗時，保守放行避免誤傷
