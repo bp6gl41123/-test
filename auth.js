@@ -1,4 +1,9 @@
-
+if (new URLSearchParams(window.location.search).get('liff_reload') === '1') {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('liff_reload');
+    window.history.replaceState({}, '', url);
+    location.reload();
+}
 
 /* ========================================== */
 /* ==== 【齊聚眾選：雙軌身分防禦系統 - auth.js】 ==== */
@@ -521,7 +526,7 @@ function handleTransitionLogin(type) {
                 <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
             </div>
         `;
-        setTimeout(() => { if (window.liff) liff.login({ redirectUri: window.location.href }); }, 1500);
+        setTimeout(() => { if (window.liff) liff.login({ redirectUri: window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'liff_reload=1' }); }, 1500);
     }
 }
 
