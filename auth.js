@@ -191,10 +191,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof window.init === 'function') window.init();
         }
     } catch(e) {
-        // API 失敗時，保守放行避免誤傷
-        console.error('apicheck-user 失敗，保守放行', e);
-        fullUnlockSystem();
-    }
+    console.error('apicheck-user 失敗，保守放行', e);
+    isRestrictedMode = true;
+    const mainContent = document.getElementById('mainContent');
+    if (mainContent) mainContent.style.display = 'block';
+    if (typeof window.init === 'function') window.init();
+}
 
     } else {
         // 情況 B：未登入 LINE 的新客
