@@ -198,8 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } else {
         // 情況 B：未登入 LINE 的新客
-        trackVisitorDays();
-        isRestrictedMode = false;
+        isRestrictedMode = trackVisitorDays();
 
         const mainContent = document.getElementById('mainContent');
         if (mainContent) mainContent.style.display = 'block'; 
