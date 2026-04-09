@@ -13,7 +13,7 @@ let isRestrictedMode = false;
 let validClickCount = 0;      
 let hasLockedDown = false;    
 const MAX_CLICKS = 1;         
-const FREE_DAYS_LIMIT = 7;  /* 👉 測試地雷請改 0 */
+const FREE_DAYS_LIMIT = 0;  /* 👉 測試地雷請改 0 */
 const isMeta = /FBAN|FBAV|FBIOS|FBSV|FBSS|FB_IAB|Instagram|Barcelona/i.test(navigator.userAgent);
 
 // 🌟 推廣雷達 (完整保留)
