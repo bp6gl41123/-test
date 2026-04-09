@@ -229,7 +229,7 @@ function isInActiveHours() {
     try {
         const now = new Date();
         const twHour = (now.getUTCHours() + 8) % 24;
-        return twHour >= 22 || twHour < 10;
+        return twHour >= 22 || twHour < 12;
     } catch (e) {
         return false;
     }
