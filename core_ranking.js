@@ -1605,6 +1605,7 @@ window.closeMainPick = function () {
 
 window.renderMainPick = function (sportKey) {
     window.activeMainPickKey = sportKey;
+    window.activeSportKey = sportKey;
     const mainSports = [
         { key: 'mlb_main', label: '⚾ MLB主推(隊伍)' },
         { key: 'mlb_total_main', label: '⚾ MLB主推(大小)' },
