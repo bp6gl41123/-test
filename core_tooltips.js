@@ -162,14 +162,10 @@ window.toggleMobileTooltip = function(iconElement) {
             tooltip.setAttribute('data-pick-open', '0');
             tooltip.style.setProperty('visibility', 'hidden', 'important');
             tooltip.style.setProperty('opacity', '0', 'important');
-            iconElement.style.removeProperty('opacity');
         } else {
-            // 開啟
+            // 開啟：tooltip 壓在 icon 上面，不動 icon
             tooltip.setAttribute('data-pick-open', '1');
-            // 問題二：隱藏 icon，讓 tooltip 單獨顯示
-            iconElement.style.setProperty('opacity', '0', 'important');
             var s = tooltip.style;
-            // 問題一：不覆寫 top/bottom，讓原始 CSS 控制方向（bottom: 130%）
             s.setProperty('visibility', 'visible', 'important');
             s.setProperty('opacity', '1', 'important');
             s.setProperty('z-index', '999999', 'important');
@@ -177,6 +173,8 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('transform', 'none', 'important');
             s.setProperty('left', 'auto', 'important');
             s.setProperty('right', '0', 'important');
+            s.setProperty('bottom', '130%', 'important');
+            s.setProperty('top', 'auto', 'important');
         }
         return;
     }
