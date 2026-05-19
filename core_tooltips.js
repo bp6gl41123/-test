@@ -165,8 +165,7 @@ window.toggleMobileTooltip = function(iconElement) {
         tooltip.removeAttribute('style');
     }
 };
- iconElement.nextElementSibling.classList.toggle('show-mobile'); };
-document.addEventListener('click', (e) => { if(!e.target.closest('.pick-icon') && !e.target.closest('.pick-tooltip')) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile')); } });
+document.addEventListener('click', (e) => { if(!e.target.closest('.pick-icon') && !e.target.closest('.pick-tooltip')) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { el.classList.remove('show-mobile'); el.removeAttribute('style'); }); } });
 
 
 
