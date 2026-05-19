@@ -78,7 +78,27 @@ body { padding-bottom: 120px; }
     #mainPickTop4 .pick-tooltip,
     #mainPickMiddle .pick-tooltip,
     #mainPickBottom4 .pick-tooltip {
+        display: none !important;
+        position: fixed !important;
+        width: 300px !important;
+        min-width: 300px !important;
+        padding: 18px 20px !important;
+        font-size: 15px !important;
+        line-height: 1.8 !important;
+        background: #0f172a !important;
+        border: 1px solid rgba(251,191,36,0.6) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.7) !important;
+        z-index: 999999 !important;
         transform: none !important;
+        top: unset !important;
+        left: unset !important;
+        right: unset !important;
+    }
+    #mainPickTop4 .pick-tooltip-container:hover .pick-tooltip,
+    #mainPickMiddle .pick-tooltip-container:hover .pick-tooltip,
+    #mainPickBottom4 .pick-tooltip-container:hover .pick-tooltip {
+        display: block !important;
     }
     #mainPickTop4 .pick-content,
     #mainPickMiddle .pick-content,
