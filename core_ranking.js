@@ -1628,9 +1628,9 @@ window.renderMainPick = function (sportKey) {
     ];
     sportBar.innerHTML = sportGroups.map(g =>
         `<div style="display:flex; align-items:center; gap:6px;">
-            <span style="color:#64748b; font-size:13px; font-weight:bold; white-space:nowrap;">${g.league}</span>
+            <span style="color:#94a3b8; font-size:16px; font-weight:bold; white-space:nowrap;">${g.league}</span>
             ${g.items.map(s =>
-                `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : 'transparent'}; color:${s.key === sportKey ? '#000' : '#94a3b8'}; border:1px solid ${s.key === sportKey ? '#fbbf24' : '#334155'}; padding:5px 14px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap;">${s.key.includes('total') || s.key.includes('kbo_total') ? '大小' : '隊伍'}</button>`
+                `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : 'transparent'}; color:${s.key === sportKey ? '#000' : '#cbd5e1'}; border:1px solid ${s.key === sportKey ? '#fbbf24' : '#475569'}; padding:6px 18px; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap;">${s.key.includes('total') || s.key.includes('kbo_total') ? '大小' : '隊伍'}</button>`
             ).join('')}
         </div>`
     ).join('<div style="width:1px; background:#1e293b; margin:0 4px;"></div>');
