@@ -144,33 +144,39 @@ window.toggleMobileTooltip = function(iconElement) {
     var inMainPick = !!iconElement.closest('#mainPickTop4, #mainPickMiddle, #mainPickBottom4');
 
     if (inMainPick) {
+        // 先關掉其他已開的
+        document.querySelectorAll('.pick-tooltip[data-pick-open="1"]').forEach(function(el) {
+            el.setAttribute('data-pick-open', '0');
+            el.style.setProperty('visibility', 'hidden', 'important');
+            el.style.setProperty('opacity', '0', 'important');
+            // 還原旁邊的 icon
+            var prevIcon = el.previousElementSibling;
+            if (prevIcon) prevIcon.style.removeProperty('opacity');
+        });
+
         var tooltip = iconElement.nextElementSibling;
         var isOpen = tooltip.getAttribute('data-pick-open') === '1';
+
         if (isOpen) {
+            // 關閉
             tooltip.setAttribute('data-pick-open', '0');
             tooltip.style.setProperty('visibility', 'hidden', 'important');
             tooltip.style.setProperty('opacity', '0', 'important');
+            iconElement.style.removeProperty('opacity');
         } else {
-            document.querySelectorAll('.pick-tooltip[data-pick-open="1"]').forEach(function(el) {
-                el.setAttribute('data-pick-open', '0');
-                el.style.setProperty('visibility', 'hidden', 'important');
-                el.style.setProperty('opacity', '0', 'important');
-            });
-            var rect = iconElement.getBoundingClientRect();
-            var top = rect.bottom + 8;
-            var left = rect.right - 280;
-            if (left < 8) left = 8;
-            if (top + 300 > window.innerHeight) top = rect.top - 320;
+            // 開啟
             tooltip.setAttribute('data-pick-open', '1');
+            // 問題二：隱藏 icon，讓 tooltip 單獨顯示
+            iconElement.style.setProperty('opacity', '0', 'important');
             var s = tooltip.style;
+            // 問題一：不覆寫 top/bottom，讓原始 CSS 控制方向（bottom: 130%）
             s.setProperty('visibility', 'visible', 'important');
             s.setProperty('opacity', '1', 'important');
-            s.setProperty('position', 'fixed', 'important');
-            s.setProperty('top', top + 'px', 'important');
-            s.setProperty('left', left + 'px', 'important');
-            s.setProperty('bottom', 'auto', 'important');
-            s.setProperty('transform', 'none', 'important');
             s.setProperty('z-index', '999999', 'important');
+            s.setProperty('position', 'absolute', 'important');
+            s.setProperty('transform', 'none', 'important');
+            s.setProperty('left', 'auto', 'important');
+            s.setProperty('right', '0', 'important');
         }
         return;
     }
