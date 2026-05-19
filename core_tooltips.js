@@ -162,7 +162,28 @@ window.toggleMobileTooltip = function(iconElement) {
             if (left < 8) left = 8;
             if (top + 300 > window.innerHeight) top = rect.top - 320;
             tooltip.setAttribute('data-pick-open', '1');
-            tooltip.style.cssText = 'visibility:visible; opacity:1; position:fixed; width:300px; min-width:300px; padding:18px 20px; background:#0f172a; border:1px solid rgba(251,191,36,0.6); border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.7); z-index:999999; font-size:15px; line-height:1.8; color:#f8fafc; white-space:normal; word-break:break-all; top:' + top + 'px; left:' + left + 'px;';
+            var s = tooltip.style;
+            s.setProperty('visibility', 'visible', 'important');
+            s.setProperty('opacity', '1', 'important');
+            s.setProperty('position', 'fixed', 'important');
+            s.setProperty('width', '300px', 'important');
+            s.setProperty('min-width', '300px', 'important');
+            s.setProperty('max-width', '300px', 'important');
+            s.setProperty('padding', '18px 20px', 'important');
+            s.setProperty('background', '#0f172a', 'important');
+            s.setProperty('border', '1px solid rgba(251,191,36,0.6)', 'important');
+            s.setProperty('border-radius', '14px', 'important');
+            s.setProperty('box-shadow', '0 10px 40px rgba(0,0,0,0.7)', 'important');
+            s.setProperty('z-index', '999999', 'important');
+            s.setProperty('font-size', '15px', 'important');
+            s.setProperty('line-height', '1.8', 'important');
+            s.setProperty('color', '#f8fafc', 'important');
+            s.setProperty('white-space', 'normal', 'important');
+            s.setProperty('word-break', 'break-all', 'important');
+            s.setProperty('top', top + 'px', 'important');
+            s.setProperty('left', left + 'px', 'important');
+            s.setProperty('bottom', 'auto', 'important');
+            s.setProperty('transform', 'none', 'important');;
         }
         return;
     }
