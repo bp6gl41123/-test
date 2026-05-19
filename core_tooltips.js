@@ -144,25 +144,25 @@ window.toggleMobileTooltip = function(iconElement) {
     var inMainPick = !!iconElement.closest('#mainPickTop4, #mainPickMiddle, #mainPickBottom4');
 
     if (inMainPick) {
-        // 主推區專用邏輯：用 data-pick-open 標記，不碰 show-mobile，避免被全域關閉邏輯干擾
         var tooltip = iconElement.nextElementSibling;
         var isOpen = tooltip.getAttribute('data-pick-open') === '1';
         if (isOpen) {
             tooltip.setAttribute('data-pick-open', '0');
-            tooltip.removeAttribute('style');
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = '0';
         } else {
-            // 先關掉其他已開的主推區泡泡
             document.querySelectorAll('.pick-tooltip[data-pick-open="1"]').forEach(function(el) {
                 el.setAttribute('data-pick-open', '0');
-                el.removeAttribute('style');
+                el.style.visibility = 'hidden';
+                el.style.opacity = '0';
             });
             var rect = iconElement.getBoundingClientRect();
             var top = rect.bottom + 8;
             var left = rect.right - 300;
             if (left < 8) left = 8;
-            if (top + 200 > window.innerHeight) top = rect.top - 220;
+            if (top + 300 > window.innerHeight) top = rect.top - 320;
             tooltip.setAttribute('data-pick-open', '1');
-            tooltip.style.cssText = 'position:fixed !important; width:300px !important; min-width:300px !important; padding:18px 20px !important; background:#0f172a !important; border:1px solid rgba(251,191,36,0.6) !important; border-radius:14px !important; box-shadow:0 10px 40px rgba(0,0,0,0.7) !important; z-index:999999 !important; font-size:15px !important; line-height:1.8 !important; color:#f8fafc !important; white-space:normal !important; word-break:break-all !important; top:' + top + 'px; left:' + left + 'px; display:block !important;';
+            tooltip.style.cssText = 'visibility:visible; opacity:1; position:fixed; width:300px; min-width:300px; padding:18px 20px; background:#0f172a; border:1px solid rgba(251,191,36,0.6); border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.7); z-index:999999; font-size:15px; line-height:1.8; color:#f8fafc; white-space:normal; word-break:break-all; top:' + top + 'px; left:' + left + 'px;';
         }
         return;
     }
