@@ -75,10 +75,11 @@ body { padding-bottom: 120px; }
         margin-left: 8px !important;
         display: inline-flex !important;
     }
-    #mainPickTop4 .pick-tooltip,
+   #mainPickTop4 .pick-tooltip,
     #mainPickMiddle .pick-tooltip,
     #mainPickBottom4 .pick-tooltip {
-        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
         position: fixed !important;
         width: 300px !important;
         min-width: 300px !important;
@@ -91,14 +92,16 @@ body { padding-bottom: 120px; }
         box-shadow: 0 10px 40px rgba(0,0,0,0.7) !important;
         z-index: 999999 !important;
         transform: none !important;
-        top: unset !important;
-        left: unset !important;
-        right: unset !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: 0 !important;
+        top: 100% !important;
     }
     #mainPickTop4 .pick-tooltip-container:hover .pick-tooltip,
     #mainPickMiddle .pick-tooltip-container:hover .pick-tooltip,
     #mainPickBottom4 .pick-tooltip-container:hover .pick-tooltip {
-        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     #mainPickTop4 .pick-content,
     #mainPickMiddle .pick-content,
