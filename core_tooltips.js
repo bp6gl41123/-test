@@ -171,6 +171,7 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('bottom', 'auto', 'important');
             s.setProperty('transform', 'none', 'important');
             s.setProperty('z-index', '999999', 'important');
+           }
         return;
     }
 
