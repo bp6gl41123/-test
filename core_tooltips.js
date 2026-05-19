@@ -166,25 +166,11 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('visibility', 'visible', 'important');
             s.setProperty('opacity', '1', 'important');
             s.setProperty('position', 'fixed', 'important');
-            s.setProperty('width', '240px', 'important');
-            s.setProperty('min-width', '240px', 'important');
-            s.setProperty('max-width', '240px', 'important');
-            s.setProperty('padding', '12px 14px', 'important');
-            s.setProperty('background', 'linear-gradient(135deg, #1e293b, #0f172a)', 'important');
-            s.setProperty('border', '1px solid #fbbf24', 'important');
-            s.setProperty('border-radius', '12px', 'important');
-            s.setProperty('box-shadow', '0 10px 25px rgba(0,0,0,0.5)', 'important');
-            s.setProperty('z-index', '999999', 'important');
-            s.setProperty('font-size', '14px', 'important');
-            s.setProperty('line-height', '1.6', 'important');
-            s.setProperty('color', '#fbbf24', 'important');
-            s.setProperty('white-space', 'normal', 'important');
-            s.setProperty('word-break', 'break-all', 'important');
             s.setProperty('top', top + 'px', 'important');
             s.setProperty('left', left + 'px', 'important');
             s.setProperty('bottom', 'auto', 'important');
             s.setProperty('transform', 'none', 'important');
-        }
+            s.setProperty('z-index', '999999', 'important');
         return;
     }
 
