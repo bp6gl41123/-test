@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     try {
         // 1. 先抓取該推薦碼目前的點擊數
         const getRes = await fetch(
-            `${SUPABASE_URL}/rest/v1/fu6rm4?ref_code=eq.${encodeURIComponent(refCode)}&select=click_count`,
+            `${SUPABASE_URL}/rest/v1/referrals?ref_code=eq.${encodeURIComponent(refCode)}&select=click_count`,
             {
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
             // 2. 更新點擊數 (+1)
             await fetch(
-                `${SUPABASE_URL}/rest/v1/fu6rm4?ref_code=eq.${encodeURIComponent(refCode)}`,
+                `${SUPABASE_URL}/rest/v1/referrals?ref_code=eq.${encodeURIComponent(refCode)}`,
                 {
                     method: 'PATCH',
                     headers: {

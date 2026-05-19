@@ -30,8 +30,15 @@ export default async function handler(req, res) {
         const record = data[0];
 
         // 檢查是否已使用（一次性）
-        if (record.used) {
-            return res.status(200).json({ valid: false, reason: 'used' });
+        const { revalidate, line_user_id: lineIdForCheck } = req.body;
+        if (record.used && !revalidate) {
+            // 已使用，但檢查這個 LINE ID 是不是原本綁定的人
+            if (lineIdForCheck && record.bound_line_id && lineIdForCheck === record.bound_line_id) {
+                // 是同一個人，直接放行，不當作新使用
+                console.log('V1 LINE ID 吻合，放行:', lineIdForCheck);
+            } else {
+                return res.status(200).json({ valid: false, reason: 'used' });
+            }
         }
 
         // 檢查是否過期
@@ -41,7 +48,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ valid: false, reason: 'expired' });
         }
 
-        // 標記為已使用
+        // 標記為已使用，並綁定 LINE ID
+        const { line_user_id } = req.body;
         await fetch(
             `${SUPABASE_URL}/rest/v1/fu6rm4?key=eq.${encodeURIComponent(key)}`,
             {
@@ -51,7 +59,10 @@ export default async function handler(req, res) {
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ used: true })
+                body: JSON.stringify({ 
+                    used: true,
+                    bound_line_id: line_user_id || null
+                })
             }
         );
 

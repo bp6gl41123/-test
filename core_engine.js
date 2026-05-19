@@ -2,11 +2,10 @@
 /* ==== 【組件 E：核心引擎 - core_engine.js】 ==== */
 /* ============================================================== */
 
-const DB_KEY = 'DashboardDB_V152_Final'; 
-window.dataDB = JSON.parse(localStorage.getItem(DB_KEY));
-window.isNegativeMode = false; // 🪄 魔法反向開關
+const DB_KEY = 'DashboardDB_V212_Final'; 
 
-if (!window.dataDB) { window.dataDB = JSON.parse(JSON.stringify(defaultDB)); }
+window.isNegativeMode = false; // 🪄 魔法反向開關
+window.dataDB = JSON.parse(JSON.stringify(defaultDB));
 
 // 🎨 全站核心 CSS 注入
 if (!document.getElementById('pickTooltipStyle')) {
@@ -258,9 +257,8 @@ if (typeof dailyUpdates !== 'undefined') {
         if (!isDuplicate) window.dataDB[expert][sport].unshift([date, wl, net]); 
     });
     const currentYear = new Date().getFullYear();
-    for (let exp in window.dataDB) { for (let sp in window.dataDB[exp]) { window.dataDB[exp][sp].sort((a, b) => { const parseDate = (dStr) => { let d = new Date(`${currentYear}/${dStr}`); if (d.getMonth() === 11 && new Date().getMonth() <= 2) d.setFullYear(currentYear - 1); return d.getTime(); }; return parseDate(b[0]) - parseDate(a[0]); }); } }
+    for (let exp in window.dataDB) { for (let sp in window.dataDB[exp]) { if (sp === 'summary') continue; window.dataDB[exp][sp].sort((a, b) => { const parseDate = (dStr) => { let d = new Date(dStr.split('/').length === 3 ? dStr : `${currentYear}/${dStr}`); return d.getTime(); }; return parseDate(b[0]) - parseDate(a[0]); }); } }
 }
-localStorage.setItem(DB_KEY, JSON.stringify(window.dataDB));
 
 window.toggleIndexMode = function(mode) {
     window.isNegativeMode = (mode === 'neg');
@@ -290,19 +288,27 @@ let rankedList = [];
         let uniqueDates = new Set(records.map(r => r[0]));
 
 
-let isQualified = uniqueDates.size >= filterThreshold || qualifiedWhitelist.includes(name + '||' + targetSport);
+let isQualified = (uniqueDates.size >= 10 && isActive) || qualifiedWhitelist.includes(name + '||' + targetSport);
 
         let sliceRec = window.currentHomeFilter === 'all' ? records : records.slice(0, window.currentHomeFilter);
-        let net = sliceRec.reduce((sum, r) => sum + parseInt(r[2] || 0), 0);
-        
+
         // 🎯 核心升級：精準計算勝率
-        let w = 0, l = 0;
-        sliceRec.forEach(r => {
-            const wm = r[1].match(/(\d+)勝/);
-            const lm = r[1].match(/(\d+)敗/);
-            if(wm) w += parseInt(wm[1]);
-            if(lm) l += parseInt(lm[1]);
-        });
+        let w = 0, l = 0, net = 0;
+
+        if (window.currentHomeFilter === 'all' && window.dataDB[name] && window.dataDB[name].summary && window.dataDB[name].summary[targetSport]) {
+            const summary = window.dataDB[name].summary[targetSport];
+            w = summary.win || 0;
+            l = summary.loss || 0;
+            net = summary.net || 0;
+        } else {
+            sliceRec.forEach(r => {
+                const wm = r[1].match(/(\d+)勝/);
+                const lm = r[1].match(/(\d+)敗/);
+                if(wm) w += parseInt(wm[1]);
+                if(lm) l += parseInt(lm[1]);
+                net += parseInt(String(r[2]).replace(/[^0-9+\-]/g, '')) || 0;
+            });
+        }
         let winRate = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
 
         rankedList.push({ name, net, winRate, isActive, isQualified });
@@ -409,6 +415,8 @@ if (exp.isActive && exp.isQualified) {
         `;
     }
 
+    // 🎯 卡片渲染完成，通知讀取條可以消失了
+    if (typeof window.finishLoadingBar === 'function') window.finishLoadingBar();
 
 };
 
@@ -438,6 +446,7 @@ const tabs = document.getElementById('tabContainer');
             { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
             { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
             { name: '🇹🇼 中職 CPBL', items: [ { id: 'cpbl_team', label: '中華職棒隊伍' }, { id: 'cpbl_total', label: '中華職棒大小' } ] },
+            { name: '🇰🇷 韓棒 KBO', items: [ { id: 'kbo_team', label: '韓棒隊伍' }, { id: 'kbo_total', label: '韓棒大小' } ] },
             { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },
 
 
@@ -462,7 +471,16 @@ const tabs = document.getElementById('tabContainer');
 window.updateTabHighlights = function() {
     const tabs = document.querySelectorAll('#tabContainer .sport-tab');
     const categories = document.querySelectorAll('#tabContainer .dropdown-wrapper');
-    
+
+    // ── 新三層選擇器的 sportKey → 大類 對應表 ──
+    var catKeyMap = {
+        basketball: ['nba_team','nba_total','nba_team_total','nba_team_spread','nba_1h_total','euro_team','euro_total','euro_1h','nbl_team','nbl_total','jbl_team','jbl_total','kbl_team','kbl_total','cba_team','cba_total'],
+        baseball:   ['mlb_ml','mlb_runline','mlb_total','mlb_ml_high','npb_runline','npb_ml','npb_total','npb_1h_runline','npb_1h_ml','npb_1h_total','cpbl_team','cpbl_total','kbo_team','kbo_total'],
+        football:   ['soccer_team','soccer_total','soccer_ml','soccer_btts','soccer_corner_total','soccer_corner_ml'],
+        hockey:     ['nhl_ml','nhl_ml_reg','nhl_spread_ot','nhl_spread_reg','nhl_total_ot','nhl_total_reg','khl_team','khl_total'],
+        esports:    ['lol_team','lol_total']
+    };
+
     // 1. 如果沒有選擇任何好手，恢復全部預設狀態 (不亮也不灰)
     if (window.selectedExperts.length === 0) {
         tabs.forEach(t => { t.classList.remove('tab-highlight', 'tab-dimmed'); });
@@ -470,6 +488,27 @@ window.updateTabHighlights = function() {
             const btn = c.querySelector('.category-btn');
             if (btn) btn.classList.remove('tab-highlight', 'tab-dimmed'); 
         });
+
+        // 新三層：全部恢復預設色
+        document.querySelectorAll('.cat-btn').forEach(function(b) {
+            b.style.background = '#fef9ee';
+            b.style.color = '#92400e';
+            b.style.borderColor = '#d97706';
+            b.style.boxShadow = 'none';
+        });
+        document.querySelectorAll('#subTabContainer button').forEach(function(b) {
+            b.style.background = 'white';
+            b.style.color = '#1e293b';
+            b.style.borderColor = '#1e293b';
+            b.style.boxShadow = 'none';
+        });
+        document.querySelectorAll('#itemTabContainer button').forEach(function(b) {
+            b.style.background = 'white';
+            b.style.color = '#1e293b';
+            b.style.borderColor = '#1e293b';
+            b.style.boxShadow = 'none';
+        });
+        window._pendingHighlightKeys = null;
         return;
     }
 
@@ -478,6 +517,7 @@ window.updateTabHighlights = function() {
     window.selectedExperts.forEach(name => {
         if (window.dataDB[name]) {
             for (let key in window.dataDB[name]) {
+                if (key === 'summary') continue;
                 if (window.dataDB[name][key] && window.dataDB[name][key].length > 0) {
                     activeKeys.add(key);
                 }
@@ -485,11 +525,9 @@ window.updateTabHighlights = function() {
         }
     });
 
-    // 3. 更新各個小標籤的狀態
+    // 3. 更新各個小標籤的狀態 (原有 #tabContainer 邏輯完整保留)
     tabs.forEach(tab => {
-        // 從 tab 的 id (例如 'l-nba_team') 取出賽事 key ('nba_team')
         let sportKey = tab.id.replace('l-', '');
-        
         if (activeKeys.has(sportKey)) {
             tab.classList.add('tab-highlight');
             tab.classList.remove('tab-dimmed');
@@ -499,18 +537,90 @@ window.updateTabHighlights = function() {
         }
     });
 
-    // 4. 更新外層大分類按鈕的狀態 (只要底下有任何一個子項目發光，母按鈕就跟著發光)
-    categories.forEach(wrapper => {
-        const btn = wrapper.querySelector('.category-btn');
-        const hasActiveChild = wrapper.querySelector('.tab-highlight');
-        if (btn) {
-            if (hasActiveChild) {
-                btn.classList.add('tab-highlight');
-                btn.classList.remove('tab-dimmed');
-            } else {
-                btn.classList.add('tab-dimmed');
-                btn.classList.remove('tab-highlight');
+    // 8. 新三層：第三層 itemTabContainer 按鈕發光（已展開才操作）
+    document.querySelectorAll('#itemTabContainer button').forEach(function(b) {
+        var sk = b.getAttribute('data-sport-key');
+        if (sk && activeKeys.has(sk)) {
+            b.style.background = '#fffbeb';
+            b.style.color = '#d97706';
+            b.style.borderColor = '#f59e0b';
+            b.style.boxShadow = '0 4px 10px rgba(245,158,11,0.3)';
+        } else {
+            b.style.background = 'white';
+            b.style.color = '#1e293b';
+            b.style.borderColor = '#1e293b';
+            b.style.boxShadow = 'none';
+        }
+    });
+
+   // 5. 新三層：第一層 cat-btn 發光
+    document.querySelectorAll('.cat-btn').forEach(function(b) {
+        var catId = b.id.replace('cat-', '');
+        var keys = catKeyMap[catId] || [];
+        var hasActive = keys.some(function(k) { return activeKeys.has(k); });
+        if (hasActive) {
+            b.style.background = '#fffbeb';
+            b.style.color = '#d97706';
+            b.style.borderColor = '#f59e0b';
+            b.style.boxShadow = '0 4px 10px rgba(245,158,11,0.3)';
+        } else {
+            b.style.background = 'white';
+            b.style.color = '#94a3b8';
+            b.style.borderColor = '#e1e4e8';
+            b.style.boxShadow = 'none';
+        }
+    });
+
+    // 6. 新三層：記錄 activeKeys 供第二三層展開時使用
+    window._pendingHighlightKeys = activeKeys;
+
+    // 7. 新三層：第二層 subTabContainer 按鈕發光（已展開才操作）
+    document.querySelectorAll('#subTabContainer button').forEach(function(b) {
+        var label = b.textContent.trim();
+        var leagueKeys = [];
+        var allLeagues = [
+            { label: '🏀 NBA',         keys: ['nba_team','nba_total','nba_team_total','nba_team_spread','nba_1h_total'] },
+            { label: '🌏 亞歐籃',       keys: ['euro_team','euro_total','euro_1h','nbl_team','nbl_total','jbl_team','jbl_total','kbl_team','kbl_total','cba_team','cba_total'] },
+            { label: '⚾ MLB',          keys: ['mlb_ml','mlb_runline','mlb_total','mlb_ml_high'] },
+            { label: '🇯🇵 NPB 日棒',   keys: ['npb_runline','npb_ml','npb_total','npb_1h_runline','npb_1h_ml','npb_1h_total'] },
+            { label: '🇹🇼 CPBL 中職',  keys: ['cpbl_team','cpbl_total'] },
+            { label: '🇰🇷 KBO 韓棒',   keys: ['kbo_team','kbo_total'] },
+            { label: '⚽ 足球',         keys: ['soccer_team','soccer_total','soccer_ml','soccer_btts','soccer_corner_total','soccer_corner_ml'] },
+            { label: '🏒 NHL / KHL',   keys: ['nhl_ml','nhl_ml_reg','nhl_spread_ot','nhl_spread_reg','nhl_total_ot','nhl_total_reg','khl_team','khl_total'] },
+            { label: '🎮 電競',         keys: ['lol_team','lol_total'] }
+        ];
+        allLeagues.forEach(function(lg) {
+            if (label.indexOf(lg.label.replace(/\s/g,'')) > -1 || lg.label.indexOf(label) > -1 || label === lg.label) {
+                leagueKeys = lg.keys;
             }
+        });
+        var hasActive = leagueKeys.some(function(k) { return activeKeys.has(k); });
+        if (hasActive) {
+            b.style.background = '#fffbeb';
+            b.style.color = '#d97706';
+            b.style.borderColor = '#f59e0b';
+            b.style.boxShadow = '0 4px 10px rgba(245,158,11,0.3)';
+        } else {
+            b.style.background = 'white';
+            b.style.color = '#64748b';
+            b.style.borderColor = '#64748b';
+            b.style.boxShadow = 'none';
+        }
+    });
+
+    // 8. 新三層：第三層 itemTabContainer 按鈕發光（已展開才操作）
+    document.querySelectorAll('#itemTabContainer button').forEach(function(b) {
+        var sk = b.getAttribute('data-sport-key');
+        if (sk && activeKeys.has(sk)) {
+            b.style.background = '#fffbeb';
+            b.style.color = '#d97706';
+            b.style.borderColor = '#f59e0b';
+            b.style.boxShadow = '0 4px 10px rgba(245,158,11,0.3)';
+        } else {
+            b.style.background = 'white';
+            b.style.color = '#94a3b8';
+            b.style.borderColor = '#94a3b8';
+            b.style.boxShadow = 'none';
         }
     });
 };

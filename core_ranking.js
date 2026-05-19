@@ -2,39 +2,65 @@
 /* ==== 【組件 D：戰力表現 - core_ranking.js】 ==== */
 /* ============================================================== */
 
-window.selectedExperts = [];  
-window.excludedExperts = [];  
+window.selectedExperts = [];
+window.excludedExperts = [];
 window.expandStates = {};
-window.manualSwapList = []; 
+window.manualSwapList = [];
 
-window.toggleManualSwap = function(name) {
+window.toggleManualSwap = function (name) {
     const idx = window.manualSwapList.indexOf(name);
     if (idx > -1) window.manualSwapList.splice(idx, 1);
     else window.manualSwapList.push(name);
-    window.renderDisplay(); 
+    window.renderDisplay();
 };
 
-window.handleCompare = function() { 
-    window.excludedExperts = []; window.expandStates = {}; 
-    if (window.selectedExperts.length === 0 && window.activeSportKey === "") return alert('請點選好手'); 
-    document.getElementById('details').style.display = 'block'; 
-    window.renderDisplay(); 
-    document.getElementById('details').scrollIntoView({ behavior: 'smooth' }); 
+window._compareToastHandler = null;
+window.handleCompare = function () {
+    window.excludedExperts = []; window.expandStates = {};
+    if (window.selectedExperts.length === 0 && window.activeSportKey === "") {
+        // 清除舊的殘留 handler
+        if (window._compareToastHandler) {
+            document.removeEventListener('click', window._compareToastHandler);
+            window._compareToastHandler = null;
+        }
+        var old = document.getElementById('compare-toast');
+        if (old) old.remove();
+        var toast = document.createElement('div');
+        toast.id = 'compare-toast';
+        toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;background:linear-gradient(145deg,#0f172a,#1e293b);border:1px solid rgba(201,168,76,0.5);border-radius:16px;padding:32px 48px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.7),inset 0 0 30px rgba(201,168,76,0.05);min-width:280px;';
+        toast.innerHTML = '<div style="font-size:32px;margin-bottom:12px;">🎯</div><div style="color:#fbbf24;font-size:20px;font-weight:900;letter-spacing:1px;margin-bottom:8px;">請點選好手 或 賽事項目</div><div style="color:#94a3b8;font-size:14px;font-weight:bold;line-height:1.6;">先選好手名牌<br>或選擇賽事項目<br>再按眾選成績清單</div><button onclick="document.getElementById(\'compare-toast\').remove()" style="margin-top:20px;background:linear-gradient(135deg,#d97706,#fbbf24);color:#0f172a;border:none;padding:10px 32px;border-radius:50px;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:1px;">確定</button>';
+        document.body.appendChild(toast);
+        setTimeout(function() {
+            window._compareToastHandler = function(e) {
+                var t = document.getElementById('compare-toast');
+                if (t && !t.contains(e.target)) {
+                    t.remove();
+                    document.removeEventListener('click', window._compareToastHandler);
+                    window._compareToastHandler = null;
+                }
+            };
+            document.addEventListener('click', window._compareToastHandler);
+        }, 100);
+        return;
+    }
+    document.getElementById('details').style.display = 'block';
+    window.renderDisplay();
+    document.getElementById('details').scrollIntoView({ behavior: 'smooth' });
 };
 
 // 🎯 [核心新增] 智慧滾動偵測：自動判斷按鈕是否該往左滑動避開邊緣
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', function () {
     const detailsDiv = document.getElementById('details');
-    
+
     // 若對比區塊不存在或尚未顯示，確保按鈕退回右側邊緣
     if (!detailsDiv || detailsDiv.style.display === 'none') {
         if (typeof window.setFloatingButtonsCompareMode === 'function') window.setFloatingButtonsCompareMode(false);
         return;
     }
-    
+
     // 取得對比區塊距離螢幕頂部的相對位置
     const rect = detailsDiv.getBoundingClientRect();
-    
+
     // 判斷邏輯：當畫面往下滑，對比區塊進入螢幕可視範圍 (到達螢幕高度的 70% 處) 時，按鈕往左滑動
     if (rect.top < window.innerHeight * 0.7) {
         if (typeof window.setFloatingButtonsCompareMode === 'function') {
@@ -50,7 +76,7 @@ window.addEventListener('scroll', function() {
 
 // 🎯 手機版強制：沒對比時也用相同的隱藏/露出邏輯
 if (window.innerWidth < 1024) {
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         var detailsDiv = document.getElementById('details');
         if (detailsDiv && detailsDiv.offsetParent !== null) return;
         var anchor = document.getElementById('tabContainer');
@@ -63,54 +89,423 @@ if (window.innerWidth < 1024) {
     });
 }
 
-window.renderDisplay = function() {
+window.renderDisplay = function () {
     const display = document.getElementById('displayArea'); const header = document.getElementById('singleHeader');
-    const layouts = display.querySelectorAll('.pk-layout'); const scrollMap = {}; layouts.forEach(l => { if(l.id) scrollMap[l.id] = l.scrollLeft; });
-    const mainScroll = display.scrollLeft; 
+    const layouts = display.querySelectorAll('.pk-layout'); const scrollMap = {}; layouts.forEach(l => { if (l.id) scrollMap[l.id] = l.scrollLeft; });
+    const mainScroll = display.scrollLeft;
     display.innerHTML = ''; display.className = ''; display.style.flexDirection = '';
     header.style.display = 'none';
     if (window.selectedExperts.length === 0 && window.activeSportKey !== "") window.renderRankMode(); else if (window.selectedExperts.length === 1) window.renderNormalMode(); else window.renderPKMode();
-    setTimeout(() => { const newLayouts = display.querySelectorAll('.pk-layout'); newLayouts.forEach(l => { if(l.id && scrollMap[l.id]) l.scrollLeft = scrollMap[l.id]; }); display.scrollLeft = mainScroll; }, 0);
+    setTimeout(() => { const newLayouts = display.querySelectorAll('.pk-layout'); newLayouts.forEach(l => { if (l.id && scrollMap[l.id]) l.scrollLeft = scrollMap[l.id]; }); display.scrollLeft = mainScroll; }, 0);
 };
 
-window.toggleExpand = function(n) { window.expandStates[n] = !window.expandStates[n]; window.renderDisplay(); };
+window.toggleExpand = function (n) { window.expandStates[n] = !window.expandStates[n]; window.renderDisplay(); };
 
-window.renderPKMode = function() {
+window.renderPKMode = function () {
     const display = document.getElementById('displayArea'); if (!display) return;
     const key = window.activeSportKey || "nba_team"; display.className = 'pk-layout';
-    let htmlStr = ''; 
+    let htmlStr = '';
     window.selectedExperts.forEach(n => {
         try {
             let dbData = (window.dataDB[n] && window.dataDB[n][key]) ? window.dataDB[n][key] : [];
             const hasMore = dbData.length > 20; const showFull = window.expandStates[n];
             const btnHtml = hasMore ? `<button class="expand-btn" onclick="window.toggleExpand('${n}')">${showFull ? '🔼 收起歷史' : '🔍 展開更多歷史'}</button>` : '';
             htmlStr += `<div class="pk-column"><div class="close-x" onclick="window.toggleExpert('${n}', null);">×</div><div class="pk-name-label" style="display:flex; align-items:center; justify-content:center;">${n} ${window.getPickTooltipHtml(n)}</div>${window.getRankBanner(typeof itemNames !== 'undefined' && itemNames[key] ? itemNames[key] : '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:70px;text-align:center;">戰績</div><div style="flex:1;padding-left:5px;">反饋</div></div>${window.buildHTML(dbData, !showFull, n, key)}${btnHtml}</div>`;
-        } catch(e) { console.error("資料異常跳過:", n); }
+        } catch (e) { console.error("資料異常跳過:", n); }
     });
-    display.innerHTML = htmlStr; 
+    display.innerHTML = htmlStr;
 };
 
-window.renderRankMode = function() {
+window.renderRankMode = function () {
     const display = document.getElementById('displayArea'); let allSorted = []; let systemLatestDate = window.getSystemLatestDate(window.activeSportKey);
     // 🎯 特殊激活白名單
     let qualifiedWhitelistRM = [];
-    try { qualifiedWhitelistRM = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    try { qualifiedWhitelistRM = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { }
 
-    for(let name in window.dataDB) {
-        if(window.excludedExperts.includes(name)) continue; let list = window.dataDB[name][window.activeSportKey] || []; if(list.length === 0) continue;
-        
-let diffDays = window.getDaysDiff(list[0][0], systemLatestDate); if (diffDays > 3) continue;
+    for (let name in window.dataDB) {
+        if (window.excludedExperts.includes(name)) continue; let list = window.dataDB[name][window.activeSportKey] || []; if (list.length === 0) continue;
+
+        let diffDays = window.getDaysDiff(list[0][0], systemLatestDate); if (diffDays > 3) continue;
         // 🎯 門檻激活：不重複天數 < 10 天不進入賽事排行
-let uniqueDatesRank = new Set(list.map(r => r[0]));
-        if (uniqueDatesRank.size < 10 && !qualifiedWhitelistRM.includes(name)) continue;
+        let uniqueDatesRank = new Set(list.map(r => r[0]));
+        const isQualifiedRM = (list.length >= 20 && uniqueDatesRank.size >= 10) || qualifiedWhitelistRM.includes(name + '||' + window.activeSportKey);
 
-        let w=0, l=0, n20=0; list.slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w+l) > 0 ? (w/(w+l)) : 0; allSorted.push({ name, w, l, net: n20, rate });
+        let w = 0, l = 0, n20 = 0; list.slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w + l) > 0 ? Math.round(w / (w + l) * 100) / 100 : 0;
+        const getRate = (days) => { let tw = 0, tl = 0; list.slice(0, days).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); }); return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0; };
+        const r10 = getRate(10);
+        const rPrev10 = (() => { let tw = 0, tl = 0; list.slice(10, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); }); return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0; })();;
+        allSorted.push({ name, w, l, net: n20, rate, r10, rPrev10, r9: getRate(9), r8: getRate(8), r7: getRate(7), r6: getRate(6), r5: getRate(5), r4: getRate(4), r3: getRate(3), r2: getRate(2), r1: getRate(1), isQualified: isQualifiedRM });
     }
-    allSorted.sort((a,b) => b.rate - a.rate || b.net - a.net);
-    const isActuallyPositive = (item) => { const naturallyPositive = item.rate >= 0.5; const isSwapped = window.manualSwapList.includes(item.name); return isSwapped ? !naturallyPositive : naturallyPositive; };
+    allSorted.sort((a, b) => {
+        // 達標優先，未達標沉底
+        if (a.isQualified && !b.isQualified) return -1;
+        if (!a.isQualified && b.isQualified) return 1;
+        if (!a.isQualified && !b.isQualified) return b.rate - a.rate;
+        // 第一步：三步多數決（3:0）→ 直接決勝
+        const s1 = a.rate - b.rate;
+        const s2 = a.r10 - b.r10;
+        const s3 = a.rPrev10 - b.rPrev10;
+        const aWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+        const bWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
+       // 一進一退大幅趨勢機制（第一觸發）
+        {
+            const trendA = a.r10 - a.rPrev10;
+            const trendB = b.r10 - b.rPrev10;
+            const aAdvancing = trendA > 0;
+            const bAdvancing = trendB > 0;
+            const aRetreating = trendA < 0;
+            const bRetreating = trendB < 0;
+            // 第一關：方向相反（一進一退），持平不算退步也不算進步
+            if ((aAdvancing && bRetreating) || (bAdvancing && aRetreating)) {
+                const absA = Math.abs(trendA);
+                const absB = Math.abs(trendB);
+                const advancingSideIsA = aAdvancing;
+                // 🎯 一進一退內建步步進步偵測：進步方若同時符合步步進步條件，直接走步步進步機制
+                const advObj = advancingSideIsA ? a : b;
+                const isStepUp = advObj.rPrev10 < advObj.r10 && advObj.r10 < advObj.r5;
+                if (isStepUp) {
+                    const s5 = a.r5 - b.r5;
+                    // 正向：數字低才是輸，所以 a 輸的步 = s1 < 0，b 輸的步 = s1 > 0
+                    const stepUpLoseSteps = advancingSideIsA
+                        ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                        : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                    const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                    if (stepUpLoseSteps.length > 0) {
+                        const skipByGate1 = Math.abs(s1) > 0.15;
+                        const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                        const skipByGate2 = gate2Count >= 2;
+                        if (!skipByGate1 && !skipByGate2) {
+                            if (Math.abs(s5) > minLoseStep) return s5 > 0 ? -1 : 1;
+                        }
+                    }
+                } else {
+                    // 第二關：幅度驗證（三個條件任一符合）
+                    const singleLarge = absA >= 0.40 || absB >= 0.40;
+                    const dualLarge   = absA >= 0.30 && absB >= 0.30;
+                    // 條件三：進步方近5場 減 退步方近5場的差值，大於三步總值絕對值（正向：進步方勝率高）
+                    const r5Diff = advancingSideIsA ? (a.r5 - b.r5) : (b.r5 - a.r5);
+                    const tripleCondition = r5Diff > Math.abs(s1 + s2 + s3);
+                    if (singleLarge || dualLarge || tripleCondition) {
+                        // 第三關：進步方是近20場落後的那方
+                        const advancingIsTrailing = advancingSideIsA ? s1 < 0 : s1 > 0;
+                        if (advancingIsTrailing && Math.abs(s1) <= 0.10) {
+                            // 大幅進步者排前（正向：a排前 return -1）
+                            return advancingSideIsA ? -1 : 1;
+                        }
+                    }
+                }
+            }
+        }
+        if (aWins === 3) return -1;
+        if (bWins === 3) return 1;
+        // 多數決鞏固機制（2:1）：2票方輸的那步，均小於贏的兩步 → 直接勝出
+        // 例：2票方贏 s1=5%、s3=12%，輸 s2=3%，3% < 5% 且 3% < 12% → 直接勝出
+        if (aWins === 2 && bWins <= 1) {
+            const aLoseStep = s1 <= 0 ? Math.abs(s1) : s2 <= 0 ? Math.abs(s2) : Math.abs(s3);
+            const aWinSteps = [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+            if (aLoseStep < aWinSteps[0] && aLoseStep < aWinSteps[1]) {
+                    return -1;
+            }
+        }
+        if (bWins === 2 && aWins <= 1) {
+            const bLoseStep = s1 >= 0 ? Math.abs(s1) : s2 >= 0 ? Math.abs(s2) : Math.abs(s3);
+            const bWinSteps = [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+            if (bLoseStep < bWinSteps[0] && bLoseStep < bWinSteps[1]) {
+                    return 1;
+            }
+        }
 
-const top6 = allSorted.filter(item => isActuallyPositive(item)); 
-    const bottom6 = allSorted.filter(item => !isActuallyPositive(item)).sort((a,b) => a.rate - b.rate || a.net - b.net);
+        // 第二步：三步總和同分（=0）才觸發十階細分，找出差值備用
+        const totalScore = s1 + s2 + s3;
+        let tierDiff = 0;
+        if (Math.abs(totalScore) <= 0.0001) {
+            tierDiff = a.r10 - b.r10 !== 0 ? a.r10 - b.r10 : a.r9 - b.r9 !== 0 ? a.r9 - b.r9 : a.r8 - b.r8 !== 0 ? a.r8 - b.r8 : a.r7 - b.r7 !== 0 ? a.r7 - b.r7 : a.r6 - b.r6 !== 0 ? a.r6 - b.r6 : a.r5 - b.r5 !== 0 ? a.r5 - b.r5 : a.r4 - b.r4 !== 0 ? a.r4 - b.r4 : a.r3 - b.r3 !== 0 ? a.r3 - b.r3 : a.r2 - b.r2 !== 0 ? a.r2 - b.r2 : a.r1 - b.r1;
+        }
+
+        // 第三步：趨勢機制（正向指標）
+        const trendA = a.r10 - a.rPrev10;
+        const trendB = b.r10 - b.rPrev10;
+        const eitherRetreating = trendA < -0.05 || trendB < -0.05;
+        const eitherAdvancing = trendA > 0.05 || trendB > 0.05;
+        const trendDiff = trendA - trendB;
+        // 雙方同向退步才觸發退步機制
+        // 條件：至少一方退步超過5%，且沒有人進步超過5%
+        // 退步幅度差距 大於 三步總和 x1.9 才正式介入
+        if (eitherRetreating && !eitherAdvancing) {
+            if (Math.abs(trendDiff) > Math.abs(totalScore) * 1.9) {
+                const s5 = a.r5 - b.r5;
+                // 近5場差距 大於 近10場退步幅度差距 → 近5場退步方讓位
+                // 近5場差距 小於等於 近10場退步幅度差距 → 近10場退步方讓位
+                if (Math.abs(s5) > Math.abs(trendDiff)) return s5 > 0 ? -1 : 1;
+                return trendDiff > 0 ? -1 : 1;
+            }
+        }
+        // 雙方同向進步才觸發進步機制
+        if (eitherAdvancing && !eitherRetreating) {
+            if (Math.abs(trendDiff) > Math.abs(totalScore) * 3) {
+                if (Math.abs(s2) > 0.11) return trendDiff > 0 ? -1 : 1;
+            }
+        }
+        // 步步退步獨立機制（正向）：任一方 rPrev10 > r10 > r5，另一方沒有
+        // 步步退步成立後，必須過兩道門檻才能進入近5場決勝
+        // 步步退步獨立機制（正向）：一方 rPrev10 > r10 > r5，另一方沒有
+        {
+            const aStepDown = a.rPrev10 > a.r10 && a.r10 > a.r5;
+            const bStepDown = b.rPrev10 > b.r10 && b.r10 > b.r5;
+            if (aStepDown !== bStepDown) {
+                const s5 = a.r5 - b.r5;
+                const stepDownSide = aStepDown ? 'a' : 'b';
+                const stepDownWinSteps = stepDownSide === 'a'
+                    ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                    : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                const minWinStep = stepDownWinSteps.length > 0 ? Math.min(...stepDownWinSteps) : 0;
+                // 第一門檻：|s1| > 15% → 步步退步失效
+                const skipByGate1 = Math.abs(s1) > 0.15;
+                // 第二門檻：以下三條件滿足兩條 → 步步退步失效
+                const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                const skipByGate2 = gate2Count >= 2;
+                if (!skipByGate1 && !skipByGate2) {
+                    // 兩道門檻都未觸發，進入近5場決勝（正向：高的排前）
+                    if (Math.abs(s5) > minWinStep) return s5 > 0 ? -1 : 1;
+                }
+            }
+        }
+        // 步步進步獨立機制（正向）：一方 rPrev10 < r10 < r5，另一方沒有
+        {
+            const aStepUp = a.rPrev10 < a.r10 && a.r10 < a.r5;
+            const bStepUp = b.rPrev10 < b.r10 && b.r10 < b.r5;
+            if (aStepUp !== bStepUp) {
+                const s5 = a.r5 - b.r5;
+                const stepUpSide = aStepUp ? 'a' : 'b';
+                const stepUpLoseSteps = stepUpSide === 'a'
+                    ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                    : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                // 第一門檻：|s1| > 15% → 步步進步失效
+                const skipByGate1 = Math.abs(s1) > 0.15;
+                // 第二門檻：以下三條件滿足兩條 → 步步進步失效
+                const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                const skipByGate2 = gate2Count >= 2;
+                if (!skipByGate1 && !skipByGate2) {
+                    // 兩道門檻都未觸發，進入近5場決勝（正向：高的排前）
+                    if (Math.abs(s5) > minLoseStep) return s5 > 0 ? -1 : 1;
+                }
+            }
+        }
+        // 三步總和 ≤ 14%（含=0）→ 先比近5場
+        // s3加權：三步總和0.12~0.14之間，三步總和贏方同時s3>19% → 直接決勝（正向）
+        if (Math.abs(totalScore) > 0.12 && Math.abs(totalScore) <= 0.14) {
+            if (totalScore > 0 && s3 > 0.19) return -1;
+            if (totalScore < 0 && s3 < -0.19) return 1;
+        }
+        if (Math.abs(totalScore) <= 0.14) {
+            const s5 = a.r5 - b.r5;
+            if (Math.abs(s5) > 0.0001) {
+                // 近5場新機制：兩條件都通過才決勝，否則走三步總和
+                const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
+                const cond2 = (s5 > 0 && (s2 < 0 || s5 > s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
+                if (cond1 || cond2) return s5 > 0 ? -1 : 1;
+            }
+        }
+        if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? -1 : 1;
+        // 十階差值決勝（正向：高的排前面，僅總和=0且近5場=0才觸發）
+        return tierDiff > 0 ? -1 : tierDiff < 0 ? 1 : 0;
+    });
+    const isActuallyPositive = (item) => { const naturallyPositive = item.rate >= 0.5;; const isSwapped = window.manualSwapList.includes(item.name); return isSwapped ? !naturallyPositive : naturallyPositive; };
+
+    const top6 = allSorted.filter(item => isActuallyPositive(item));
+    const bottom6 = allSorted.filter(item => !isActuallyPositive(item)).sort((a, b) => {
+        if ((a.name === '傲慢20' || b.name === '傲慢20') && (a.name === '秉達Li da 35' || b.name === '秉達Li da 35')) {
+            console.error('[追蹤]', a.name, 'isQualified:', a.isQualified, '| trendA:', (a.r10 - a.rPrev10).toFixed(2), '|| ', b.name, 'isQualified:', b.isQualified, '| trendB:', (b.r10 - b.rPrev10).toFixed(2));
+        }
+        if (a.isQualified && !b.isQualified) return -1;
+        if (!a.isQualified && b.isQualified) return 1;
+        if (!a.isQualified && !b.isQualified) return a.rate - b.rate;
+        // 第一步：三步多數決（3:0）→ 直接決勝
+        const s1 = a.rate - b.rate;
+        const s2 = a.r10 - b.r10;
+        const s3 = a.rPrev10 - b.rPrev10;
+        const aWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
+        const bWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+        // 一進一退大幅趨勢機制（第一觸發，反向）
+        // 反向：進步 = r10 < rPrev10（數字低才是好），退步 = r10 > rPrev10
+        {
+            const trendA = a.r10 - a.rPrev10;
+            const trendB = b.r10 - b.rPrev10;
+            const aAdvancing = trendA < 0;
+            const bAdvancing = trendB < 0;
+            const aRetreating = trendA > 0;
+            const bRetreating = trendB > 0;
+            // 第一關：方向相反（一進一退），持平不算退步也不算進步
+            if ((aAdvancing && bRetreating) || (bAdvancing && aRetreating)) {
+                const absA = Math.abs(trendA);
+                const absB = Math.abs(trendB);
+                const advancingSideIsA = aAdvancing;
+                // 🎯 一進一退內建步步進步偵測（反向）：進步方若同時符合步步進步條件，直接走步步進步機制
+                const advObj = advancingSideIsA ? a : b;
+                const isStepUp = advObj.rPrev10 > advObj.r10 && advObj.r10 > advObj.r5;
+                if (isStepUp) {
+                        const s5 = a.r5 - b.r5;
+                        // 反向：數字高才是輸，所以 a 輸的步 = s1 > 0，b 輸的步 = s1 < 0
+                        const stepUpLoseSteps = advancingSideIsA
+                            ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                            : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                        const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                        if (stepUpLoseSteps.length > 0) {
+                            const skipByGate1 = Math.abs(s1) > 0.15;
+                            const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                            const skipByGate2 = gate2Count >= 2;
+                            if (!skipByGate1 && !skipByGate2) {
+                                if (Math.abs(s5) > minLoseStep) return s5 > 0 ? 1 : -1;
+                            }
+                        }
+                    } else {
+                        // 第二關：幅度驗證（三個條件任一符合）
+                        const singleLarge = absA >= 0.40 || absB >= 0.40;
+                        const dualLarge   = absA >= 0.30 && absB >= 0.30;
+                        // 條件三：退步方近5場 減 進步方近5場的差值，大於三步總值絕對值（反向：退步方勝率高）
+                        const r5Diff = advancingSideIsA ? (b.r5 - a.r5) : (a.r5 - b.r5);
+                        const tripleCondition = r5Diff > Math.abs(s1 + s2 + s3);
+                        if (singleLarge || dualLarge || tripleCondition) {
+                            const advancingIsTrailing = advancingSideIsA ? s1 > 0 : s1 < 0;
+                            if (advancingIsTrailing && Math.abs(s1) <= 0.10) {
+                                return advancingSideIsA ? -1 : 1;
+                            }
+                        }
+                    }
+            }
+        }
+        if (aWins === 3) return -1;
+if (bWins === 3) return 1;
+        // 多數決鞏固機制（2:1）：2票方輸的那步，均小於贏的兩步 → 直接勝出（反向）
+        // 例：2票方贏 s1=5%、s3=12%，輸 s2=3%，3% < 5% 且 3% < 12% → 直接勝出
+        if (aWins === 2 && bWins <= 1) {
+            const aLoseStep = s1 >= 0 ? Math.abs(s1) : s2 >= 0 ? Math.abs(s2) : Math.abs(s3);
+            const aWinSteps = [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+            if (aLoseStep < aWinSteps[0] && aLoseStep < aWinSteps[1]) {
+                    return -1;
+            }
+        }
+        if (bWins === 2 && aWins <= 1) {
+            const bLoseStep = s1 <= 0 ? Math.abs(s1) : s2 <= 0 ? Math.abs(s2) : Math.abs(s3);
+            const bWinSteps = [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+            if (bLoseStep < bWinSteps[0] && bLoseStep < bWinSteps[1]) {
+                    return 1;
+            }
+        }
+
+        // 第二步：三步總和同分才觸發十階，找出差值備用
+        const totalScore = s1 + s2 + s3;
+        let tierDiff = 0;
+        if (Math.abs(totalScore) <= 0.0001) {
+            tierDiff = b.r10 - a.r10 !== 0 ? b.r10 - a.r10 : b.r9 - a.r9 !== 0 ? b.r9 - a.r9 : b.r8 - a.r8 !== 0 ? b.r8 - a.r8 : b.r7 - a.r7 !== 0 ? b.r7 - a.r7 : b.r6 - a.r6 !== 0 ? b.r6 - a.r6 : b.r5 - a.r5 !== 0 ? b.r5 - a.r5 : b.r4 - a.r4 !== 0 ? b.r4 - a.r4 : b.r3 - a.r3 !== 0 ? b.r3 - a.r3 : b.r2 - a.r2 !== 0 ? b.r2 - a.r2 : b.r1 - a.r1;
+        }
+        // 第三步：趨勢機制（反向指標：進步=退步，退步=進步）
+        const trendA = a.r10 - a.rPrev10;
+        const trendB = b.r10 - b.rPrev10;
+        const eitherRetreating = trendA > 0.05 || trendB > 0.05;
+        const eitherAdvancing = trendA < -0.05 || trendB < -0.05;
+        const trendDiff = trendA - trendB;
+        // 雙方同向退步才觸發退步機制（反向：進步=退步，退步=進步，方向相反）
+        // 雙方同向退步才觸發退步機制（反向：實際成績進步幅度高 = 反向退步）
+        // 條件：至少一方近10場 > 上10場超過5%（反向中高是壞事，代表退步），且沒有人反向進步
+        // 退步幅度差距 大於 三步總和 x1.9 才正式介入
+        if (eitherRetreating && !eitherAdvancing) {
+            if (Math.abs(trendDiff) > Math.abs(totalScore) * 1.9) {
+                const s5 = a.r5 - b.r5;
+                // 【反向退步機制近5場判斷邏輯】
+                // 退步機制觸發後，比較兩人近5場差距 vs 近10場退步幅度差距：
+                // 近10場：數字高的在反向中退步較多（實際進步但反向是壞事）
+                // 近5場：數字高的在反向中退步較多（實際進步但反向是壞事）
+                // 兩人近10場退步幅度差距 = Math.abs(trendDiff)（近10場幅度差）
+                // 兩人近5場退步差距 = Math.abs(s5)（近5場差距）
+                // 若近5場差距 > 近10場退步幅度差距 → 近5場退步方（數字高的）讓位
+                // 若近5場差距 <= 近10場退步幅度差距 → 近10場退步方（數字高的）讓位
+                if (Math.abs(s5) > Math.abs(trendDiff)) return s5 > 0 ? 1 : -1;
+                return trendDiff > 0 ? 1 : -1;
+            }
+        }
+        if (eitherAdvancing && !eitherRetreating) {
+                if (Math.abs(trendDiff) > Math.abs(totalScore) * 3) {
+                    if (Math.abs(s2) > 0.11) {
+                        // 反向進步機制最終門檻：勝出方上10場勝率達59%以上，需與對方差距在10%以內才過關
+                        const advWinner = trendDiff < 0 ? 'a' : 'b';
+                        const winnerPrev10 = advWinner === 'a' ? a.rPrev10 : b.rPrev10;
+                        const loserPrev10  = advWinner === 'a' ? b.rPrev10 : a.rPrev10;
+                        const prev10Gap = winnerPrev10 - loserPrev10;
+                        if (winnerPrev10 >= 0.59 && prev10Gap > 0.10) {
+                            // 門檻不過，反向進步機制失效，繼續往下走
+                        } else {
+                            return trendDiff > 0 ? 1 : -1;
+                        }
+                    }
+                }
+            }
+        // 步步退步獨立機制（反向）：一方 rPrev10 < r10 < r5，另一方沒有
+        {
+            const aStepDown = a.rPrev10 < a.r10 && a.r10 < a.r5;
+            const bStepDown = b.rPrev10 < b.r10 && b.r10 < b.r5;
+            if (aStepDown !== bStepDown) {
+                const s5 = a.r5 - b.r5;
+                const stepDownSide = aStepDown ? 'a' : 'b';
+                // 反向：數字低才是贏，所以 a 贏的步 = s1 < 0，b 贏的步 = s1 > 0
+                const stepDownWinSteps = stepDownSide === 'a'
+                    ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                    : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                const minWinStep = stepDownWinSteps.length > 0 ? Math.min(...stepDownWinSteps) : 0;
+                // 第一門檻：|s1| > 15% → 步步退步失效
+                const skipByGate1 = Math.abs(s1) > 0.15;
+                // 第二門檻：以下三條件滿足兩條 → 步步退步失效
+                const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                const skipByGate2 = gate2Count >= 2;
+                if (!skipByGate1 && !skipByGate2) {
+                    // 兩道門檻都未觸發，進入近5場決勝（反向：高的排後）
+                    if (Math.abs(s5) > minWinStep) return s5 > 0 ? 1 : -1;
+                }
+            }
+        }
+        // 步步進步獨立機制（反向）：一方 rPrev10 > r10 > r5，另一方沒有
+        {
+            const aStepUp = a.rPrev10 > a.r10 && a.r10 > a.r5;
+            const bStepUp = b.rPrev10 > b.r10 && b.r10 > b.r5;
+            if (aStepUp !== bStepUp) {
+                const s5 = a.r5 - b.r5;
+                const stepUpSide = aStepUp ? 'a' : 'b';
+                // 反向：數字高才是輸，所以 a 輸的步 = s1 > 0，b 輸的步 = s1 < 0
+                const stepUpLoseSteps = stepUpSide === 'a'
+                    ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                    : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                // 第一門檻：|s1| > 15% → 步步進步失效
+                const skipByGate1 = Math.abs(s1) > 0.15;
+                // 第二門檻：以下三條件滿足兩條 → 步步進步失效
+                const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                const skipByGate2 = gate2Count >= 2;
+                if (!skipByGate1 && !skipByGate2) {
+                    // 兩道門檻都未觸發，進入近5場決勝（反向：高的排後）
+                    if (Math.abs(s5) > minLoseStep) return s5 > 0 ? 1 : -1;
+                }
+            }
+        }
+        // 三步總和 ≤ 14%（含=0）→ 先比近5場（反向：低的排前面）
+        // s3加權：三步總和0.12~0.14之間，三步總和贏方同時s3>19% → 直接決勝（反向）
+        if (Math.abs(totalScore) > 0.12 && Math.abs(totalScore) <= 0.14) {
+            if (totalScore > 0 && s3 > 0.19) return 1;
+            if (totalScore < 0 && s3 < -0.19) return -1;
+        }
+        if (Math.abs(totalScore) <= 0.14) {
+            const s5 = a.r5 - b.r5;
+            if (Math.abs(s5) > 0.0001) {
+                // 近5場新機制：兩條件都通過才決勝，否則走三步總和
+                const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
+                const cond2 = (s5 > 0 && -s5 < s2) || (s5 < 0 && s5 < -s2);
+                if (cond1 || cond2) return s5 > 0 ? 1 : -1;
+            }
+        }
+            if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? 1 : -1;
+        // 十階差值決勝（反向：低的排前面，僅總和=0且近5場=0才觸發）
+        return tierDiff > 0 ? -1 : tierDiff < 0 ? 1 : 0;
+    });
     /* 🎯 專業化名詞與圖示升級：戰力紅/黑榜 ➔ 正向/反向指標，骷髏頭 ➔ 魔法杖 */
     display.innerHTML = `<div class="rank-group-title" style="color:#16a34a; border-bottom:2px solid #bbf7d0;">🏆 ${itemNames[window.activeSportKey]} - 正向指標</div><div class="pk-layout" id="topLayout"></div><div class="rank-group-title" style="color:#dc3545; border-bottom:2px solid #fecaca;">🪄 ${itemNames[window.activeSportKey]} - 反向指標</div><div class="pk-layout" id="bottomLayout"></div>`;
     top6.forEach((item, i) => document.getElementById('topLayout').innerHTML += window.renderRankCard(item, i, window.activeSportKey, false));
@@ -118,36 +513,56 @@ const top6 = allSorted.filter(item => isActuallyPositive(item));
     bottom6.forEach((item, i) => document.getElementById('bottomLayout').innerHTML += window.renderRankCard(item, i, window.activeSportKey, true));
 };
 
-window.renderRankCard = function(item, idx, key, isReverse) {
-    let cls = isReverse ? "title-rank-neg" : (idx===0 ? "title-rank-1" : (idx===1 ? "title-rank-2" : (idx===2 ? "title-rank-3" : "title-unranked")));
-    let bCls = isReverse ? "rank-neg-badge" : (idx===0 ? "rank-1-badge" : (idx===1 ? "rank-2-badge" : (idx===2 ? "rank-3-badge" : "")));
+window.renderRankCard = function (item, idx, key, isReverse) {
+    let cls = isReverse ? "title-rank-neg" : (idx === 0 ? "title-rank-1" : (idx === 1 ? "title-rank-2" : (idx === 2 ? "title-rank-3" : "title-unranked")));
+    let bCls = isReverse ? "rank-neg-badge" : (idx === 0 ? "rank-1-badge" : (idx === 1 ? "rank-2-badge" : (idx === 2 ? "rank-3-badge" : "")));
     const showFull = window.expandStates[item.name]; const hasMore = window.dataDB[item.name][key] && window.dataDB[item.name][key].length > 20;
     const btnHtml = hasMore ? `<button class="expand-btn" onclick="window.toggleExpand('${item.name}')">${showFull ? '🔼 收起' : '🔍 展開歷史'}</button>` : '';
     const swapText = isReverse ? '暫居正向區' : '暫居反向區'; const swapColor = isReverse ? '#16a34a' : '#dc3545';
-const swapBtn = `<button onclick="event.stopPropagation(); window.toggleManualSwap('${item.name}')" style="cursor:pointer; font-size:13px; color:${swapColor}; border:1.5px solid ${swapColor}; padding:4.5px 12px; border-radius:4px; font-weight:900; white-space:nowrap; background:transparent; transition:0.2s; height:28px; line-height:1;">${swapText}</button>`;
-    
-// 🎯 新增的：收入麾下按鈕邏輯
+    const swapBtn = `<button onclick="event.stopPropagation(); window.toggleManualSwap('${item.name}')" style="cursor:pointer; font-size:13px; color:${swapColor}; border:1.5px solid ${swapColor}; padding:4.5px 12px; border-radius:4px; font-weight:900; white-space:nowrap; background:transparent; transition:0.2s; height:28px; line-height:1;">${swapText}</button>`;
+
+    // 🎯 新增的：收入麾下按鈕邏輯
     let recruitKey = `${item.name}||${key}`;
     let isRecruited = window.userRecruit && window.userRecruit.includes(recruitKey);
     let recruitBtn = `<button class="recruit-btn ${isRecruited ? 'recruited' : ''}" onclick="event.stopPropagation(); if(window.toggleRecruit) window.toggleRecruit('${item.name}', this, '${key}')">${isRecruited ? '⭐ 已收錄' : '📌 收入麾下'}</button>`;
 
-    return `<div class="pk-column">${recruitBtn}<div class="close-x" onclick="window.excludeAndRedraw('${item.name}')">×</div><div class="pk-name-label" style="display:flex; align-items:center; justify-content:center; padding: 10px 5px;">${item.name} ${window.getPickTooltipHtml(item.name)}</div><div class="title-container ${cls}"><h4 class="section-title">勝率 ${(item.rate*100).toFixed(0)}%</h4><span class="rank-badge ${bCls}">${isReverse?'反向':''} NO.${idx+1} (${item.net>=0?'+'+item.net:item.net})</span></div>${window.buildHTML(window.dataDB[item.name][key] || [], !showFull, item.name, key, swapBtn)}${btnHtml}</div>`;
+    const unqualifiedBadge = item.isQualified === false ? `<div style="text-align:center; color:#94a3b8; font-size:12px; margin-bottom:5px;">📊 資料累積中（${window.dataDB[item.name][key]?.length || 0}/20筆）</div>` : '';
+    const colStyle = item.isQualified === false ? 'opacity:0.5; filter:grayscale(50%);' : '';
+    return `<div class="pk-column" style="${colStyle}">${recruitBtn}<div class="close-x" onclick="window.excludeAndRedraw('${item.name}')">×</div><div class="pk-name-label" style="display:flex; align-items:center; justify-content:center; padding: 10px 5px;">${item.name} ${window.getPickTooltipHtml(item.name)}</div>${unqualifiedBadge}<div class="title-container ${cls}"><h4 class="section-title">勝率 ${(item.rate * 100).toFixed(0)}%</h4><span class="rank-badge ${bCls}">${isReverse ? '反向' : ''} NO.${idx + 1} (${item.net >= 0 ? '+' + item.net : item.net})</span></div>${window.buildHTML(window.dataDB[item.name][key] || [], !showFull, item.name, key, swapBtn)}${btnHtml}</div>`;;
 };
 
-window.excludeAndRedraw = function(name) { window.excludedExperts.push(name); window.renderDisplay(); };
+window.excludeAndRedraw = function (name) { window.excludedExperts.push(name); window.renderDisplay(); };
 
-window.renderNormalMode = function() {
-    const area = document.getElementById('displayArea'); const header = document.getElementById('singleHeader'); 
+window.renderNormalMode = function () {
+    const area = document.getElementById('displayArea'); const header = document.getElementById('singleHeader');
     const key = window.activeSportKey || "nba_team"; const n = window.selectedExperts[0]; const base = key.split('_')[0];
     header.style.display = 'flex';
     document.getElementById('expertTitle').innerHTML = `${n} ${window.getPickTooltipHtml(n)} <span style="font-size: 16px; color:#94a3b8; font-weight:normal; margin-left:10px;">- 專家戰力履歷</span>`;
     document.getElementById('topBadge').innerText = base.toUpperCase();
     const records = window.dataDB[n][key] || []; let totalW = 0, totalL = 0, totalNet = 0;
-    records.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) totalW += parseInt(wm[1]); if(lm) totalL += parseInt(lm[1]); totalNet += parseInt(r[2] || 0); });
+    const summaryData = window.dataDB[n] && window.dataDB[n].summary && window.dataDB[n].summary[key];
+    if (summaryData) {
+        totalW = summaryData.win || 0;
+        totalL = summaryData.loss || 0;
+        totalNet = summaryData.net || 0;
+        // 補加 dailyUpdates 注入的新筆數（summary 是備份時寫死的，不含當天新增）
+        if (typeof dailyUpdates !== 'undefined') {
+            dailyUpdates.forEach(([expert, sport, date, wl, net]) => {
+                if (expert !== n || sport !== key) return;
+                const wm = wl.match(/(\d+)勝/);
+                const lm = wl.match(/(\d+)敗/);
+                totalW += wm ? parseInt(wm[1]) : 0;
+                totalL += lm ? parseInt(lm[1]) : 0;
+                totalNet += parseInt(String(net).replace(/[^0-9+\-]/g, '')) || 0;
+            });
+        }
+    } else {
+        records.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) totalW += parseInt(wm[1]); if (lm) totalL += parseInt(lm[1]); totalNet += parseInt(r[2] || 0); });
+    }
     const totalRate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
     // ⚙️ 升級版雙核引擎：同時計算勝率與淨值 (取代了舊的 getRate)
-    const getStats = (num) => { let w = 0, l = 0, net = 0; records.slice(0, num).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); net += parseInt(r[2] || 0); }); return { rate: (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0, net: net }; };
-    
+    const getStats = (num) => { let w = 0, l = 0, net = 0; records.slice(0, num).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]); net += parseInt(r[2] || 0); }); return { rate: (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0, net: net }; };
+
     // 📊 預先結算四個區間的包裹數據
     const s30 = getStats(30), s20 = getStats(20), s7 = getStats(7), s3 = getStats(3);
 
@@ -173,16 +588,7 @@ window.renderNormalMode = function() {
        
 
 <div style="display: flex; flex-direction: column; width: 100%;">
-            <div style="text-align: center; margin-bottom: 15px;">
-                <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24; font-size: 13px; padding: 4px 15px; border-radius: 20px; letter-spacing: 0.5px; font-weight: bold;">👇 點擊下方按鈕，可自由開關觀測線</span>
-            </div>
             
-            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                <button class="chart-toggle-btn" data-idx="0" style="background: rgba(16,185,129,0.15); border: 1.5px solid #10b981; color: #10b981; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟩 30場指標</button>
-                <button class="chart-toggle-btn" data-idx="1" style="background: rgba(56,189,248,0.15); border: 1.5px solid #38bdf8; color: #38bdf8; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟦 20場指標</button>
-                <button class="chart-toggle-btn" data-idx="2" style="background: rgba(168,85,247,0.15); border: 1.5px solid #a855f7; color: #a855f7; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟪 7場維持度</button>
-                <button class="chart-toggle-btn" data-idx="3" style="background: rgba(251,191,36,0.15); border: 1.5px solid #fbbf24; color: #fbbf24; padding: 8px 16px; border-radius: 10px; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">🟨 3場近況</button>
-            </div>
 
             <div style="position: relative; height: 200px; width: 100%; margin-bottom: 25px;">
                 <canvas id="normalModeChart"></canvas>
@@ -193,7 +599,7 @@ window.renderNormalMode = function() {
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">30日指標</div><div style="font-size: 34px; font-weight: 900; color: #34d399;">${s30.rate}%</div><div style="font-size: 16px; color: ${s30.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s30.net >= 0 ? '+' : ''}${s30.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">20日指標</div><div style="font-size: 34px; font-weight: 900;">${s20.rate}%</div><div style="font-size: 16px; color: ${s20.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s20.net >= 0 ? '+' : ''}${s20.net} 注</div></div>
                 <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">7日維持度</div><div style="font-size: 34px; font-weight: 900;">${s7.rate}%</div><div style="font-size: 16px; color: ${s7.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s7.net >= 0 ? '+' : ''}${s7.net} 注</div></div>
-                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">3日近況</div><div style="font-size: 34px; font-weight: 900; color: ${s3.rate>=60?'#f87171':'#fff'}">${s3.rate}%</div><div style="font-size: 16px; color: ${s3.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s3.net >= 0 ? '+' : ''}${s3.net} 注</div></div>
+                <div style="min-width: 100px;"><div style="color: #94a3b8; font-size: 16px; margin-bottom: 8px; font-weight: bold;">3日近況</div><div style="font-size: 34px; font-weight: 900; color: ${s3.rate >= 60 ? '#f87171' : '#fff'}">${s3.rate}%</div><div style="font-size: 16px; color: ${s3.net >= 0 ? '#fbbf24' : '#ef4444'}; margin-top: 8px; font-weight: bold;">${s3.net >= 0 ? '+' : ''}${s3.net} 注</div></div>
             </div>
         </div>
     </div>`;
@@ -201,10 +607,10 @@ window.renderNormalMode = function() {
     const isSingleColumn = key.includes('_total') || key.includes('_ml') || key.includes('_reg') || key.includes('_spread') || key.includes('_btts') || key === 'nbl_team' || key === 'jp_team' || key === 'kbl_team' || key === 'cpbl_team';
 
     area.className = 'data-layout'; area.style.flexDirection = 'column';
-    if (isSingleColumn) { area.innerHTML = `${radarHtml} <div class="record-column" style="max-width: 100%;">${window.getRankBanner(itemNames[key] || '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div>`; } 
+    if (isSingleColumn) { area.innerHTML = `${radarHtml} <div class="record-column" style="max-width: 100%;">${window.getRankBanner(itemNames[key] || '紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div>`; }
     else { let rightKey = base + '_total'; if (key === 'nhl_spread_ot') rightKey = 'nhl_total_ot'; area.innerHTML = `${radarHtml} <div style="display:flex; gap:20px;"><div class="record-column">${window.getRankBanner(itemNames[key] || '隊伍紀錄', n, key)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(records, false, n, key)}</div><div class="record-column">${window.getRankBanner('大小紀錄', n, rightKey)}<div class="table-header"><div>日期</div><div style="width:80px;text-align:center;">戰績</div><div style="flex:1;padding-left:10px;">反饋</div></div>${window.buildHTML(window.dataDB[n][rightKey] || [], false, n, rightKey)}</div></div>`; }
 
-// 🎯 呼叫 Chart.js 渲染圖表
+    // 🎯 呼叫 Chart.js 渲染圖表
     setTimeout(() => {
         const canvas = document.getElementById('normalModeChart');
         if (!canvas) return;
@@ -225,7 +631,7 @@ window.renderNormalMode = function() {
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; 
+                ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([5, 5]);
                 ctx.moveTo(chartArea.left, yPos);
@@ -235,67 +641,89 @@ window.renderNormalMode = function() {
                 const text = `生涯 ${careerRate}% (${trueTotalMatches}場)`;
                 ctx.font = 'bold 12px sans-serif'; // 配合微縮版，字體稍微縮小
                 const textWidth = ctx.measureText(text).width;
-                const paddingX = 10, boxHeight = 22; 
+                const paddingX = 10, boxHeight = 22;
                 const boxWidth = textWidth + paddingX * 2;
-                const boxX = chartArea.left; 
+                const boxX = chartArea.left;
                 let boxY = yPos - boxHeight / 2;
 
                 if (boxY < chartArea.top) boxY = chartArea.top + 2;
                 if (boxY + boxHeight > chartArea.bottom) boxY = chartArea.bottom - boxHeight - 2;
 
-                ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; 
+                ctx.fillStyle = 'rgba(236, 72, 153, 0.9)';
                 ctx.beginPath();
                 ctx.rect(boxX, boxY, boxWidth, boxHeight);
                 ctx.fill();
 
-                ctx.fillStyle = '#ffffff'; 
+                ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
                 ctx.restore();
             }
-        };           
+        };
+
+        const fiveLabels = ['全賽季', '30天', '20天', '7天', '3天'];
+        const fiveVals = [totalRate, s30.rate, s20.rate, s7.rate, s3.rate];
+        const fivePtColor = (v) => v >= 62 ? '#1D9E75' : v >= 57 ? '#fbbf24' : '#f87171';
 
         new Chart(ctx, {
             type: 'line',
-            plugins: [careerLevelPlugin], 
             data: {
+                labels: fiveLabels,
                 datasets: [
-                    { label: '30場', data: generateAuthenticTrack(30, records), borderColor: c30, borderWidth: 2, pointRadius: 1, tension: 0.2 },
-                    { label: '20場', data: generateAuthenticTrack(20, records), borderColor: c20, borderWidth: 2, pointRadius: 1, tension: 0.2 },
-                    { label: '7場', data: generateAuthenticTrack(7, records), borderColor: c7,  borderWidth: 2.5, pointRadius: 1.5, tension: 0.2 },
-                    { label: '3場', data: generateAuthenticTrack(3, records), borderColor: c3,  borderWidth: 3, pointRadius: 2, pointHitRadius: 10, tension: 0.2 }
+                    {
+                        data: fiveVals,
+                        borderColor: '#38bdf8',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: fiveVals.map(fivePtColor),
+                        pointBorderColor: fiveVals.map(fivePtColor),
+                        pointRadius: 6,
+                        tension: 0.35,
+                        fill: false
+                    },
+                    {
+                        data: [57, 57, 57, 57, 57],
+                        borderColor: 'rgba(148,163,184,0.3)',
+                        borderWidth: 1.5,
+                        borderDash: [4, 3],
+                        pointRadius: 0,
+                        fill: false
+                    }
                 ]
             },
-            // 🚨 語法修復：補回被誤刪的 options 與 plugins 大門，讓設定生效！
             options: {
                 responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'nearest', axis: 'x', intersect: false },
                 plugins: {
-                    // 🚨 隱藏原生殘缺圖例，畫面交由我們新建的實體 HTML 按鈕控制
                     legend: { display: false },
-                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#94a3b8', bodyFont: { weight: 'bold' }, callbacks: { label: function(c) { if (c.dataIndex === 0) return null; return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; } } }
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.9)',
+                        titleColor: '#94a3b8',
+                        callbacks: { label: c => c.datasetIndex === 1 ? '目標線' : c.raw + '%' }
+                    }
                 },
-
                 scales: {
-                    x: { type: 'linear', position: 'bottom', reverse: true, min: 1, max: 31, ticks: { stepSize: 1, autoSkip: false, color: '#64748b', maxRotation: 0, font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.02)' } },
-                    y: { position: 'right', min: 0, max: 100, ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 15, weight: 'bold' } } },
+                    y: {
+                        min: 0, max: 100, position: 'right',
+                        ticks: { stepSize: 20, callback: v => v + '%', color: '#64748b', font: { size: 13 } },
+                        grid: { color: 'rgba(255,255,255,0.04)' }
+                    }
                 }
             }
         }); // 👈 這裡宣告結束
 
         // 🚨 終極綁定引擎：讓 HTML 按鈕可以控制畫布裡的線條顯示與隱藏！
         document.querySelectorAll('.chart-toggle-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-idx'));
                 const myChart = Chart.getChart(canvas); // 抓取當前圖表
-                if(!myChart) return;
-                
+                if (!myChart) return;
+
                 const meta = myChart.getDatasetMeta(idx);
                 // 切換隱藏狀態
                 meta.hidden = meta.hidden === null ? !myChart.data.datasets[idx].hidden : null;
                 myChart.update();
-                
+
                 // 視覺回饋：如果被隱藏，按鈕變暗；如果開啟，按鈕發光
                 if (meta.hidden) {
                     this.style.opacity = '0.3';
@@ -306,24 +734,33 @@ window.renderNormalMode = function() {
                 }
             });
         });
-        
+
     }, 150);
 };
 
-window.getRankBanner = function(title, name, key) {
+window.getRankBanner = function (title, name, key) {
     let list = []; let systemLatestDate = window.getSystemLatestDate(key);
     // 🎯 特殊激活白名單
     let qualifiedWhitelistRB = [];
-    try { qualifiedWhitelistRB = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    try { qualifiedWhitelistRB = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { }
 
-for(let n in window.dataDB) { if(window.dataDB[n][key] && window.dataDB[n][key].length > 0){ let diffDays = window.getDaysDiff(window.dataDB[n][key][0][0], systemLatestDate); if (diffDays > 3) continue;
-        // 🎯 門檻激活：不重複天數 < 10 天不進入 getRankBanner 排名
-let uniqueDatesRB = new Set(window.dataDB[n][key].map(r => r[0]));
-if (uniqueDatesRB.size < 10 && !qualifiedWhitelistRB.includes(n + '||' + key)) continue;
+    for (let n in window.dataDB) {
+        if (window.dataDB[n][key] && window.dataDB[n][key].length > 0) {
+            let diffDays = window.getDaysDiff(window.dataDB[n][key][0][0], systemLatestDate); if (diffDays > 3) continue;
+            // 🎯 門檻激活：不重複天數 < 10 天不進入 getRankBanner 排名
+            let uniqueDatesRB = new Set(window.dataDB[n][key].map(r => r[0]));
+            if (uniqueDatesRB.size < 10 && !qualifiedWhitelistRB.includes(n + '||' + key)) continue;
 
-        let w=0, l=0, n20=0; window.dataDB[n][key].slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w+l) > 0 ? (w/(w+l)) : 0; list.push({name: n, net: n20, rate: rate}); } }
- 
-const target = list.find(r => r.name === name);
+            let w = 0, l = 0, n20 = 0; window.dataDB[n][key].slice(0, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]); n20 += parseInt(r[2] || 0); }); let rate = (w + l) > 0 ? Math.round(w / (w + l) * 100) / 100 : 0;
+            const getRateRB = (days, recs) => { let tw = 0, tl = 0; recs.slice(0, days).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); }); return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0; };
+            const recs = window.dataDB[n][key];
+            const r10rb = getRateRB(10, recs);
+            const rPrev10rb = (() => { let tw = 0, tl = 0; recs.slice(10, 20).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); }); return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0; })();
+            list.push({ name: n, net: n20, rate, r10: r10rb, rPrev10: rPrev10rb, r9: getRateRB(9, recs), r8: getRateRB(8, recs), r7: getRateRB(7, recs), r6: getRateRB(6, recs), r5: getRateRB(5, recs), r4: getRateRB(4, recs), r3: getRateRB(3, recs), r2: getRateRB(2, recs), r1: getRateRB(1, recs) });
+        }
+    }
+
+    const target = list.find(r => r.name === name);
     if (!target) {
         const wlKey = (name + '||' + key).replace(/'/g, "\\'");
         const activateBtn = (window.isAdmin === true)
@@ -333,48 +770,392 @@ const target = list.find(r => r.name === name);
     }
 
     let isReverse = target.rate < 0.5; let rankIdx = -1; let cls = "title-unranked"; let bCls = ""; let rankPrefix = "近況";
-    if (!isReverse) { let topList = list.filter(item => item.rate >= 0.5); topList.sort((a,b) => b.rate - a.rate || b.net - a.net); rankIdx = topList.findIndex(r => r.name === name); if(rankIdx === 0) { cls = "title-rank-1"; bCls = "rank-1-badge"; } else if(rankIdx === 1) { cls = "title-rank-2"; bCls = "rank-2-badge"; } else if(rankIdx === 2) { cls = "title-rank-3"; bCls = "rank-3-badge"; } } 
-    else { let bottomList = list.filter(item => item.rate < 0.5); bottomList.sort((a,b) => a.rate - b.rate || a.net - b.net); rankIdx = bottomList.findIndex(r => r.name === name); rankPrefix = "反向"; cls = "title-rank-neg"; bCls = "rank-neg-badge"; }
-    return `<div class="title-container ${cls}"><h4 class="section-title">${title}</h4><span class="rank-badge ${bCls}">${(rankIdx !== -1)?`${rankPrefix} NO.${rankIdx+1}`:'近況'} (${target.net>=0?'+'+target.net:target.net})</span></div>`;
+    if (!isReverse) {
+        let topList = list.filter(item => item.rate >= 0.5); topList.sort((a, b) => {
+            const s1 = a.rate - b.rate;
+            const s2 = a.r10 - b.r10;
+            const s3 = a.rPrev10 - b.rPrev10;
+            const aWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+            const bWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
+            // 一進一退大幅趨勢機制（第一觸發）
+            {
+                const trendA = a.r10 - a.rPrev10;
+                const trendB = b.r10 - b.rPrev10;
+                const aAdvancing = trendA > 0;
+                const bAdvancing = trendB > 0;
+                const aRetreating = trendA < 0;
+                const bRetreating = trendB < 0;
+                // 第一關：方向相反（一進一退），持平不算退步也不算進步
+                if ((aAdvancing && bRetreating) || (bAdvancing && aRetreating)) {
+                    const absA = Math.abs(trendA);
+                    const absB = Math.abs(trendB);
+                    const advancingSideIsA = aAdvancing;
+                    // 🎯 一進一退內建步步進步偵測：進步方若同時符合步步進步條件，直接走步步進步機制
+                    const advObj = advancingSideIsA ? a : b;
+                    const isStepUp = advObj.rPrev10 < advObj.r10 && advObj.r10 < advObj.r5;
+                    if (isStepUp) {
+                        const s5 = a.r5 - b.r5;
+                        const stepUpLoseSteps = advancingSideIsA
+                            ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                            : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                        const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                        if (stepUpLoseSteps.length > 0) {
+                            const skipByGate1 = Math.abs(s1) > 0.15;
+                            const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                            const skipByGate2 = gate2Count >= 2;
+                            if (!skipByGate1 && !skipByGate2) {
+                                if (Math.abs(s5) > minLoseStep) return s5 > 0 ? -1 : 1;
+                            }
+                        }
+                    } else {
+                        // 第二關：幅度驗證（三個條件任一符合）
+                        const singleLarge = absA >= 0.40 || absB >= 0.40;
+                        const dualLarge   = absA >= 0.30 && absB >= 0.30;
+                        // 條件三：進步方近5場 減 退步方近5場的差值，大於三步總值絕對值（正向：進步方勝率高）
+                        const r5Diff = advancingSideIsA ? (a.r5 - b.r5) : (b.r5 - a.r5);
+                        const tripleCondition = r5Diff > Math.abs(s1 + s2 + s3);
+                        if (singleLarge || dualLarge || tripleCondition) {
+                            const advancingIsTrailing = advancingSideIsA ? s1 < 0 : s1 > 0;
+                            if (advancingIsTrailing && Math.abs(s1) <= 0.10) {
+                                return advancingSideIsA ? -1 : 1;
+                            }
+                        }
+                    }
+                }
+            }
+            if (aWins === 3) return -1;
+            if (bWins === 3) return 1;
+            // 多數決鞏固機制（2:1）：2票方輸的那步，均小於贏的兩步 → 直接勝出
+            // 例：2票方贏 s1=5%、s3=12%，輸 s2=3%，3% < 5% 且 3% < 12% → 直接勝出
+            if (aWins === 2 && bWins <= 1) {
+                const aLoseStep = s1 <= 0 ? Math.abs(s1) : s2 <= 0 ? Math.abs(s2) : Math.abs(s3);
+                const aWinSteps = [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                if (aLoseStep < aWinSteps[0] && aLoseStep < aWinSteps[1]) {
+                    return -1;
+                }
+            }
+            if (bWins === 2 && aWins <= 1) {
+                const bLoseStep = s1 >= 0 ? Math.abs(s1) : s2 >= 0 ? Math.abs(s2) : Math.abs(s3);
+                const bWinSteps = [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                if (bLoseStep < bWinSteps[0] && bLoseStep < bWinSteps[1]) {
+                    return 1;
+                }
+            }
+            const totalScore = s1 + s2 + s3;
+            let tierDiff = 0;
+            if (Math.abs(totalScore) <= 0.0001) {
+                tierDiff = a.r10 - b.r10 !== 0 ? a.r10 - b.r10 : a.r9 - b.r9 !== 0 ? a.r9 - b.r9 : a.r8 - b.r8 !== 0 ? a.r8 - b.r8 : a.r7 - b.r7 !== 0 ? a.r7 - b.r7 : a.r6 - b.r6 !== 0 ? a.r6 - b.r6 : a.r5 - b.r5 !== 0 ? a.r5 - b.r5 : a.r4 - b.r4 !== 0 ? a.r4 - b.r4 : a.r3 - b.r3 !== 0 ? a.r3 - b.r3 : a.r2 - b.r2 !== 0 ? a.r2 - b.r2 : a.r1 - b.r1;
+            }
+            const trendA = a.r10 - a.rPrev10;
+            const trendB = b.r10 - b.rPrev10;
+            const eitherRetreating = trendA < -0.05 || trendB < -0.05;
+            const eitherAdvancing = trendA > 0.05 || trendB > 0.05;
+            const trendDiff = trendA - trendB;
+            // 雙方同向退步才觸發退步機制
+            // 條件：至少一方退步超過5%，且沒有人進步超過5%
+            // 退步幅度差距 大於 三步總和 x1.9 才正式介入
+        if (eitherRetreating && !eitherAdvancing) {
+            if (Math.abs(trendDiff) > Math.abs(totalScore) * 1.9) {
+                const s5 = a.r5 - b.r5;
+                // 近5場差距 大於 近10場退步幅度差距 → 近5場退步方讓位
+                // 近5場差距 小於等於 近10場退步幅度差距 → 近10場退步方讓位
+                if (Math.abs(s5) > Math.abs(trendDiff)) return s5 > 0 ? -1 : 1;
+                return trendDiff > 0 ? -1 : 1;
+            }
+        }
+            // 雙方同向進步才觸發進步機制
+            if (eitherAdvancing && !eitherRetreating) {
+                if (Math.abs(trendDiff) > Math.abs(totalScore) * 3) {
+                    if (Math.abs(s2) > 0.11) return trendDiff > 0 ? -1 : 1;
+                }
+            }
+            // 步步退步獨立機制（正向）：一方 rPrev10 > r10 > r5，另一方沒有
+            {
+                const aStepDown = a.rPrev10 > a.r10 && a.r10 > a.r5;
+                const bStepDown = b.rPrev10 > b.r10 && b.r10 > b.r5;
+                if (aStepDown !== bStepDown) {
+                    const s5 = a.r5 - b.r5;
+                    const stepDownSide = aStepDown ? 'a' : 'b';
+                    const stepDownWinSteps = stepDownSide === 'a'
+                        ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                        : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                    const minWinStep = stepDownWinSteps.length > 0 ? Math.min(...stepDownWinSteps) : 0;
+                    // 第一門檻：|s1| > 15% → 步步退步失效
+                    const skipByGate1 = Math.abs(s1) > 0.15;
+                    // 第二門檻：以下三條件滿足兩條 → 步步退步失效
+                    const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                    const skipByGate2 = gate2Count >= 2;
+                    if (!skipByGate1 && !skipByGate2) {
+                        // 兩道門檻都未觸發，進入近5場決勝（正向：高的排前）
+                        if (Math.abs(s5) > minWinStep) return s5 > 0 ? -1 : 1;
+                    }
+                }
+            }
+            // 步步進步獨立機制（正向）：一方 rPrev10 < r10 < r5，另一方沒有
+            {
+                const aStepUp = a.rPrev10 < a.r10 && a.r10 < a.r5;
+                const bStepUp = b.rPrev10 < b.r10 && b.r10 < b.r5;
+                if (aStepUp !== bStepUp) {
+                    const s5 = a.r5 - b.r5;
+                    const stepUpSide = aStepUp ? 'a' : 'b';
+                    const stepUpLoseSteps = stepUpSide === 'a'
+                        ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                        : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                    const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                    // 第一門檻：|s1| > 15% → 步步進步失效
+                    const skipByGate1 = Math.abs(s1) > 0.15;
+                    // 第二門檻：以下三條件滿足兩條 → 步步進步失效
+                    const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                    const skipByGate2 = gate2Count >= 2;
+                    if (!skipByGate1 && !skipByGate2) {
+                        // 兩道門檻都未觸發，進入近5場決勝（正向：高的排前）
+                        if (Math.abs(s5) > minLoseStep) return s5 > 0 ? -1 : 1;
+                    }
+                }
+            }
+            // 三步總和 ≤ 14%（含=0）→ 先比近5場
+            // s3加權：三步總和0.12~0.14之間，三步總和贏方同時s3>19% → 直接決勝（正向）
+            if (Math.abs(totalScore) > 0.12 && Math.abs(totalScore) <= 0.14) {
+                if (totalScore > 0 && s3 > 0.19) return -1;
+                if (totalScore < 0 && s3 < -0.19) return 1;
+            }
+        if (Math.abs(totalScore) <= 0.14) {
+            const s5 = a.r5 - b.r5;
+            if (Math.abs(s5) > 0.0001) {
+                // 近5場新機制（反向）：兩條件都通過才決勝，否則走三步總和
+                const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
+                const cond2 = (s5 > 0 && (s2 < 0 || s5 > s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
+                if (cond1 || cond2) return s5 > 0 ? -1 : 1;
+            }
+        }
+        if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? 1 : -1;
+            // 十階差值決勝（正向：高的排前面，僅總和=0且近5場=0才觸發）
+            return tierDiff > 0 ? -1 : tierDiff < 0 ? 1 : 0;
+        }); rankIdx = topList.findIndex(r => r.name === name);; if (rankIdx === 0) { cls = "title-rank-1"; bCls = "rank-1-badge"; } else if (rankIdx === 1) { cls = "title-rank-2"; bCls = "rank-2-badge"; } else if (rankIdx === 2) { cls = "title-rank-3"; bCls = "rank-3-badge"; }
+    }
+    else {
+        let bottomList = list.filter(item => item.rate < 0.5); bottomList.sort((a, b) => {
+            const s1 = a.rate - b.rate;
+            const s2 = a.r10 - b.r10;
+            const s3 = a.rPrev10 - b.rPrev10;
+            const aWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
+            const bWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+            // 一進一退大幅趨勢機制（第一觸發，反向）
+            {
+                const trendA = a.r10 - a.rPrev10;
+                const trendB = b.r10 - b.rPrev10;
+                const aAdvancing = trendA < 0;
+                const bAdvancing = trendB < 0;
+                const aRetreating = trendA > 0;
+                const bRetreating = trendB > 0;
+                // 第一關：方向相反（一進一退），持平不算退步也不算進步
+                if ((aAdvancing && bRetreating) || (bAdvancing && aRetreating)) {
+                    const absA = Math.abs(trendA);
+                    const absB = Math.abs(trendB);
+                    const advancingSideIsA = aAdvancing;
+                    // 🎯 一進一退內建步步進步偵測（反向）：進步方若同時符合步步進步條件，直接走步步進步機制
+                    const advObj = advancingSideIsA ? a : b;
+                    const isStepUp = advObj.rPrev10 > advObj.r10 && advObj.r10 > advObj.r5;
+                    if (isStepUp) {
+                        const s5 = a.r5 - b.r5;
+                        // 反向：數字高才是輸，所以 a 輸的步 = s1 > 0，b 輸的步 = s1 < 0
+                        const stepUpLoseSteps = advancingSideIsA
+                            ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                            : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                        const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                        if (stepUpLoseSteps.length > 0) {
+                            const skipByGate1 = Math.abs(s1) > 0.15;
+                            const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                            const skipByGate2 = gate2Count >= 2;
+                            if (!skipByGate1 && !skipByGate2) {
+                                if (Math.abs(s5) > minLoseStep) return s5 > 0 ? 1 : -1;
+                            }
+                        }
+                    } else {
+                        // 第二關：幅度驗證（三個條件任一符合）
+                        const singleLarge = absA >= 0.40 || absB >= 0.40;
+                        const dualLarge   = absA >= 0.30 && absB >= 0.30;
+                        // 條件三：退步方近5場 減 進步方近5場的差值，大於三步總值絕對值（反向：退步方勝率高）
+                        const r5Diff = advancingSideIsA ? (b.r5 - a.r5) : (a.r5 - b.r5);
+                        const tripleCondition = r5Diff > Math.abs(s1 + s2 + s3);
+                        if (singleLarge || dualLarge || tripleCondition) {
+                            const advancingIsTrailing = advancingSideIsA ? s1 > 0 : s1 < 0;
+                            if (advancingIsTrailing && Math.abs(s1) <= 0.10) {
+                                return advancingSideIsA ? -1 : 1;
+                            }
+                        }
+                    }
+                }
+            }
+            if (aWins === 3) return -1;
+            if (bWins === 3) return 1;
+            // 多數決鞏固機制（2:1）：2票方輸的那步，均小於贏的兩步 → 直接勝出（反向）
+            // 例：2票方贏 s1=5%、s3=12%，輸 s2=3%，3% < 5% 且 3% < 12% → 直接勝出
+            if (aWins === 2 && bWins <= 1) {
+                const aLoseStep = s1 >= 0 ? Math.abs(s1) : s2 >= 0 ? Math.abs(s2) : Math.abs(s3);
+                const aWinSteps = [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                if (aLoseStep < aWinSteps[0] && aLoseStep < aWinSteps[1]) {
+                    return -1;
+                }
+            }
+            if (bWins === 2 && aWins <= 1) {
+                const bLoseStep = s1 <= 0 ? Math.abs(s1) : s2 <= 0 ? Math.abs(s2) : Math.abs(s3);
+                const bWinSteps = [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                if (bLoseStep < bWinSteps[0] && bLoseStep < bWinSteps[1]) {
+                    return 1;
+                }
+            }
+            const totalScore = s1 + s2 + s3;
+            let tierDiff = 0;
+            if (Math.abs(totalScore) <= 0.0001) {
+                tierDiff = b.r10 - a.r10 !== 0 ? b.r10 - a.r10 : b.r9 - a.r9 !== 0 ? b.r9 - a.r9 : b.r8 - a.r8 !== 0 ? b.r8 - a.r8 : b.r7 - a.r7 !== 0 ? b.r7 - a.r7 : b.r6 - a.r6 !== 0 ? b.r6 - a.r6 : b.r5 - a.r5 !== 0 ? b.r5 - a.r5 : b.r4 - a.r4 !== 0 ? b.r4 - a.r4 : b.r3 - a.r3 !== 0 ? b.r3 - a.r3 : b.r2 - a.r2 !== 0 ? b.r2 - a.r2 : b.r1 - a.r1;
+            }
+            const trendA = a.r10 - a.rPrev10;
+            const trendB = b.r10 - b.rPrev10;
+            const eitherRetreating = trendA > 0.05 || trendB > 0.05;
+            const eitherAdvancing = trendA < -0.05 || trendB < -0.05;
+            const trendDiff = trendA - trendB;
+            // 雙方同向退步才觸發退步機制（反向：實際成績進步幅度高 = 反向退步）
+            // 條件：至少一方近10場 > 上10場超過5%（反向中高是壞事，代表退步），且沒有人反向進步
+            // 退步幅度差距 大於 三步總和 x1.9 才正式介入
+            if (eitherRetreating && !eitherAdvancing) {
+            if (Math.abs(trendDiff) > Math.abs(totalScore) * 1.9) {
+                const s5 = a.r5 - b.r5;
+                // 【反向退步機制近5場判斷邏輯】
+                // 退步機制觸發後，比較兩人近5場差距 vs 近10場退步幅度差距：
+                // 近10場：數字高的在反向中退步較多（實際進步但反向是壞事）
+                // 近5場：數字高的在反向中退步較多（實際進步但反向是壞事）
+                // 兩人近10場退步幅度差距 = Math.abs(trendDiff)（近10場幅度差）
+                // 兩人近5場退步差距 = Math.abs(s5)（近5場差距）
+                // 若近5場差距 > 近10場退步幅度差距 → 近5場退步方（數字高的）讓位
+                // 若近5場差距 <= 近10場退步幅度差距 → 近10場退步方（數字高的）讓位
+                if (Math.abs(s5) > Math.abs(trendDiff)) return s5 > 0 ? 1 : -1;
+                return trendDiff > 0 ? 1 : -1;
+            }
+            }
+            if (eitherAdvancing && !eitherRetreating) {
+    if (Math.abs(trendDiff) > Math.abs(totalScore) * 3) {
+        if (Math.abs(s2) > 0.11) {
+            // 反向進步機制最終門檻：勝出方上10場勝率達59%以上，需與對方差距在10%以內才過關
+            const advWinner = trendDiff < 0 ? 'a' : 'b';
+            const winnerPrev10 = advWinner === 'a' ? a.rPrev10 : b.rPrev10;
+            const loserPrev10  = advWinner === 'a' ? b.rPrev10 : a.rPrev10;
+            const prev10Gap = winnerPrev10 - loserPrev10;
+            if (winnerPrev10 >= 0.59 && prev10Gap > 0.10) {
+                // 門檻不過，反向進步機制失效，繼續往下走
+            } else {
+                return trendDiff > 0 ? 1 : -1;
+            }
+        }
+    }
+}
+            // 步步退步獨立機制（反向）：一方 rPrev10 < r10 < r5，另一方沒有
+            {
+                const aStepDown = a.rPrev10 < a.r10 && a.r10 < a.r5;
+                const bStepDown = b.rPrev10 < b.r10 && b.r10 < b.r5;
+                if (aStepDown !== bStepDown) {
+                    const s5 = a.r5 - b.r5;
+                    const stepDownSide = aStepDown ? 'a' : 'b';
+                    // 反向：數字低才是贏，所以 a 贏的步 = s1 < 0，b 贏的步 = s1 > 0
+                    const stepDownWinSteps = stepDownSide === 'a'
+                        ? [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                        : [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                    const minWinStep = stepDownWinSteps.length > 0 ? Math.min(...stepDownWinSteps) : 0;
+                    // 第一門檻：|s1| > 15% → 步步退步失效
+                    const skipByGate1 = Math.abs(s1) > 0.15;
+                    // 第二門檻：以下三條件滿足兩條 → 步步退步失效
+                    const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                    const skipByGate2 = gate2Count >= 2;
+                    if (!skipByGate1 && !skipByGate2) {
+                        // 兩道門檻都未觸發，進入近5場決勝（反向：高的排後）
+                        if (Math.abs(s5) > minWinStep) return s5 > 0 ? 1 : -1;
+                    }
+                }
+            }
+            // 步步進步獨立機制（反向）：一方 rPrev10 > r10 > r5，另一方沒有
+            {
+                const aStepUp = a.rPrev10 > a.r10 && a.r10 > a.r5;
+                const bStepUp = b.rPrev10 > b.r10 && b.r10 > b.r5;
+                if (aStepUp !== bStepUp) {
+                    const s5 = a.r5 - b.r5;
+                    const stepUpSide = aStepUp ? 'a' : 'b';
+                    // 反向：數字高才是輸，所以 a 輸的步 = s1 > 0，b 輸的步 = s1 < 0
+                    const stepUpLoseSteps = stepUpSide === 'a'
+                        ? [s1 > 0 ? Math.abs(s1) : null, s2 > 0 ? Math.abs(s2) : null, s3 > 0 ? Math.abs(s3) : null].filter(v => v !== null)
+                        : [s1 < 0 ? Math.abs(s1) : null, s2 < 0 ? Math.abs(s2) : null, s3 < 0 ? Math.abs(s3) : null].filter(v => v !== null);
+                    const minLoseStep = stepUpLoseSteps.length > 0 ? Math.min(...stepUpLoseSteps) : 0;
+                    // 第一門檻：|s1| > 15% → 步步進步失效
+                    const skipByGate1 = Math.abs(s1) > 0.15;
+                    // 第二門檻：以下三條件滿足兩條 → 步步進步失效
+                    const gate2Count = (Math.abs(s1) > 0.11 ? 1 : 0) + (Math.abs(s1 + s2 + s3) > 0.19 ? 1 : 0) + (Math.abs(s3) > 0.20 ? 1 : 0);
+                    const skipByGate2 = gate2Count >= 2;
+                    if (!skipByGate1 && !skipByGate2) {
+                        // 兩道門檻都未觸發，進入近5場決勝（反向：高的排後）
+                        if (Math.abs(s5) > minLoseStep) return s5 > 0 ? 1 : -1;
+                    }
+                }
+            }
+            // 三步總和 ≤ 14%（含=0）→ 先比近5場（反向：低的排前面）
+            // s3加權：三步總和0.12~0.14之間，三步總和贏方同時s3>19% → 直接決勝（反向）
+            if (Math.abs(totalScore) > 0.12 && Math.abs(totalScore) <= 0.14) {
+                if (totalScore > 0 && s3 > 0.19) return 1;
+                if (totalScore < 0 && s3 < -0.19) return -1;
+            }
+        if (Math.abs(totalScore) <= 0.14) {
+            const s5 = a.r5 - b.r5;
+            if (Math.abs(s5) > 0.0001) {
+                // 近5場新機制（反向）：兩條件都通過才決勝，否則走三步總和
+                const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
+                const cond2 = (s5 > 0 && -s5 < s2) || (s5 < 0 && s5 < -s2);
+                if (cond1 || cond2) return s5 > 0 ? 1 : -1;
+            }
+        }
+            if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? 1 : -1;
+            // 十階差值決勝（反向：低的排前面，僅總和=0且近5場=0才觸發）
+            return tierDiff > 0 ? -1 : tierDiff < 0 ? 1 : 0;
+
+        }); rankIdx = bottomList.findIndex(r => r.name === name); rankPrefix = "反向"; cls = "title-rank-neg"; bCls = "rank-neg-badge";;
+    }
+    return `<div class="title-container ${cls}"><h4 class="section-title">${title}</h4><span class="rank-badge ${bCls}">${(rankIdx !== -1) ? `${rankPrefix} NO.${rankIdx + 1}` : '近況'} (${target.net >= 0 ? '+' + target.net : target.net})</span></div>`;
 };
 
 
-window.buildHTML = function(list, limitTo20, expertName = null, sportKey = null, prefixBtn = '') {
-// 💡 歸類標記：強制鎖定 window.isAdmin 狀態
-const canEdit = (window.isAdmin === true);
+window.buildHTML = function (list, limitTo20, expertName = null, sportKey = null, prefixBtn = '') {
+    // 💡 歸類標記：強制鎖定 window.isAdmin 狀態
+    const canEdit = (window.isAdmin === true);
 
-    let addBtnHtml = (expertName && sportKey && canEdit) ? 
+    let addBtnHtml = (expertName && sportKey && canEdit) ?
         `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <div class="func-left">${prefixBtn}</div>
             <button onclick="window.adminAddRecord('${expertName}', '${sportKey}')" style="background:#10b981; color:white; border:none; padding:5px 12px; border-radius:4px; font-size:13px; font-weight:bold; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.1);">➕ 新增戰績</button>
         </div>` : (prefixBtn ? `<div style="margin-bottom:10px;">${prefixBtn}</div>` : '');
 
 
-    if(!list || list.length === 0) { let hint = ''; if (expertName && window.dataDB[expertName]) { let avail = []; for (let k in window.dataDB[expertName]) { if (window.dataDB[expertName][k].length > 0 && itemNames[k]) avail.push(itemNames[k]); } if (avail.length > 0) hint = `<div style="margin-top:10px;font-size:14px;color:#f59e0b;">💡 該好手主要預測：<b>${avail.join('、')}</b></div>`; } return `${addBtnHtml}<div style="padding:40px 20px;text-align:center;color:#94a3b8;background:#f8fafc;border-radius:8px;">目前項目無數據${hint}</div>`; }
+    if (!list || list.length === 0) { let hint = ''; if (expertName && window.dataDB[expertName]) { let avail = []; for (let k in window.dataDB[expertName]) { if (window.dataDB[expertName][k].length > 0 && itemNames[k]) avail.push(itemNames[k]); } if (avail.length > 0) hint = `<div style="margin-top:10px;font-size:14px;color:#f59e0b;">💡 該好手主要預測：<b>${avail.join('、')}</b></div>`; } return `${addBtnHtml}<div style="padding:40px 20px;text-align:center;color:#94a3b8;background:#f8fafc;border-radius:8px;">目前項目無數據${hint}</div>`; }
     let show = limitTo20 ? list.slice(0, 20) : list; let html = addBtnHtml;
     for (let i = 0; i < show.length; i += 10) {
-        const chunk = show.slice(i, i + 10); let w=0, l=0, n=0; chunk.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]); n += parseInt(r[2] || 0); }); const rate = Math.round((w/(w+l))*100) || 0; let sCls = (rate>=55)?"summary-pos":(rate<=40?"summary-neg":"summary-neu");
-        html += `<div class="summary-row ${sCls}"><div class="summary-stats">${w}勝 ${l}敗 | 淨勝 ${n>=0?'+'+n:n} | ${rate}%</div></div>`;
-        chunk.forEach((r, idx) => { 
-            let val = parseInt(r[2] || 0); let bg = val > 0 ? "bg-pos" : (val < 0 ? "bg-neg" : "bg-neu"); 
-            let sH = val > 0 ? `<span class="score-pos">+${val}</span>` : (val < 0 ? `<span class="score-neg">${val}</span>` : `<span class="score-neu">0</span>`); 
+        const chunk = show.slice(i, i + 10); let w = 0, l = 0, n = 0; chunk.forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]); n += parseInt(r[2] || 0); }); const rate = Math.round((w / (w + l)) * 100) || 0; let sCls = (rate >= 55) ? "summary-pos" : (rate <= 40 ? "summary-neg" : "summary-neu");
+        html += `<div class="summary-row ${sCls}"><div class="summary-stats">${w}勝 ${l}敗 | 淨勝 ${n >= 0 ? '+' + n : n} | ${rate}%</div></div>`;
+        chunk.forEach((r, idx) => {
+            let val = parseInt(r[2] || 0); let bg = val > 0 ? "bg-pos" : (val < 0 ? "bg-neg" : "bg-neu");
+            let sH = val > 0 ? `<span class="score-pos">+${val}</span>` : (val < 0 ? `<span class="score-neg">${val}</span>` : `<span class="score-neu">0</span>`);
 
-// 💡 歸類標記：修正語法，只有管理員能生成垃圾桶按鈕
-let delBtnHtml = (expertName && sportKey && canEdit) ? `<span onclick="window.adminDelRecord('${expertName}', '${sportKey}', '${r[0]}', '${r[1]}')" style="cursor:pointer; position:absolute; right:10px; font-size:14px; filter:grayscale(100%); transition:0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(100%)'" title="刪除此筆">🗑️</span>` : '';
+            // 💡 歸類標記：修正語法，只有管理員能生成垃圾桶按鈕
+            let delBtnHtml = (expertName && sportKey && canEdit) ? `<span onclick="window.adminDelRecord('${expertName}', '${sportKey}', '${r[0]}', '${r[1]}')" style="cursor:pointer; position:absolute; right:10px; font-size:14px; filter:grayscale(100%); transition:0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(100%)'" title="刪除此筆">🗑️</span>` : '';
 
-            html += `<div class="record-row ${bg} ${idx===chunk.length-1 && i+10<show.length?'ten-day-gap':''}"><div class="col-date">${r[0]}</div><div class="col-record">${r[1]}</div><div class="score-wrapper" style="display:flex; align-items:center; position:relative;">${sH}${delBtnHtml}</div></div>`; 
+            html += `<div class="record-row ${bg} ${idx === chunk.length - 1 && i + 10 < show.length ? 'ten-day-gap' : ''}"><div class="col-date">${r[0].split('/').length === 3 ? r[0].split('/').slice(1).join('/') : r[0]}</div><div class="col-record">${r[1]}</div><div class="score-wrapper" style="display:flex; align-items:center; position:relative;">${sH}${delBtnHtml}</div></div>`;
         });
     } return html;
 };
 
-window.adminActivateExpert = function(wlKey) {
+window.adminActivateExpert = function (wlKey) {
     var parts = wlKey.split('||');
     var expertName = parts[0];
     var sportKey = parts[1];
     var sportLabel = (typeof itemNames !== 'undefined' && itemNames[sportKey]) ? itemNames[sportKey] : sportKey;
     if (!confirm('激活「' + expertName + '」的【' + sportLabel + '】榜單資格？')) return;
     var whitelist = [];
-    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    try { whitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { }
     if (whitelist.includes(wlKey)) { alert('已在白名單中。'); return; }
     whitelist.push(wlKey);
     localStorage.setItem('AdminWhitelist_Experts', JSON.stringify(whitelist));
@@ -390,14 +1171,14 @@ window.adminActivateExpert = function(wlKey) {
 /* 🚀 專家動能實力總表 (Project Momentum) - 100% 繼承 core_engine 大腦
 /* ========================================================================= */
 
-window.openMomentumRadar = function() {
+window.openMomentumRadar = function () {
     const mainContent = document.getElementById('mainContent');
     const radarPage = document.getElementById('momentumRadarPage');
     if (!radarPage) {
         alert("找不到戰情室畫面，請確認 index.html 已經更新！");
         return;
     }
-    
+
     // 1. 單純切換顯示
     mainContent.style.display = 'none';
     radarPage.style.display = 'block';
@@ -406,22 +1187,22 @@ window.openMomentumRadar = function() {
 
     // 2. 🚨 霸道展開指令：不分裝置，強制踹引擎一腳，要它立刻把畫面填滿！
     if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 50);
+        setTimeout(function () { window.scalePage(true); }, 50);
     }
-    
+
     // 3. 渲染數據
     let defaultTimeframe = window.currentHomeFilter || 20;
-    window.renderMomentumRadar(defaultTimeframe); 
+    window.renderMomentumRadar(defaultTimeframe);
 };
 
-window.closeMomentumRadar = function() {
+window.closeMomentumRadar = function () {
     var radarPage = document.getElementById('momentumRadarPage');
     if (radarPage) radarPage.style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
     // 🚨 霸道歸位指令：關閉時也強制引擎重新計算一次主頁！
     if (typeof window.scalePage === 'function') {
-        setTimeout(function() { window.scalePage(true); }, 50);
+        setTimeout(function () { window.scalePage(true); }, 50);
     }
 };
 
@@ -444,14 +1225,14 @@ function generateAuthenticTrack(maxMatches, records) {
     reversed.forEach((r, index) => {
         const wm = r[1].match(/(\d+)勝/);
         const lm = r[1].match(/(\d+)敗/);
-        if(wm) totalW += parseInt(wm[1]);
-        if(lm) totalL += parseInt(lm[1]);
+        if (wm) totalW += parseInt(wm[1]);
+        if (lm) totalL += parseInt(lm[1]);
 
         // 3. 沿用前台公式：計算累積到這場為止的「真實勝率」
         let rate = (totalW + totalL) > 0 ? Math.round((totalW / (totalW + totalL)) * 100) : 0;
-        
+
         // 4. 座標推進：例如 20 場，第一節點就是 X=20，最後的牆壁剛好是 X=1
-        let xPos = actualLen - index; 
+        let xPos = actualLen - index;
         data.push({ x: xPos, y: rate });
     });
 
@@ -460,32 +1241,32 @@ function generateAuthenticTrack(maxMatches, records) {
 
 
 // 畫面渲染主邏輯
-window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
+window.renderMomentumRadar = function (timeframe = 20, btnElement = null) {
     if (btnElement) {
         const btns = btnElement.parentElement.querySelectorAll('.r-btn');
         btns.forEach(b => b.classList.remove('active'));
         btnElement.classList.add('active');
     } else {
         const filterBar = document.querySelector('#momentumRadarPage .ranking-filter-bar');
-        if(filterBar) {
+        if (filterBar) {
             const btns = filterBar.querySelectorAll('.r-btn');
             btns.forEach(b => {
                 b.classList.remove('active');
                 let txt = timeframe === 'all' ? '總榜' : timeframe.toString();
-                if(b.innerText.includes(txt)) b.classList.add('active');
+                if (b.innerText.includes(txt)) b.classList.add('active');
             });
         }
     }
 
     const listContainer = document.getElementById('momentumRadarList');
-    listContainer.innerHTML = ''; 
-    
-    const key = window.activeSportKey || 'nba_team'; 
+    listContainer.innerHTML = '';
+
+    const key = window.activeSportKey || 'nba_team';
     const badgeName = typeof itemNames !== 'undefined' && itemNames[key] ? itemNames[key] : key;
 
     let systemLatestDate = window.getSystemLatestDate ? window.getSystemLatestDate(key) : new Date().toISOString().split('T')[0];
     let qualifiedWhitelist = [];
-    try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch(e) {}
+    try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { }
 
     let filterThreshold = timeframe === 'all' ? 0 : parseInt(timeframe);
     let allSorted = [];
@@ -512,18 +1293,18 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         let w = 0, l = 0;
         sliceRec.forEach(r => {
             const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
-            if(wm) w += parseInt(wm[1]); if(lm) l += parseInt(lm[1]);
+            if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]);
         });
         let winRate = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
 
         // 4. 四線圖表專用勝率
         const getLineRate = (days) => {
-            let tw=0, tl=0;
+            let tw = 0, tl = 0;
             records.slice(0, days).forEach(r => {
                 const m1 = r[1].match(/(\d+)勝/); const m2 = r[1].match(/(\d+)敗/);
-                if(m1) tw += parseInt(m1[1]); if(m2) tl += parseInt(m2[1]);
+                if (m1) tw += parseInt(m1[1]); if (m2) tl += parseInt(m2[1]);
             });
-            return (tw+tl)>0 ? Math.round((tw/(tw+tl))*100) : 0;
+            return (tw + tl) > 0 ? Math.round((tw / (tw + tl)) * 100) : 0;
         };
 
         allSorted.push({
@@ -539,13 +1320,13 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     allSorted.sort((a, b) => {
         const aRank = a.isActive && a.isQualified;
         const bRank = b.isActive && b.isQualified;
-        
+
         // 沉澱機制發動：沒達標/休眠的人強制往下沉！
         if (aRank && !bRank) return -1;
         if (!aRank && bRank) return 1;
         if (a.isActive && !b.isActive) return -1;
         if (!a.isActive && b.isActive) return 1;
-        
+
         // 勝率與淨值比較 (支援正反向模式)
         if (window.isNegativeMode) {
             return a.winRate - b.winRate || a.net - b.net;
@@ -557,20 +1338,20 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
     // 🚨 找回消失的心臟代碼：這行絕對不能少！過濾並產生 displayList 陣列！
     const displayList = window.isNegativeMode ? allSorted.filter(item => item.winRate < 50) : allSorted.filter(item => item.winRate >= 50);
 
-// 🎯 終極升級：戰情室內建無縫下拉選單 (移植自主頁核心)
+    // 🎯 終極升級：戰情室內建無縫下拉選單 (移植自主頁核心)
     // 1. 定義選單結構 (與主頁 100% 同步)
     const categories = [
 
-    { name: '🏀 美籃 NBA', items: [ { id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' } ] }, 
-        { name: '⚾ 美棒 MLB', items: [ { id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' } ] },
-        { name: '🇯🇵 日棒 NPB', items: [ { id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' } ] },
-        { name: '🇹🇼 中職 CPBL', items: [ { id: 'cpbl_team', label: '中華職棒隊伍' }, { id: 'cpbl_total', label: '中華職棒大小' } ] },
-        { name: '⚽ 足球系列', items: [ { id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' } ] },
+        { name: '🏀 美籃 NBA', items: [{ id: 'nba_team', label: 'NBA 讓分盤' }, { id: 'nba_total', label: 'NBA 大小分' }, { id: 'nba_team_total', label: 'NBA 單隊大小' }, { id: 'nba_team_spread', label: 'NBA 單隊讓盤' }, { id: 'nba_1h_total', label: 'NBA 上半大小' }] },
+        { name: '⚾ 美棒 MLB', items: [{ id: 'mlb_ml', label: 'MLB 獨贏(正常)' }, { id: 'mlb_runline', label: 'MLB 讓分盤' }, { id: 'mlb_total', label: 'MLB 大小分' }, { id: 'mlb_ml_high', label: 'MLB 高賠獨贏' }] },
+        { name: '🇯🇵 日棒 NPB', items: [{ id: 'npb_runline', label: '日棒讓分' }, { id: 'npb_ml', label: '日棒獨贏' }, { id: 'npb_total', label: '日棒大小' }, { id: 'npb_1h_runline', label: '日棒上半讓分' }, { id: 'npb_1h_ml', label: '日棒上半獨贏' }, { id: 'npb_1h_total', label: '日棒上半大小' }] },
+        { name: '🇹🇼 中職 CPBL', items: [{ id: 'cpbl_team', label: '中華職棒隊伍' }, { id: 'cpbl_total', label: '中華職棒大小' }] },
+        { name: '⚽ 足球系列', items: [{ id: 'soccer_team', label: '足球隊伍' }, { id: 'soccer_total', label: '足球大小分' }, { id: 'soccer_ml', label: '足球獨贏' }, { id: 'soccer_btts', label: '足球兩隊進球' }, { id: 'soccer_corner_total', label: '足球角球大小' }, { id: 'soccer_corner_ml', label: '足球角球PK' }] },
 
-        { name: '🏒 冰球系列', items: [ { id: 'nhl_ml', label: '冰球獨贏(含加時)' }, { id: 'nhl_ml_reg', label: '冰球獨贏(不含加時)' }, { id: 'nhl_spread_ot', label: '冰球讓盤(含加時)' }, { id: 'nhl_spread_reg', label: '冰球讓盤(不含加時)' }, { id: 'nhl_total_ot', label: '冰球大小(含加時)' }, { id: 'nhl_total_reg', label: '冰球大小(不含加時)' }, { id: 'khl_team', label: '俄冰隊伍' }, { id: 'khl_total', label: '俄冰大小分' } ] },
+        { name: '🏒 冰球系列', items: [{ id: 'nhl_ml', label: '冰球獨贏(含加時)' }, { id: 'nhl_ml_reg', label: '冰球獨贏(不含加時)' }, { id: 'nhl_spread_ot', label: '冰球讓盤(含加時)' }, { id: 'nhl_spread_reg', label: '冰球讓盤(不含加時)' }, { id: 'nhl_total_ot', label: '冰球大小(含加時)' }, { id: 'nhl_total_reg', label: '冰球大小(不含加時)' }, { id: 'khl_team', label: '俄冰隊伍' }, { id: 'khl_total', label: '俄冰大小分' }] },
 
-        { name: '🌏 亞洲/歐籃', items: [ { id: 'euro_team', label: '歐籃隊伍' }, { id: 'euro_total', label: '歐籃大小' }, { id: 'euro_1h', label: '歐籃上半' }, { id: 'nbl_team', label: '澳籃隊伍' }, { id: 'nbl_total', label: '澳籃大小' }, { id: 'jbl_team', label: '日籃隊伍' },{ id: 'jbl_total', label: '日籃大小' },{ id: 'kbl_team', label: '韓籃隊伍' }, { id: 'kbl_total', label: '韓籃大小' }, { id: 'cba_team', label: '中籃隊伍' }, { id: 'cba_total', label: '中籃大小' } ] }, 
-        { name: '🎮 電競系列', items: [ { id: 'lol_team', label: '電競隊伍' }, { id: 'lol_total', label: '電競大小' } ] }
+        { name: '🌏 亞洲/歐籃', items: [{ id: 'euro_team', label: '歐籃隊伍' }, { id: 'euro_total', label: '歐籃大小' }, { id: 'euro_1h', label: '歐籃上半' }, { id: 'nbl_team', label: '澳籃隊伍' }, { id: 'nbl_total', label: '澳籃大小' }, { id: 'jbl_team', label: '日籃隊伍' }, { id: 'jbl_total', label: '日籃大小' }, { id: 'kbl_team', label: '韓籃隊伍' }, { id: 'kbl_total', label: '韓籃大小' }, { id: 'cba_team', label: '中籃隊伍' }, { id: 'cba_total', label: '中籃大小' }] },
+        { name: '🎮 電競系列', items: [{ id: 'lol_team', label: '電競隊伍' }, { id: 'lol_total', label: '電競大小' }] }
     ];
 
     // 2. 生成 HTML 結構 (暗黑科技風的 hover 展開選單)
@@ -602,7 +1383,7 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         </div>
     `;
 
-    if(displayList.length === 0) {
+    if (displayList.length === 0) {
         listContainer.innerHTML = sportBadgeHtml + '<div style="color:#94a3b8; text-align:center; font-size:20px; padding:50px; font-weight:bold;">目前項目無符合條件之好手</div>';
         return;
     }
@@ -615,11 +1396,11 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         const isTopTier = exp.isActive && exp.isQualified;
         let cardBorder = '#334155'; let rankBg = '#475569'; let rankColor = '#fff'; let glow = '';
         let rankStr = `NO.${index + 1}`;
-        
+
         if (isTopTier) {
-            if(index === 0) { cardBorder = '#fbbf24'; rankBg = '#fbbf24'; rankColor = '#000'; glow = 'box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);'; rankStr = 'RANK 1'; }
-            else if(index === 1) { cardBorder = '#94a3b8'; rankBg = '#94a3b8'; rankColor = '#000'; glow = 'box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);'; rankStr = 'RANK 2'; }
-            else if(index === 2) { cardBorder = '#ea580c'; rankBg = '#ea580c'; rankColor = '#fff'; glow = 'box-shadow: 0 0 15px rgba(234, 88, 12, 0.2);'; rankStr = 'RANK 3'; }
+            if (index === 0) { cardBorder = '#fbbf24'; rankBg = '#fbbf24'; rankColor = '#000'; glow = 'box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);'; rankStr = 'RANK 1'; }
+            else if (index === 1) { cardBorder = '#94a3b8'; rankBg = '#94a3b8'; rankColor = '#000'; glow = 'box-shadow: 0 0 15px rgba(148, 163, 184, 0.2);'; rankStr = 'RANK 2'; }
+            else if (index === 2) { cardBorder = '#ea580c'; rankBg = '#ea580c'; rankColor = '#fff'; glow = 'box-shadow: 0 0 15px rgba(234, 88, 12, 0.2);'; rankStr = 'RANK 3'; }
         } else {
             // ❄️ 沉澱者外觀
             cardBorder = '#475569'; rankBg = '#334155'; rankColor = '#94a3b8';
@@ -632,28 +1413,63 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
 
         // 🚨 LINE 瀏覽器終極防護：強制鎖定卡片寬度為電腦版尺寸，確保圖表永遠不被擠壓，完美交由外部引擎等比例縮小！
         rowDiv.style.cssText = `display: flex; gap: 25px; background: #1e293b; padding: 25px; border-radius: 20px; border: 1px solid ${cardBorder}; ${glow} ${opacityStyle} position: relative; min-width: 880px; box-sizing: border-box;`;
-        
-        const safeId = `radarChart_${rankStr.replace(/\s/g,'')}_${exp.name.replace(/\s+/g, '')}`;
+
+        const safeId = `radarChart_${rankStr.replace(/\s/g, '')}_${exp.name.replace(/\s+/g, '')}`;
+
+        // 計算五項指標
+        const getMetric = (days) => {
+            let tw = 0, tl = 0, tn = 0;
+            const recs = days === 'all' ? (window.dataDB[exp.name][key] || []) : (window.dataDB[exp.name][key] || []).slice(0, days);
+            recs.forEach(r => {
+                const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
+                if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]);
+                tn += parseInt(r[2] || 0);
+            });
+            const rate = (tw + tl) > 0 ? Math.round((tw / (tw + tl)) * 100) : 0;
+            return { rate, net: tn };
+        };
+        const m = { season: getMetric('all'), d30: getMetric(30), d20: getMetric(20), d7: getMetric(7), d3: getMetric(3) };
+        const mList = [
+            { p: '全賽季', rate: m.season.rate, net: m.season.net },
+            { p: '30天', rate: m.d30.rate, net: m.d30.net },
+            { p: '20天', rate: m.d20.rate, net: m.d20.net },
+            { p: '7天', rate: m.d7.rate, net: m.d7.net },
+            { p: '3天', rate: m.d3.rate, net: m.d3.net },
+        ];
+        const mRateColor = (v) => v >= 62 ? '#1D9E75' : v >= 57 ? '#fbbf24' : '#f87171';
+        const mNetColor = (n) => n >= 0 ? '#1D9E75' : '#f87171';
+
+
+        const metricsHtml = mList.map(mm => `
+            <div style="flex:1;text-align:center;">
+                <div style="font-size:17px;color:#94a3b8;margin-bottom:6px;">${mm.p}</div>
+                <div style="font-size:28px;font-weight:900;color:${mRateColor(mm.rate)};line-height:1;">${mm.rate}%</div>
+                <div style="font-size:17px;margin-top:6px;color:${mNetColor(mm.net)};">${mm.net >= 0 ? '+' : ''}${mm.net}注</div>
+            </div>
+        `).join('');
+
 
         rowDiv.innerHTML = `
             ${sleepBadge}
-            <div style="width: 200px; background: #0f172a; border-radius: 15px; padding: 20px 10px; text-align: center; position: relative; border: 1px solid #334155; display:flex; flex-direction:column; justify-content:center;">
-                <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: ${rankBg}; color: ${rankColor}; padding: 4px 15px; border-radius: 20px; font-weight: 900; font-size: 14px; letter-spacing: 1px; white-space: nowrap;">${rankStr}</div>
-                ${index === 0 && isTopTier ? '<div style="font-size:28px; margin-bottom:5px;">👑</div>' : ''}
-                <div style="font-size: 18px; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${exp.name}</div>
-                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 15px; background: rgba(255,255,255,0.05); display:inline-block; padding:2px 8px; border-radius:5px; margin-left:auto; margin-right:auto;">${badgeName}</div>
-                <div style="font-size: 38px; font-weight: 900; color: ${window.isNegativeMode ? '#f87171' : '#38bdf8'}; line-height: 1;">${exp.winRate}%</div>
+            <div style="width:100%;display:flex;flex-direction:column;gap:0;">
+                <div style="display:flex;align-items:center;gap:16px;padding:4px 0 10px 0;border-bottom:1px solid #1e293b;">
 
-                <div style="color: ${exp.net >= 0 ? '#fbbf24' : '#ef4444'}; font-size: 16px; font-weight: bold; margin-top: 10px;">
-                    ${exp.net >= 0 ? '+' : ''}${exp.net} 注 
-                    <span style="font-size: 12px; color: #94a3b8; font-weight: normal; margin-left: 4px;">
-                        ${timeframe === 'all' ? '(總榜)' : '(近' + timeframe + '場)'}
-                    </span>
+
+                   <div style="min-width:180px;">
+                        <div style="display:inline-block;background:${rankBg};color:${rankColor};padding:5px 16px;border-radius:20px;font-size:16px;font-weight:900;margin-bottom:10px;">${rankStr}</div>
+                        <div style="font-size:28px;font-weight:900;color:#f8fafc;">${exp.name}</div>
+                        <div style="font-size:16px;color:#94a3b8;margin-top:4px;">${badgeName}</div>
+                    </div>
+
+
+                    <div style="display:flex;flex:1;">
+                        ${metricsHtml}
+                    </div>
                 </div>
-
-            </div>
-            <div style="flex: 1; position: relative; height: 220px; width: 100%;">
-                <canvas id="${safeId}"></canvas>
+                <div style="font-size:16px;color:#475569;margin:10px 0 6px;">長期 → 短期勝率走向</div>
+                <div style="position:relative;height:160px;width:100%;">
+                    <canvas id="${safeId}"></canvas>
+                </div>
             </div>
         `;
         listContainer.appendChild(rowDiv);
@@ -664,16 +1480,16 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
             // 💡 拔除淡化特效，讓四種顏色的線永遠保持 100% 飽和度
             const c30 = '#10b981';
             const c20 = '#38bdf8';
-            const c7  = '#a855f7';
-            const c3  = '#fbbf24';
+            const c7 = '#a855f7';
+            const c3 = '#fbbf24';
 
 
-// 🎯 結算專家生涯真實總預測數與勝率
+            // 🎯 結算專家生涯真實總預測數與勝率
             let cW = 0, cL = 0;
             let expertRecords = window.dataDB[exp.name][key] || [];
             expertRecords.forEach(r => {
                 const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
-                if(wm) cW += parseInt(wm[1]); if(lm) cL += parseInt(lm[1]);
+                if (wm) cW += parseInt(wm[1]); if (lm) cL += parseInt(lm[1]);
             });
             // 🚨 修正 3：真實總預測數 (勝+敗)，讓數據邏輯 100% 嚴謹
             let trueTotalMatches = cW + cL;
@@ -689,9 +1505,9 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     const yPos = yAxis.getPixelForValue(careerRate);
 
                     ctx.save();
-                    
+
                     ctx.beginPath();
-                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)'; 
+                    ctx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
                     ctx.lineWidth = 1.5;
                     ctx.setLineDash([5, 5]);
                     ctx.moveTo(chartArea.left, yPos);
@@ -699,91 +1515,66 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
                     ctx.stroke();
 
                     const text = `生涯 ${careerRate}% (${trueTotalMatches}場)`;
-                    ctx.font = 'bold 14px sans-serif'; 
+                    ctx.font = 'bold 14px sans-serif';
                     const textWidth = ctx.measureText(text).width;
-                    const paddingX = 12, boxHeight = 26; 
+                    const paddingX = 12, boxHeight = 26;
                     const boxWidth = textWidth + paddingX * 2;
-                    
-                    const boxX = chartArea.left; 
+
+                    const boxX = chartArea.left;
                     let boxY = yPos - boxHeight / 2;
 
                     // 🚨 修正 2：防裁切保護！如果 100% 碰到天花板、或 0% 碰到地板，強制內縮
                     if (boxY < chartArea.top) boxY = chartArea.top + 2;
                     if (boxY + boxHeight > chartArea.bottom) boxY = chartArea.bottom - boxHeight - 2;
 
-                    ctx.fillStyle = 'rgba(236, 72, 153, 0.9)'; 
+                    ctx.fillStyle = 'rgba(236, 72, 153, 0.9)';
                     ctx.beginPath();
                     // 🚨 修正 1：捨棄舊版 iPhone 會當機的 roundRect，改用絕對安全的 rect
                     ctx.rect(boxX, boxY, boxWidth, boxHeight);
                     ctx.fill();
 
-                    ctx.fillStyle = '#ffffff'; 
+                    ctx.fillStyle = '#ffffff';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     // 文字的 Y 軸座標必須跟著受保護的 boxY 居中對齊
                     ctx.fillText(text, boxX + boxWidth / 2, boxY + boxHeight / 2);
-                    
+
                     ctx.restore();
                 }
             };
+            const lineVals = mList.map(mm => mm.rate);
+            const linePtColors = mList.map(mm => mRateColor(mm.rate));
             new Chart(ctx, {
                 type: 'line',
-                plugins: [careerLevelPlugin], // 👈 啟動剛寫好的生涯雷射浮標外掛！
                 data: {
-
-                    // 💡 不再根據 timeframe 改變粗細，讓四條線同時清晰呈現
+                    labels: mList.map(mm => mm.p),
                     datasets: [
-                        { label: '30場指標', data: generateAuthenticTrack(30, window.dataDB[exp.name][key] || []), borderColor: c30, borderWidth: 2.5, pointRadius: 1, tension: 0.2 },
-                        { label: '20場指標', data: generateAuthenticTrack(20, window.dataDB[exp.name][key] || []), borderColor: c20, borderWidth: 2.5, pointRadius: 1, tension: 0.2 },
-                        { label: '7場維持度', data: generateAuthenticTrack(7,  window.dataDB[exp.name][key] || []), borderColor: c7,  borderWidth: 3,   pointRadius: 2, tension: 0.2 },
-                        { label: '3場近況',   data: generateAuthenticTrack(3,  window.dataDB[exp.name][key] || []), borderColor: c3,  borderWidth: 4,   pointRadius: 3, pointHitRadius: 10, tension: 0.2 }
+                        {
+                            data: lineVals, borderColor: '#38bdf8', borderWidth: 2,
+                            pointBackgroundColor: linePtColors, pointBorderColor: linePtColors,
+                            pointRadius: 5, tension: 0.35, fill: false
+                        },
+                        {
+                            data: [57, 57, 57, 57, 57], borderColor: 'rgba(148,163,184,0.3)',
+                            borderWidth: 1, borderDash: [4, 3], pointRadius: 0, fill: false
+                        }
                     ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    // 🚨 修正核心：改為 nearest 與 axis: 'x'，絕對精準對齊游標位置！不再抓錯資料！
-                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
-                    plugins: { 
-
-                        // 🎯 視覺升級：將圖例移至正中央 (center)，並加上 padding (20) 讓四個按鈕均勻散開不擁擠
-                        legend: { position: 'top', align: 'center', labels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' }, boxWidth: 20, padding: 20 } },
-
-                        tooltip: { 
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                            titleColor: '#94a3b8', 
-                            bodyFont: { weight: 'bold' }, 
-                            callbacks: { 
-                                label: function(c) { 
-                                    // 🛡️ 終極防呆：攔截第 0 個點！不讓用戶看到底部的 0%
-                                    if (c.dataIndex === 0) return null; 
-                                    return c.dataset.label + ': ' + Math.round(c.raw.y) + '%'; 
-                                } 
-                            } 
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15,23,42,0.9)', titleColor: '#94a3b8',
+                            callbacks: { label: c => c.datasetIndex === 1 ? '目標線' : c.raw + '%' }
                         }
                     },
-                    // 🚨 終極修正：X 軸 1~31 完整顯示，並強制每個節點對齊刻度！
                     scales: {
-                        x: { 
-                            type: 'linear', 
-                            position: 'bottom', 
-                            reverse: true, 
-                            min: 1, 
-                            max: 31, 
-                            title: { display: true, text: '距今場次', color: '#475569' }, 
-                            ticks: { 
-                                stepSize: 1,       // 👈 關鍵 1：每 1 單位就畫一個刻度
-                                autoSkip: false,   // 👈 關鍵 2：強制顯示所有數字，不允許系統自動隱藏
-                                color: '#64748b' 
-                            }, 
-                            grid: { color: 'rgba(255,255,255,0.02)' } 
-                        },
-                        y: { 
-                            position: 'right', 
-                            min: 0, 
-                            max: 100, 
-                            title: { display: true, text: '勝率牆 (%)', color: '#fbbf24' }, 
-                            ticks: { stepSize: 20, color: '#fbbf24', font: { weight: 'bold' }, callback: v => v + '%' }, 
-                            grid: { color: 'rgba(255,255,255,0.05)' } 
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
+                        y: {
+                            min: 0, max: 100, position: 'right',
+                            ticks: { stepSize: 20, callback: v => v + '%', color: '#fbbf24', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
                         }
                     }
                 }
@@ -791,4 +1582,134 @@ window.renderMomentumRadar = function(timeframe = 20, btnElement = null) {
         }, 150);
 
     });
+};
+
+window.openMainPick = function (sportKey) {
+    const mainContent = document.getElementById('mainContent');
+    const pickPage = document.getElementById('mainPickPage');
+    if (!pickPage) { alert("找不到主推介面，請確認 index.html 已更新！"); return; }
+    mainContent.style.display = 'none';
+    pickPage.style.display = 'flex';
+    window.scrollTo(0, 0);
+    pickPage.scrollTo(0, 0);
+    if (typeof window.scalePage === 'function') setTimeout(function () { window.scalePage(true); }, 50);
+    window.renderMainPick(sportKey || window.activeMainPickKey || 'mlb_main');
+};
+
+window.closeMainPick = function () {
+    const pickPage = document.getElementById('mainPickPage');
+    if (pickPage) pickPage.style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    if (typeof window.scalePage === 'function') setTimeout(function () { window.scalePage(true); }, 50);
+};
+
+window.renderMainPick = function (sportKey) {
+    window.activeMainPickKey = sportKey;
+    const mainSports = [
+        { key: 'mlb_main', label: '⚾ MLB主推(隊伍)' },
+        { key: 'mlb_total_main', label: '⚾ MLB主推(大小)' },
+        { key: 'nba_main', label: '🏀 NBA主推(隊伍)' },
+        { key: 'nba_total_main', label: '🏀 NBA主推(大小)' },
+        { key: 'npb_main', label: '🇯🇵 NPB主推(隊伍)' },
+        { key: 'npb_total_main', label: '🇯🇵 NPB主推(大小)' },
+        { key: 'cpbl_main', label: '🇹🇼 CPBL主推(隊伍)' },
+        { key: 'cpbl_total_main', label: '🇹🇼 CPBL主推(大小)' },
+        { key: 'kbo_team', label: '🇰🇷 KBO主推(隊伍)' },
+        { key: 'kbo_total', label: '🇰🇷 KBO主推(大小)' },
+    ];
+
+    const sportBar = document.getElementById('mainPickSportBar');
+    sportBar.innerHTML = mainSports.map(s =>
+        `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : '#1e293b'}; color:${s.key === sportKey ? '#000' : '#fbbf24'}; border:1px solid #fbbf24; padding:8px 18px; border-radius:50px; font-size:14px; font-weight:bold; cursor:pointer; transition:0.2s;">${s.label}</button>`
+    ).join('');
+
+    let allSorted = [];
+    let systemLatestDate = window.getSystemLatestDate(sportKey);
+    let qualifiedWhitelist = [];
+    try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { console.error('qualifiedWhitelist 讀取失敗', e); }
+
+    for (let name in window.dataDB) {
+        if (window.excludedExperts && window.excludedExperts.includes(name)) continue;
+        let list = window.dataDB[name][sportKey] || [];
+        if (list.length === 0) continue;
+        let diffDays = window.getDaysDiff(list[0][0], systemLatestDate);
+        if (diffDays > 3) continue;
+        let uniqueDates = new Set(list.map(r => r[0]));
+        const isQualified = (list.length >= 20 && uniqueDates.size >= 10) || qualifiedWhitelist.includes(name + '||' + sportKey);
+        let w = 0, l = 0;
+        list.slice(0, 20).forEach(r => {
+            const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
+            if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]);
+        });
+        let rate = (w + l) > 0 ? Math.round(w / (w + l) * 100) / 100 : 0;
+        const getRate = (days) => {
+            let tw = 0, tl = 0;
+            list.slice(0, days).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); });
+            return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
+        };
+        const r10 = getRate(10);
+        allSorted.push({ name, rate, r10, list, isQualified });
+    }
+
+    allSorted.sort((a, b) => b.rate - a.rate);
+
+    function buildRow(item) {
+        const records = item.list.slice(0, 20);
+        const cells = [];
+        for (let i = 19; i >= 0; i--) {
+            const r = records[i];
+            if (!r) {
+                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:16px; color:#475569; margin:1px;">－</span>`);
+                continue;
+            }
+            const val = parseInt(r[2] || 0);
+            const wl = r[1] || '';
+            let label, color, bg;
+            if (wl.includes('延')) { label = '延'; color = '#94a3b8'; bg = '#1e293b'; }
+            else if (wl.includes('缺')) { label = '缺'; color = '#64748b'; bg = '#0f172a'; }
+            else if (val > 0) { label = '過'; color = '#fff'; bg = '#16a34a'; }
+            else if (val < 0) { label = '倒'; color = '#fff'; bg = '#dc2626'; }
+            else { label = '平'; color = '#94a3b8'; bg = '#334155'; }
+            cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:16px; font-weight:bold; color:${color}; background:${bg}; border-radius:5px; margin:2px;">${label}</span>`);
+        }
+        cells.splice(10, 0, `<span style="display:inline-block; width:8px;"></span>`);
+        const pickHtml = typeof window.getPickTooltipHtml === 'function' ? window.getPickTooltipHtml(item.name) : '';
+        const rateColor = item.rate >= 0.55 ? '#16a34a' : item.rate <= 0.45 ? '#dc2626' : '#f59e0b';
+        const r10Color = item.r10 >= 0.55 ? '#16a34a' : item.r10 <= 0.45 ? '#dc2626' : '#f59e0b';
+        return `<div style="display:flex; align-items:center; padding:6px 0; border-bottom:1px solid #1e293b; ${!item.isQualified ? 'opacity:0.5;' : ''}">
+            <div style="flex:0 0 1140px;">${cells.join('')}</div>
+            <div style="flex:0 0 200px; color:#f8fafc; font-weight:bold; font-size:18px; padding:0 16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
+            <div style="flex:0 0 120px; text-align:center; color:${rateColor}; font-weight:900; font-size:20px;">${(item.rate * 100).toFixed(0)}%</div>
+            <div style="flex:0 0 120px; text-align:center; color:${r10Color}; font-weight:900; font-size:20px;">${(item.r10 * 100).toFixed(0)}%</div>
+            <div style="flex:0 0 120px; text-align:center;">${pickHtml}</div>
+        </div>`;
+    }
+
+    const dividerRow = (text) =>
+        `<div style="text-align:center; padding:4px 0; color:rgba(251,191,36,0.5); font-size:12px; font-weight:bold; letter-spacing:2px;">${text}</div>`;
+
+    const qualifiedList = allSorted.filter(i => i.isQualified);
+    const unqualifiedList = allSorted.filter(i => !i.isQualified);
+    const top4 = qualifiedList.slice(0, 4);
+    const bottom4 = qualifiedList.length > 8 ? qualifiedList.slice(-4) : qualifiedList.slice(Math.max(4, qualifiedList.length - 4));
+    const middle = qualifiedList.slice(top4.length, qualifiedList.length - bottom4.length);
+
+    const headerHtml = `<div style="display:flex; align-items:center; padding:10px 0; border-bottom:2px solid #fbbf24; color:#fbbf24; font-weight:900; font-size:16px;">
+        <div style="flex:0 0 1140px;">十場（左舊→右新）十場</div>
+        <div style="flex:0 0 200px; padding:0 16px;">人名</div>
+        <div style="flex:0 0 120px; text-align:center;">20場勝率</div>
+        <div style="flex:0 0 120px; text-align:center;">近10場勝率</div>
+        <div style="flex:0 0 120px; text-align:center;">今日推薦</div>
+    </div>`;
+
+    document.getElementById('mainPickHeader').innerHTML = headerHtml;
+    document.getElementById('mainPickTop4').innerHTML =
+        top4.map(i => buildRow(i)).join('') +
+        (middle.length > 0 ? dividerRow('▼  以下可上下滑動  ▼') : '');
+    document.getElementById('mainPickMiddle').innerHTML =
+        middle.map(i => buildRow(i)).join('') +
+        unqualifiedList.map(i => buildRow(i)).join('');
+    document.getElementById('mainPickBottom4').innerHTML =
+        (bottom4.length > 0 ? dividerRow('▲  以上可上下滑動  ▲') : '') +
+        bottom4.map(i => buildRow(i)).join('');
 };

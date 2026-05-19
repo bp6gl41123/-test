@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -32,7 +33,14 @@ export default async function handler(req, res) {
         // 取得今天的日期字串 (例如 "2026-03-18")
         const today = new Date().toLocaleDateString('en-CA'); 
 
-        // 2. 檢查天數是否已用盡
+        // 2. 檢查到期日
+        const now = new Date();
+        const expiresAt = new Date(record.expires_at);
+        if (now > expiresAt) {
+            return res.status(200).json({ valid: false, reason: 'expired' });
+        }
+
+        // 3. 檢查天數是否已用盡
         if (record.used_days >= record.total_days && record.total_days > 0) {
             return res.status(200).json({ valid: false, reason: 'expired' });
         }
@@ -44,6 +52,7 @@ export default async function handler(req, res) {
         if (record.last_login_date !== today) {
             currentUsedDays += 1;
 
+            const { line_user_id } = req.body;
             await fetch(
                 `${SUPABASE_URL}/rest/v1/fu6rm4?key=eq.${encodeURIComponent(key)}`,
                 {
@@ -56,8 +65,8 @@ export default async function handler(req, res) {
                     body: JSON.stringify({ 
                         used_days: currentUsedDays, 
                         last_login_date: today,
-                        // 如果扣完剛好滿了，順便把舊的 used 標籤打勾
-                        used: currentUsedDays >= record.total_days 
+                        used: currentUsedDays >= record.total_days,
+                        bound_line_id: line_user_id || null
                     })
                 }
             );

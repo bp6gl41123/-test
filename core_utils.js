@@ -2,9 +2,9 @@
 /* ==== 【組件 A：系統工具 - core_utils.js】 ==== */
 /* ============================================================== */
 
-window.getSystemLatestDate = function(sportKey) { let maxTime = 0; let maxStr = "01/01"; let currentYear = new Date().getFullYear(); for (let expert in window.dataDB) { if (window.dataDB[expert][sportKey] && window.dataDB[expert][sportKey].length > 0) { let dateStr = window.dataDB[expert][sportKey][0][0]; let d = new Date(`${currentYear}/${dateStr}`); if (d > new Date()) d.setFullYear(currentYear - 1); if (d.getTime() > maxTime) { maxTime = d.getTime(); maxStr = dateStr; } } } return maxStr; };
+window.getSystemLatestDate = function(sportKey) { let maxTime = 0; let maxStr = "01/01"; let currentYear = new Date().getFullYear(); for (let expert in window.dataDB) { if (window.dataDB[expert][sportKey] && window.dataDB[expert][sportKey].length > 0) { let dateStr = window.dataDB[expert][sportKey][0][0]; let d = new Date(dateStr.split('/').length === 3 ? dateStr : `${currentYear}/${dateStr}`); if (d.getTime() > maxTime) { maxTime = d.getTime(); maxStr = dateStr; } } } return maxStr; };
 
-window.getDaysDiff = function(recordDateStr, systemLatestStr) { if(!recordDateStr || !systemLatestStr) return 999; let currentYear = new Date().getFullYear(); let d1 = new Date(`${currentYear}/${systemLatestStr}`); let d2 = new Date(`${currentYear}/${recordDateStr}`); if (d2 > d1) d2.setFullYear(currentYear - 1); return Math.floor((d1 - d2) / (1000 * 60 * 60 * 24)); };
+window.getDaysDiff = function(recordDateStr, systemLatestStr) { if(!recordDateStr || !systemLatestStr) return 999; let currentYear = new Date().getFullYear(); let d1 = new Date(systemLatestStr.split('/').length === 3 ? systemLatestStr : `${currentYear}/${systemLatestStr}`); let d2 = new Date(recordDateStr.split('/').length === 3 ? recordDateStr : `${currentYear}/${recordDateStr}`); return Math.floor((d1 - d2) / (1000 * 60 * 60 * 24)); };
 
 window.changeHomeRanking = function(val, btn) { window.currentHomeFilter = val; document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); window.init(); };
 

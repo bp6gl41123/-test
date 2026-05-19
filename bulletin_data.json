@@ -1,0 +1,57 @@
+{
+  "updatedAt": "2026-05-19T06:10:28.828Z",
+  "experts": [
+    {
+      "name": "林Cu53",
+      "events": "MLB主推(隊伍)\nMLB獨贏",
+      "direction": "positive",
+      "status": "green"
+    },
+    {
+      "name": "Holly",
+      "events": "MLB獨贏",
+      "direction": "reverse",
+      "status": "green"
+    },
+    {
+      "name": "世界止めて 32",
+      "events": "MLB獨贏",
+      "direction": "reverse",
+      "status": "green"
+    },
+    {
+      "name": "小飛58",
+      "events": "MLB讓分",
+      "direction": "positive",
+      "status": "green"
+    },
+    {
+      "name": "Holly",
+      "events": "MLB讓分",
+      "direction": "reverse",
+      "status": "red"
+    },
+    {
+      "name": "Zlin小多61",
+      "events": "MLB大小\nMLB主推(大小)",
+      "direction": "reverse",
+      "status": "green"
+    },
+    {
+      "name": "莊硯",
+      "events": "MLB大小",
+      "direction": "positive",
+      "status": "green"
+    }
+  ],
+  "bulletins": [
+    {
+      "title": "跟牌技巧 版大經驗傳授",
+      "content": "\n☢️ 跟牌切記：鎖定好手時\n跟牌必須持續使用並全跟不要挑選。\n\n💡 除非勝率整個變了，才需要停用。\n規律變化：以前常贏，現在兩天不贏\n基本上都要轉為觀望 系統也會幫忙更新。\n\n#技巧在這 好手多。\n\n🧏 備註：\n勝負起伏是正常頻率 輸之後就是贏 \n鎖定好手 正常規律參考 損益才能平衡\n\n⛔️跟牌最忌諱方式\n輸了就退、輸了又退，虧損停在那邊\n別人一來一往追平了，你還是漫無目的。\n\n設定好每日限額上限 \n當天全輸就是一天上限而已\n損益還能掌握 才可維持跟牌節奏 \n不用擔心不跟時 好手就持平 \n\n規劃長期可以進行的投注習慣\n才是正確的投資行為🙆\""
+    },
+    {
+      "title": "運彩玩家 技巧傳授",
+      "content": "運彩玩家 兩種配置法💡 \n\n第一種 \"主推配\"\n\n每一個賽事細項 各找一位\"推薦中\"\n以主推 配 主推 串成 運彩專屬 2x1\n\n第二種 \"勝率配\"\n\n當期若出現 賽事較穩定的玩家\n\n勝率常常四過三 三過二等....\n換角度說 常轟或常常只倒一場\n\n鎖定這類型的玩家 當日推薦五場 \n就用這五場 去配五場不同賽事的主推\n\n串成 運彩專屬 2x1 \n\n兩種配置法掌握後\n維持一個週期 如:半個月 持續操作 \n\n好手狀態何時有異動\n可參考 \"當期推薦好手榜\"\n以及另外一篇公告的 版大經驗傳授🙆"
+    }
+  ]
+}

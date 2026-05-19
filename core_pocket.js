@@ -179,10 +179,10 @@ const overlay = document.createElement('div'); overlay.className = 'pocket-modal
 
             <ul class="pocket-list" id="pocketListArea" style="flex: 1; overflow-y: auto; min-height: 0; max-height: none;"></ul>
             
-            <div class="pocket-modal-footer" style="flex-shrink: 0;">
+            <div class="pocket-modal-footer" style="flex-shrink: 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                <button class="pocket-clear-btn" id="db-copy-btn" onclick="copyPocketPicks()" style="background:#1e293b; color:#e8c96a; border:2px solid rgba(201,168,76,0.4); padding:14px 35px; border-radius:15px; cursor:pointer; font-weight:900; font-size:16px; transition:0.3s;">📋 複製所有推薦</button>
                 <button class="pocket-clear-btn" onclick="clearPocket()">🗑️ 清空所有收錄預測單</button>
             </div>
-        </div>
     `;
     document.body.appendChild(overlay);
 
@@ -212,14 +212,19 @@ window.openPocketModal = () => {
         } else {
             const itemNames = {
                 "nba_main": "🏀 NBA主推", "mlb_main": "⚾ MLB主推",
-                "npb_runline": "日棒讓分", "npb_ml": "日棒獨贏", "npb_total": "日棒大小", "npb_1h_runline": "日棒上半讓分", "npb_1h_ml": "日棒上半獨贏", "npb_1h_total": "日棒上半大小",
-                "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分",
+                "nba_team": "NBA 讓分盤", "nba_total": "NBA 大小分", "nba_team_total": "NBA 單隊大小", "nba_team_spread": "NBA 單隊讓盤", "nba_1h_total": "NBA 上半大小",
                 "mlb_ml": "MLB 獨贏", "mlb_runline": "MLB 讓分盤", "mlb_total": "MLB 大小分", "mlb_ml_high": "MLB 高賠獨贏",
-                "nhl_ml": "冰球獨贏(含加時)", "nhl_ml_reg": "冰球獨贏(不含加時)", "nhl_spread_ot": "冰球讓盤(含加時)", "nhl_spread_reg": "冰球讓盤(不含加時)", 
+                "npb_runline": "日棒讓分", "npb_ml": "日棒獨贏", "npb_total": "日棒大小", "npb_1h_runline": "日棒上半讓分", "npb_1h_ml": "日棒上半獨贏", "npb_1h_total": "日棒上半大小",
+                "cpbl_team": "中職隊伍", "cpbl_total": "中職大小",
+                "kbo_team": "韓棒隊伍", "kbo_total": "韓棒大小",
+                "nhl_ml": "冰球獨贏(含加時)", "nhl_ml_reg": "冰球獨贏(不含加時)", "nhl_spread_ot": "冰球讓盤(含加時)", "nhl_spread_reg": "冰球讓盤(不含加時)",
                 "nhl_total_ot": "冰球大小(含加時)", "nhl_total_reg": "冰球大小(不含加時)", "khl_team": "俄冰隊伍", "khl_total": "俄冰大小分",
-                
-                "soccer_team": "足球隊伍", "soccer_total": "足球大小分", "soccer_ml": "足球獨贏", "soccer_btts": "足球兩隊進球",
-                "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", "cba_team": "中籃隊伍","jbl_team": "日籃讓盤", "jbl_total": "日籃大小", "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小", "nbl_team": "澳籃隊伍",
+                "soccer_team": "足球隊伍", "soccer_total": "足球大小分", "soccer_ml": "足球獨贏", "soccer_btts": "足球兩隊進球", "soccer_corner_total": "足球角球大小", "soccer_corner_ml": "足球角球PK",
+                "euro_team": "歐籃隊伍", "euro_total": "歐籃大小", "euro_1h": "歐籃上半",
+                "nbl_team": "澳籃隊伍", "nbl_total": "澳籃大小",
+                "jbl_team": "日籃隊伍", "jbl_total": "日籃大小",
+                "kbl_team": "韓籃隊伍", "kbl_total": "韓籃大小",
+                "cba_team": "中籃隊伍", "cba_total": "中籃大小",
                 "lol_team": "電競隊伍", "lol_total": "電競大小"
             };
 
@@ -334,6 +339,66 @@ window.openPocketModal = () => {
         window.updatePocketWidget(); 
         window.closePocketModal(); 
         if (typeof window.renderDisplay === 'function') window.renderDisplay();
+    };
+
+    window.copyPocketPicks = function() {
+        var lines = [];
+        window.userPocket.forEach(function(pocketKey) {
+            var name = pocketKey;
+            var savedSportKey = "";
+            if (pocketKey.includes("||")) {
+                var parts = pocketKey.split("||");
+                name = parts[0];
+                savedSportKey = parts[1];
+            }
+            var finalContent = "";
+            if (typeof todayPicks !== 'undefined' && Array.isArray(todayPicks)) {
+                var foundAll = todayPicks.filter(function(p){ return p[0] === name; });
+                if (foundAll.length > 0) {
+                    if (foundAll[0].length >= 3) {
+                        var exactMatch = foundAll.find(function(p){ return p[1] === savedSportKey; });
+                        if (exactMatch) finalContent = exactMatch[2];
+                    } else {
+                        finalContent = foundAll[0][1] || "";
+                    }
+                }
+            }
+            if (finalContent) {
+                // 去掉 HTML tag，<br> 換成換行
+                var text = finalContent.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').trim();
+                if (text) lines.push(text);
+            }
+        });
+
+        if (lines.length === 0) {
+            dbShowToast('目前沒有任何推薦內容可複製');
+            return;
+        }
+
+        var copyText = lines.join('\n');
+        var btn = document.getElementById('db-copy-btn');
+
+        navigator.clipboard.writeText(copyText).then(function() {
+            if (btn) { btn.textContent = '✅ 已複製！'; }
+            dbShowToast('✅ 推薦內容已複製到剪貼簿');
+            setTimeout(function() {
+                if (btn) { btn.textContent = '📋 複製所有推薦'; }
+            }, 2000);
+        }).catch(function() {
+            // 降級方案
+            var ta = document.createElement('textarea');
+            ta.value = copyText;
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (btn) { btn.textContent = '✅ 已複製！'; }
+            dbShowToast('✅ 推薦內容已複製到剪貼簿');
+            setTimeout(function() {
+                if (btn) { btn.textContent = '📋 複製所有推薦'; }
+            }, 2000);
+        });
     };
 
     window.updatePocketWidget();
