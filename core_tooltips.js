@@ -166,10 +166,10 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('visibility', 'visible', 'important');
             s.setProperty('opacity', '1', 'important');
             s.setProperty('position', 'fixed', 'important');
-            s.setProperty('width', '260px', 'important');
-            s.setProperty('min-width', '260px', 'important');
-            s.setProperty('max-width', '260px', 'important');
-            s.setProperty('padding', '14px 18px', 'important');
+            s.setProperty('width', '240px', 'important');
+            s.setProperty('min-width', '240px', 'important');
+            s.setProperty('max-width', '240px', 'important');
+            s.setProperty('padding', '12px 14px', 'important');
             s.setProperty('background', 'linear-gradient(135deg, #1e293b, #0f172a)', 'important');
             s.setProperty('border', '1px solid #fbbf24', 'important');
             s.setProperty('border-radius', '12px', 'important');
