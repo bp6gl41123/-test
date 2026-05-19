@@ -80,8 +80,16 @@ body { padding-bottom: 120px; }
     #mainPickBottom4 .pick-tooltip {
         right: 0 !important;
         left: auto !important;
-        top: 100% !important;
+        top: 145% !important;
+        bottom: auto !important;
         transform: none !important;
+        position: absolute !important;
+    }
+    #mainPickTop4 .pick-tooltip-container:hover .pick-tooltip,
+    #mainPickMiddle .pick-tooltip-container:hover .pick-tooltip,
+    #mainPickBottom4 .pick-tooltip-container:hover .pick-tooltip {
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     #mainPickTop4 .pocket-add-btn,
     #mainPickMiddle .pocket-add-btn,
