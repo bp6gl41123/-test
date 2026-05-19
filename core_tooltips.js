@@ -166,24 +166,24 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('visibility', 'visible', 'important');
             s.setProperty('opacity', '1', 'important');
             s.setProperty('position', 'fixed', 'important');
-            s.setProperty('width', '300px', 'important');
-            s.setProperty('min-width', '300px', 'important');
-            s.setProperty('max-width', '300px', 'important');
-            s.setProperty('padding', '18px 20px', 'important');
-            s.setProperty('background', '#0f172a', 'important');
-            s.setProperty('border', '1px solid rgba(251,191,36,0.6)', 'important');
-            s.setProperty('border-radius', '14px', 'important');
-            s.setProperty('box-shadow', '0 10px 40px rgba(0,0,0,0.7)', 'important');
+            s.setProperty('width', '260px', 'important');
+            s.setProperty('min-width', '260px', 'important');
+            s.setProperty('max-width', '260px', 'important');
+            s.setProperty('padding', '14px 18px', 'important');
+            s.setProperty('background', 'linear-gradient(135deg, #1e293b, #0f172a)', 'important');
+            s.setProperty('border', '1px solid #fbbf24', 'important');
+            s.setProperty('border-radius', '12px', 'important');
+            s.setProperty('box-shadow', '0 10px 25px rgba(0,0,0,0.5)', 'important');
             s.setProperty('z-index', '999999', 'important');
-            s.setProperty('font-size', '15px', 'important');
-            s.setProperty('line-height', '1.8', 'important');
-            s.setProperty('color', '#f8fafc', 'important');
+            s.setProperty('font-size', '14px', 'important');
+            s.setProperty('line-height', '1.6', 'important');
+            s.setProperty('color', '#fbbf24', 'important');
             s.setProperty('white-space', 'normal', 'important');
             s.setProperty('word-break', 'break-all', 'important');
             s.setProperty('top', top + 'px', 'important');
             s.setProperty('left', left + 'px', 'important');
             s.setProperty('bottom', 'auto', 'important');
-            s.setProperty('transform', 'none', 'important');;
+            s.setProperty('transform', 'none', 'important');
         }
         return;
     }
