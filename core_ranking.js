@@ -1619,9 +1619,21 @@ window.renderMainPick = function (sportKey) {
     ];
 
     const sportBar = document.getElementById('mainPickSportBar');
-    sportBar.innerHTML = mainSports.map(s =>
-        `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : '#1e293b'}; color:${s.key === sportKey ? '#000' : '#fbbf24'}; border:1px solid #fbbf24; padding:8px 18px; border-radius:50px; font-size:14px; font-weight:bold; cursor:pointer; transition:0.2s;">${s.label}</button>`
-    ).join('');
+    const sportGroups = [
+        { league: '⚾ MLB', items: mainSports.filter(s => s.key.startsWith('mlb')) },
+        { league: '🏀 NBA', items: mainSports.filter(s => s.key.startsWith('nba')) },
+        { league: '🇯🇵 NPB', items: mainSports.filter(s => s.key.startsWith('npb')) },
+        { league: '🇹🇼 CPBL', items: mainSports.filter(s => s.key.startsWith('cpbl')) },
+        { league: '🇰🇷 KBO', items: mainSports.filter(s => s.key.startsWith('kbo')) },
+    ];
+    sportBar.innerHTML = sportGroups.map(g =>
+        `<div style="display:flex; align-items:center; gap:6px;">
+            <span style="color:#64748b; font-size:13px; font-weight:bold; white-space:nowrap;">${g.league}</span>
+            ${g.items.map(s =>
+                `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : 'transparent'}; color:${s.key === sportKey ? '#000' : '#94a3b8'}; border:1px solid ${s.key === sportKey ? '#fbbf24' : '#334155'}; padding:5px 14px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap;">${s.key.includes('total') || s.key.includes('kbo_total') ? '大小' : '隊伍'}</button>`
+            ).join('')}
+        </div>`
+    ).join('<div style="width:1px; background:#1e293b; margin:0 4px;"></div>');
 
     let allSorted = [];
     let systemLatestDate = window.getSystemLatestDate(sportKey);
