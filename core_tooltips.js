@@ -140,7 +140,32 @@ window.getPickTooltipHtml = function(name) {
     return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); if(typeof window.tooltipGateTrigger === 'function' && window.tooltipGateTrigger()) return; window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
 };
 
-window.toggleMobileTooltip = function(iconElement) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { if (el !== iconElement.nextElementSibling) el.classList.remove('show-mobile'); }); iconElement.nextElementSibling.classList.toggle('show-mobile'); };
+window.toggleMobileTooltip = function(iconElement) {
+    document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => {
+        if (el !== iconElement.nextElementSibling) {
+            el.classList.remove('show-mobile');
+            el.removeAttribute('style');
+        }
+    });
+    var tooltip = iconElement.nextElementSibling;
+    var isShowing = tooltip.classList.contains('show-mobile');
+    tooltip.classList.toggle('show-mobile');
+
+    // 🎯 只有在主推排行頁面（mainPickPage）內，才用 fixed 定位避免被截
+    var inMainPick = !!iconElement.closest('#mainPickTop4, #mainPickMiddle, #mainPickBottom4');
+
+    if (!isShowing && inMainPick) {
+        var rect = iconElement.getBoundingClientRect();
+        var top = rect.bottom + 8;
+        var left = rect.right - 300;
+        if (left < 8) left = 8;
+        if (top + 200 > window.innerHeight) top = rect.top - 220;
+        tooltip.style.cssText = 'position:fixed !important; width:300px !important; min-width:300px !important; padding:18px 20px !important; background:#0f172a !important; border:1px solid rgba(251,191,36,0.6) !important; border-radius:14px !important; box-shadow:0 10px 40px rgba(0,0,0,0.7) !important; z-index:999999 !important; font-size:15px !important; line-height:1.8 !important; color:#f8fafc !important; white-space:normal !important; word-break:break-all !important; top:' + top + 'px; left:' + left + 'px;';
+    } else if (isShowing) {
+        tooltip.removeAttribute('style');
+    }
+};
+ iconElement.nextElementSibling.classList.toggle('show-mobile'); };
 document.addEventListener('click', (e) => { if(!e.target.closest('.pick-icon') && !e.target.closest('.pick-tooltip')) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile')); } });
 
 
