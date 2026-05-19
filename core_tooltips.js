@@ -171,6 +171,47 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('bottom', 'auto', 'important');
             s.setProperty('transform', 'none', 'important');
             s.setProperty('z-index', '999999', 'important');
+            s.setProperty('background', 'linear-gradient(135deg, #1e293b, #0f172a)', 'important');
+            s.setProperty('color', '#fbbf24', 'important');
+            s.setProperty('border-radius', '12px', 'important');
+            s.setProperty('border', '1px solid #fbbf24', 'important');
+            s.setProperty('min-width', '220px', 'important');
+            s.setProperty('max-width', '280px', 'important');
+            s.setProperty('padding', '14px 18px', 'important');
+            s.setProperty('font-size', '14px', 'important');
+            s.setProperty('font-weight', 'bold', 'important');
+            s.setProperty('text-align', 'left', 'important');
+            s.setProperty('line-height', '1.6', 'important');
+            s.setProperty('letter-spacing', '0.5px', 'important');
+            s.setProperty('max-height', '220px', 'important');
+            s.setProperty('overflow-y', 'auto', 'important');
+            s.setProperty('white-space', 'normal', 'important');
+            s.setProperty('pointer-events', 'auto', 'important');
+            s.setProperty('box-shadow', '0 10px 25px rgba(0,0,0,0.5)', 'important');
+            // pocket-btn-wrapper
+            var wrapper = tooltip.querySelector('.pocket-btn-wrapper');
+            if (wrapper) {
+                wrapper.style.setProperty('margin-top', '10px', 'important');
+                wrapper.style.setProperty('border-top', '1px dashed #475569', 'important');
+                wrapper.style.setProperty('padding-top', '8px', 'important');
+                wrapper.style.setProperty('text-align', 'left', 'important');
+            }
+            // pocket-add-btn
+            var btn = tooltip.querySelector('.pocket-add-btn');
+            if (btn) {
+                btn.style.setProperty('background', 'linear-gradient(135deg, #f59e0b, #d97706)', 'important');
+                btn.style.setProperty('color', 'white', 'important');
+                btn.style.setProperty('border', 'none', 'important');
+                btn.style.setProperty('padding', '6px 14px', 'important');
+                btn.style.setProperty('border-radius', '6px', 'important');
+                btn.style.setProperty('font-size', '12px', 'important');
+                btn.style.setProperty('font-weight', 'bold', 'important');
+                btn.style.setProperty('cursor', 'pointer', 'important');
+                btn.style.setProperty('width', 'auto', 'important');
+                btn.style.setProperty('display', 'inline-block', 'important');
+                btn.style.setProperty('transition', '0.2s', 'important');
+                btn.style.setProperty('box-shadow', '0 2px 5px rgba(0,0,0,0.3)', 'important');
+            }
            }
         return;
     }
