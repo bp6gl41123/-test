@@ -160,7 +160,7 @@ window.toggleMobileTooltip = function(iconElement) {
             tooltip.style.setProperty('visibility', 'hidden', 'important');
             tooltip.style.setProperty('opacity', '0', 'important');
         } else {
-            // 開啟：fixed 定位脫離 overflow 容器
+            // 開啟：fixed 定位脫離 overflow，位置對齊泡泡框
             tooltip.setAttribute('data-pick-open', '1');
             var rect = iconElement.getBoundingClientRect();
             var s = tooltip.style;
@@ -169,10 +169,10 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('z-index', '999999', 'important');
             s.setProperty('position', 'fixed', 'important');
             s.setProperty('transform', 'none', 'important');
-            s.setProperty('top', 'auto', 'important');
-            s.setProperty('bottom', (window.innerHeight - rect.top + 8) + 'px', 'important');
-            s.setProperty('right', (window.innerWidth - rect.right) + 'px', 'important');
             s.setProperty('left', 'auto', 'important');
+            s.setProperty('top', 'auto', 'important');
+            s.setProperty('right', (window.innerWidth - rect.right) + 'px', 'important');
+            s.setProperty('bottom', (window.innerHeight - rect.top + 8) + 'px', 'important');
         }
         return;
     }
