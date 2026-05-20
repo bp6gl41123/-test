@@ -173,6 +173,7 @@ window.toggleMobileTooltip = function(iconElement) {
             s.setProperty('top', 'auto', 'important');
             s.setProperty('right', (window.innerWidth - rect.right) + 'px', 'important');
             s.setProperty('bottom', (window.innerHeight - rect.top + 8) + 'px', 'important');
+            s.setProperty('transition', 'none', 'important');
         }
         return;
     }
