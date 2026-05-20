@@ -149,9 +149,6 @@ window.toggleMobileTooltip = function(iconElement) {
             el.setAttribute('data-pick-open', '0');
             el.style.setProperty('visibility', 'hidden', 'important');
             el.style.setProperty('opacity', '0', 'important');
-            // 還原旁邊的 icon
-            var prevIcon = el.previousElementSibling;
-            if (prevIcon) prevIcon.style.removeProperty('opacity');
         });
 
         var tooltip = iconElement.nextElementSibling;
@@ -163,7 +160,7 @@ window.toggleMobileTooltip = function(iconElement) {
             tooltip.style.setProperty('visibility', 'hidden', 'important');
             tooltip.style.setProperty('opacity', '0', 'important');
         } else {
-            // 開啟：fixed 定位脫離 overflow 容器，壓在 icon 上面
+            // 開啟：fixed 定位脫離 overflow 容器
             tooltip.setAttribute('data-pick-open', '1');
             var rect = iconElement.getBoundingClientRect();
             var s = tooltip.style;
