@@ -1680,8 +1680,8 @@ window.renderMainPick = function (sportKey) {
             let label, color, bg;
             if (wl.includes('延')) { label = '延'; color = '#94a3b8'; bg = '#1e293b'; }
             else if (wl.includes('缺')) { label = '缺'; color = '#64748b'; bg = '#0f172a'; }
-            else if (val > 0) { label = '過'; color = '#fff'; bg = '#16a34a'; }
-            else if (val < 0) { label = '倒'; color = '#fff'; bg = '#dc2626'; }
+            else if (val > 0) { label = '過'; color = '#16a34a'; bg = '#f0fdf4'; }
+            else if (val < 0) { label = '倒'; color = '#dc2626'; bg = '#fef2f2'; }
             else { label = '平'; color = '#94a3b8'; bg = '#334155'; }
             cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:16px; font-weight:bold; color:${color}; background:${bg}; border-radius:5px; margin:2px;">${label}</span>`);
         }
