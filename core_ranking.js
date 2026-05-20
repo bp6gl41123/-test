@@ -1672,7 +1672,7 @@ window.renderMainPick = function (sportKey) {
         for (let i = 19; i >= 0; i--) {
             const r = records[i];
             if (!r) {
-                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:16px; color:#475569; margin:1px;">－</span>`);
+                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:${color}; background:${bg}; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">${label}</span>`);
                 continue;
             }
             const val = parseInt(r[2] || 0);
