@@ -1672,7 +1672,7 @@ window.renderMainPick = function (sportKey) {
         for (let i = 19; i >= 0; i--) {
             const r = records[i];
             if (!r) {
-                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:${color}; background:${bg}; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">${label}</span>`);
+                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:#94a3b8; background:#1e293b; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">－</span>`);
                 continue;
             }
             const val = parseInt(r[2] || 0);
@@ -1683,7 +1683,7 @@ window.renderMainPick = function (sportKey) {
             else if (val > 0) { label = '過'; color = '#16a34a'; bg = '#f0fdf4'; }
             else if (val < 0) { label = '倒'; color = '#dc2626'; bg = '#fef2f2'; }
             else { label = '平'; color = '#94a3b8'; bg = '#334155'; }
-            cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:32px; font-weight:900; color:${color}; background:${bg}; border-radius:5px; margin:2px;">${label}</span>`);
+            cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:${color}; background:${bg}; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">${label}</span>`);
         }
         cells.splice(10, 0, `<span style="display:inline-block; width:8px;"></span>`);
         const pickHtml = typeof window.getPickTooltipHtml === 'function' ? window.getPickTooltipHtml(item.name) : '';
