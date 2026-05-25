@@ -107,16 +107,18 @@ var bulletinData = null;
 window.openBulletinModal = function() {
   var modal = document.getElementById('bulletinModal');
   if (!modal) return;
+  modal.style.zIndex = '9000';
   modal.style.display = 'flex';
+  // 確保成績預覽卡永遠在最上層
+  var previewBox = document.getElementById('recruitPreviewBox');
+  if (previewBox) previewBox.style.zIndex = '19999';
   document.body.style.overflow = 'hidden';
-  if (!bulletinData) {
-    fetch('/bulletin_data.json?t=' + Date.now())
-      .then(function(r) { return r.json(); })
-      .then(function(data) { bulletinData = data; renderBulletin(); })
-      .catch(function() { renderBulletin(); });
-  } else {
-    renderBulletin();
-  }
+  // 每次開啟都重新 fetch，確保資料最新
+  bulletinData = null;
+  fetch('/bulletin_data.json?t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) { bulletinData = data; renderBulletin(); })
+    .catch(function() { renderBulletin(); });
 };
 
 window.closeBulletinModal = function() {
@@ -124,6 +126,9 @@ window.closeBulletinModal = function() {
   if (modal) modal.style.display = 'none';
   document.body.style.overflow = '';
 };
+
+var currentSportsFilter = 'all';
+var currentDirFilter = 'positive';
 
 function renderBulletin() {
   var data = bulletinData;
@@ -134,18 +139,55 @@ function renderBulletin() {
   var updatedEl   = document.getElementById('bulletinUpdatedAt');
   if (!listEl) return;
 
+  // ── 賽事標籤列 ──
+  var tabBar = document.getElementById('bulletinTabBar');
+  if (tabBar) {
+    tabBar.innerHTML = '';
+    if (data && data.sports) {
+      data.sports.filter(function(sp){ return sp.enabled; }).forEach(function(sp) {
+        tabBar.appendChild(makeTabBtn(sp.key, sp.label, currentSportsFilter === sp.key));
+      });
+    }
+    // 預設選第一個
+    if (currentSportsFilter === 'all' && data && data.sports) {
+      var firstEnabled = data.sports.find(function(sp){ return sp.enabled; });
+      if (firstEnabled) currentSportsFilter = firstEnabled.key;
+    }
+  }
+
+  // ── 方向切換列 ──
+  var dirBar = document.getElementById('bulletinDirBar');
+  if (dirBar) {
+    dirBar.innerHTML = '';
+    var posBtn = document.createElement('button');
+    posBtn.textContent = '✅ 正向好手';
+    posBtn.style.cssText = 'flex:1;padding:6px 0;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;transition:0.2s;border:1px solid ' +
+      (currentDirFilter !== 'reverse' ? 'rgba(22,163,74,0.6);background:rgba(22,163,74,0.15);color:#4ade80;' : 'rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#475569;');
+    posBtn.onclick = function() { currentDirFilter = 'positive'; renderBulletin(); };
+    dirBar.appendChild(posBtn);
+
+    var revBtn = document.createElement('button');
+    revBtn.textContent = '🔄 反向好手';
+    revBtn.style.cssText = 'flex:1;padding:6px 0;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;transition:0.2s;border:1px solid ' +
+      (currentDirFilter === 'reverse' ? 'rgba(168,85,247,0.6);background:rgba(168,85,247,0.15);color:#c084fc;' : 'rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#475569;');
+    revBtn.onclick = function() { currentDirFilter = 'reverse'; renderBulletin(); };
+    dirBar.appendChild(revBtn);
+  }
+
   listEl.innerHTML = '';
 
   var statusMapPositive = {
     green:  { label:'推薦中', bg:'rgba(22,163,74,0.15)',  color:'#4ade80', border:'rgba(22,163,74,0.35)' },
-    yellow: { label:'普通',   bg:'rgba(234,179,8,0.15)',  color:'#fbbf24', border:'rgba(234,179,8,0.35)' },
-    red:    { label:'觀察',   bg:'rgba(220,38,38,0.15)',  color:'#f87171', border:'rgba(220,38,38,0.35)' }
+    yellow: { label:'可關注', bg:'rgba(234,179,8,0.15)',  color:'#fbbf24', border:'rgba(234,179,8,0.35)' },
+    red:    { label:'觀察',   bg:'rgba(220,38,38,0.15)',  color:'#f87171', border:'rgba(220,38,38,0.35)' },
+    blue:   { label:'普通',   bg:'rgba(99,102,241,0.15)', color:'#818cf8', border:'rgba(99,102,241,0.35)' }
   };
 
   var statusMapReverse = {
     green:  { label:'推薦中', bg:'rgba(168,85,247,0.15)', color:'#c084fc', border:'rgba(168,85,247,0.35)' },
-    yellow: { label:'普通',   bg:'rgba(168,85,247,0.08)', color:'#a78bfa', border:'rgba(168,85,247,0.2)'  },
-    red:    { label:'觀察',   bg:'rgba(168,85,247,0.05)', color:'#7c3aed', border:'rgba(168,85,247,0.15)' }
+    yellow: { label:'可關注', bg:'rgba(234,179,8,0.15)',  color:'#fbbf24', border:'rgba(234,179,8,0.35)' },
+    red:    { label:'觀察',   bg:'rgba(220,38,38,0.15)',  color:'#f87171', border:'rgba(220,38,38,0.35)' },
+    blue:   { label:'普通',   bg:'rgba(168,85,247,0.08)', color:'#a78bfa', border:'rgba(168,85,247,0.2)'  }
   };
 
   var hasContent = data && data.experts && data.experts.length > 0;
@@ -153,48 +195,82 @@ function renderBulletin() {
   if (hasContent) {
     emptyEl.style.display = 'none';
 
-    var positiveList = data.experts.filter(function(e){ return e.direction !== 'reverse'; });
-    var reverseList  = data.experts.filter(function(e){ return e.direction === 'reverse'; });
+    // 新結構：experts 是賽事細項區塊陣列
+    // 根據目前選擇的賽事篩選（頂部 MLB/NBA 等大分類）
+    var allBlocks = data.experts || [];
+    var filteredBlocks = allBlocks;
+    if (currentSportsFilter !== 'all') {
+      filteredBlocks = allBlocks.filter(function(block) {
+        return block.eventKey && (
+          block.eventKey === currentSportsFilter ||
+          block.eventKey.indexOf(currentSportsFilter + '_') === 0
+        );
+      });
+    }
 
-    function makeExpertRow(expert, isReverse) {
+    var positiveBlocks = currentDirFilter !== 'reverse'
+      ? filteredBlocks.filter(function(b){ return b.direction !== 'reverse'; })
+      : [];
+    var reverseBlocks = currentDirFilter === 'reverse'
+      ? filteredBlocks.filter(function(b){ return b.direction === 'reverse'; })
+      : [];
+
+    function makeMemberRow(member, evKey, isReverse) {
       var sMap = isReverse ? statusMapReverse : statusMapPositive;
-      var s = sMap[expert.status] || sMap['yellow'];
-      var events = (expert.events || '').trim().split('\n').filter(function(l){ return l.trim(); });
-      var evHTML = events.map(function(ev){
-        return '<span style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:0px 5px;font-size:10px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">' + ev.trim() + '</span>';
-      }).join('');
-
+      var s = sMap[member.status] || sMap['blue'];
       var rowBorder = isReverse ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.07)';
       var rowBg     = isReverse ? 'rgba(168,85,247,0.05)' : 'rgba(255,255,255,0.03)';
-
+      var hasPreview = member.name && evKey;
+      var hoverAttr = hasPreview ?
+        'onmouseenter="window.showRecruitPreview(\'' + member.name + '\',\'' + evKey + '\',event)" onmouseleave="window.hideRecruitPreview()"' : '';
       var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:5px;background:' + rowBg + ';border:1px solid ' + rowBorder + ';border-radius:5px;padding:3px 7px;min-height:26px;';
+      row.style.cssText = 'display:flex;align-items:center;gap:5px;background:' + rowBg + ';border:1px solid ' + rowBorder + ';border-radius:5px;padding:3px 7px;min-height:28px;';
+      var nameHtml = hasPreview
+        ? '<span ' + hoverAttr + ' style="cursor:pointer;display:flex;align-items:center;gap:4px;" onmouseover="this.querySelector(\'.nm\').style.color=\'#e8c96a\'" onmouseout="this.querySelector(\'.nm\').style.color=\'#f1f5f9\'">' +
+            '<span class="nm" style="color:#f1f5f9;font-size:13px;font-weight:900;white-space:nowrap;transition:color 0.15s;">' + member.name + '</span>' +
+            '<span style="font-size:11px;opacity:0.5;">🔍</span>' +
+          '</span>'
+        : '<span style="color:#f1f5f9;font-size:13px;font-weight:900;white-space:nowrap;">' + member.name + '</span>';
       row.innerHTML =
         '<span style="flex-shrink:0;display:inline-block;background:' + s.bg + ';color:' + s.color + ';border:1px solid ' + s.border + ';border-radius:20px;padding:1px 6px;font-size:9px;font-weight:900;white-space:nowrap;">' + s.label + '</span>' +
-        '<span style="color:#f1f5f9;font-size:11px;font-weight:900;white-space:nowrap;min-width:55px;">' + expert.name + '</span>' +
-        '<div style="flex:1;display:flex;flex-wrap:nowrap;overflow:hidden;gap:2px;">' + evHTML + '</div>';
+        nameHtml;
       return row;
     }
 
     // ── 正向區塊 ──
-    if (positiveList.length > 0) {
+    if (positiveBlocks.length > 0) {
       var posHeader = document.createElement('div');
       posHeader.style.cssText = 'color:#4ade80;font-size:11px;font-weight:900;letter-spacing:1px;margin-bottom:4px;padding:3px 8px;background:rgba(22,163,74,0.08);border-left:3px solid #4ade80;border-radius:4px;';
       posHeader.textContent = '✅ 正向好手';
       listEl.appendChild(posHeader);
-      positiveList.forEach(function(expert){
-        listEl.appendChild(makeExpertRow(expert, false));
+      positiveBlocks.forEach(function(block) {
+        if (!block.members || block.members.length === 0) return;
+        // 賽事細項標題
+        var groupHeader = document.createElement('div');
+        groupHeader.style.cssText = 'color:#e8c96a;font-size:10px;font-weight:900;letter-spacing:0.8px;margin:6px 0 3px;padding:2px 8px;background:rgba(201,168,76,0.08);border-left:2px solid #C9A84C;border-radius:3px;';
+        groupHeader.textContent = block.eventLabel || block.eventKey || '';
+        listEl.appendChild(groupHeader);
+        block.members.forEach(function(member) {
+          listEl.appendChild(makeMemberRow(member, block.eventKey, false));
+        });
       });
     }
 
     // ── 反向區塊 ──
-    if (reverseList.length > 0) {
+    if (reverseBlocks.length > 0) {
       var revHeader = document.createElement('div');
       revHeader.style.cssText = 'color:#c084fc;font-size:11px;font-weight:900;letter-spacing:1px;margin:8px 0 4px;padding:3px 8px;background:rgba(168,85,247,0.08);border-left:3px solid #c084fc;border-radius:4px;';
       revHeader.textContent = '🔄 反向好手';
       listEl.appendChild(revHeader);
-      reverseList.forEach(function(expert){
-        listEl.appendChild(makeExpertRow(expert, true));
+      reverseBlocks.forEach(function(block) {
+        if (!block.members || block.members.length === 0) return;
+        var groupHeader = document.createElement('div');
+        groupHeader.style.cssText = 'color:#e8c96a;font-size:10px;font-weight:900;letter-spacing:0.8px;margin:6px 0 3px;padding:2px 8px;background:rgba(201,168,76,0.08);border-left:2px solid #C9A84C;border-radius:3px;';
+        groupHeader.textContent = block.eventLabel || block.eventKey || '';
+        listEl.appendChild(groupHeader);
+        block.members.forEach(function(member) {
+          listEl.appendChild(makeMemberRow(member, block.eventKey, true));
+        });
       });
     }
 
@@ -243,6 +319,18 @@ function renderBulletin() {
   if (dot) dot.style.display = hasContent ? 'block' : 'none';
 }
 
+function makeTabBtn(key, label, isActive) {
+  var btn = document.createElement('button');
+  btn.textContent = label;
+  btn.style.cssText = 'padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;transition:0.2s;white-space:nowrap;border:1px solid ' +
+    (isActive ? 'rgba(201,168,76,0.6);background:rgba(201,168,76,0.2);color:#e8c96a;' : 'rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;');
+  btn.onclick = function() {
+    currentSportsFilter = key;
+    renderBulletin();
+  };
+  return btn;
+}
+
 // ── 公告浮動視窗 ──────────────────────────
 function openBulletinFloat(title, content) {
   var el = document.getElementById('bulletinFloat');
@@ -280,6 +368,18 @@ function closeBulletinFloat(clearActive) {
       if (e.target === modal) window.closeBulletinModal();
     });
   }
+  // 全域點擊關掉預覽卡（只在 bulletinModal 開著時才作用）
+  document.addEventListener('click', function(e) {
+    var modal = document.getElementById('bulletinModal');
+    if (!modal || modal.style.display === 'none') return;
+    // 點的是預覽卡本身就不關
+    var previewBox = document.getElementById('recruitPreviewBox');
+    if (previewBox && previewBox.contains(e.target)) return;
+    // 點的是賽事標籤（有 onmouseenter）就不關
+    if (e.target.closest && e.target.closest('[onmouseenter*="showRecruitPreview"]')) return;
+    if (typeof window.hideRecruitPreview === 'function') window.hideRecruitPreview();
+    if (typeof window.closeRankCardPopup === 'function') window.closeRankCardPopup();
+  });
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindBulletinClose);
   } else {

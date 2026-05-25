@@ -61,28 +61,9 @@ body { padding-bottom: 120px; }
     /* 針對 Chrome, Safari, Edge 瀏覽器 */
     html::-webkit-scrollbar, 
     body::-webkit-scrollbar, 
-    #authGate::-webkit-scrollbar,
-    #mainPickMiddle::-webkit-scrollbar {
+    #authGate::-webkit-scrollbar {
         display: none !important;
         width: 0px !important;
-    }
-    #mainPickTop4 .pick-tooltip-container,
-    #mainPickMiddle .pick-tooltip-container,
-    #mainPickBottom4 .pick-tooltip-container {
-        position: relative !important;
-        top: auto !important;
-        right: auto !important;
-        margin-left: 8px !important;
-        display: inline-flex !important;
-    }
-   #mainPickTop4 .pick-tooltip,
-    #mainPickMiddle .pick-tooltip,
-    #mainPickBottom4 .pick-tooltip {
-        right: 0 !important;
-        left: auto !important;
-        top: 145% !important;
-        bottom: auto !important;
-        transform: none !important;
     }
 }
 
@@ -579,10 +560,73 @@ body { padding-bottom: 120px; }
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
     <div style="position: relative; display: inline-block;">
-        <button onclick="window.openMainPick(window.activeMainPickKey || 'mlb_main'); event.stopPropagation();" 
+        <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'; event.stopPropagation();" 
                 style="background: linear-gradient(135deg, #1a1a1a, #000000); color: #fbbf24; border: 2px solid #fbbf24; padding: 13px 35px; font-size: 22px; font-weight: 900; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.3s; display: flex; align-items: center; gap: 10px;">
-            <span id="mainPickLabel">👑 眾選主推</span>
+            <span id="mainPickLabel">👑 眾選主推</span> ▾
         </button>
+        
+        <div class="main-pick-dropdown-content" style="display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background-color: #1e293b; min-width: 230px; box-shadow: 0px 10px 30px rgba(0,0,0,0.9); z-index: 999; border-radius: 12px; border: 1px solid #fbbf24; overflow: hidden; margin-bottom: 10px;">
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='⚾ MLB主推(隊伍)'; window.activeSportKey='mlb_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 ⚾ MLB主推(隊伍)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='⚾ MLB主推(大小)'; window.activeSportKey='mlb_total_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 ⚾ MLB主推(大小)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🏀 NBA主推(隊伍)'; window.activeSportKey='nba_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🏀 NBA主推(隊伍)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🏀 NBA主推(大小)'; window.activeSportKey='nba_total_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🏀 NBA主推(大小)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='⚾ NPB主推(隊伍)'; window.activeSportKey='npb_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇯🇵 NPB主推(隊伍)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='⚾ NPB主推(大小)'; window.activeSportKey='npb_total_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇯🇵 NPB主推(大小)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🇹🇼 CPBL主推(隊伍)'; window.activeSportKey='cpbl_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇹🇼 CPBL主推(隊伍)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🇹🇼 CPBL主推(大小)'; window.activeSportKey='cpbl_total_main'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇹🇼 CPBL主推(大小)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🇰🇷 KBO主推(隊伍)'; window.activeSportKey='kbo_team'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; border-bottom: 1px solid #334155; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇰🇷 KBO主推(隊伍)
+            </div>
+            <div onclick="document.getElementById('mainPickLabel').innerHTML='🇰🇷 KBO主推(大小)'; window.activeSportKey='kbo_total'; window.init(); handleCompare(); this.parentElement.style.display='none';" 
+                 style="color: #fbbf24; padding: 15px 20px; font-size: 18px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s;" 
+                 onmouseover="this.style.background='#334155'; this.style.color='#ffffff'" 
+                 onmouseout="this.style.background='transparent'; this.style.color='#fbbf24'">
+                 🇰🇷 KBO主推(大小)
+            </div>
+        </div>
     </div>
 
                 <button style="background: linear-gradient(135deg, #1877f2, #0052cc); color: #fff; border: none; padding: 15px 70px; font-size: 22px; font-weight: bold; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(24,119,242,0.3);" onclick="handleCompare()">📊 眾選成績清單(複選)</button> 
@@ -808,19 +852,19 @@ body { padding-bottom: 120px; }
             </div>
         </div>
     </div>
-    <script src="config.js?v=1.0.224"></script>
-    <script src="data.js?v=1.0.126"></script>
-    <script src="auth.js?v=1.0.73"></script>
-    <script src="core_admin.js?v=1.0.230"></script>
+    <script src="config.js?v=1.0.236"></script>
+    <script src="data.js?v=1.0.137"></script>
+    <script src="auth.js?v=1.0.74"></script>
+    <script src="core_admin.js?v=1.0.242"></script>
     <script src="core_backup.js?v=1.0.27"></script>
     <script src="core_settle.js?v=1.0.21"></script>
     <script src="core_pocket.js?v=1.0.115"></script>
     <script src="core_utils.js?v=1.0.21"></script>
     <script src="core_tooltips.js?v=1.0.25"></script>
     <script src="core_trend.js?v=1.0.21"></script>
-    <script src="core_ranking.js?v=1.0.159"></script>
+    <script src="core_ranking.js?v=1.0.165"></script>
     <script src="core_recruit.js?v=1.0.101"></script>
-    <script src="core_engine.js?v=1.0.120"></script>
+    <script src="core_engine.js?v=1.0.132"></script>
 
 <script>
 (function() {
@@ -938,22 +982,6 @@ body { padding-bottom: 120px; }
 })();
 </script>
 
-
-
-
-<div id="mainPickPage" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060b14; z-index: 10000; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif; flex-direction: column; overflow-y: auto;">
-    <div style="max-width: 1400px; margin: 0 auto; width: 100%; padding: 20px 20px 0 20px; box-sizing: border-box; flex-shrink: 0;">
-        <button onclick="window.closeMainPick()" style="background: #1e293b; color: #fbbf24; border: 1px solid #fbbf24; padding: 10px 24px; border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 12px; transition: 0.3s;" onmouseover="this.style.background='#fbbf24'; this.style.color='#000';" onmouseout="this.style.background='#1e293b'; this.style.color='#fbbf24';">
-            ⬅️ 關閉主推介面 (返回主控制台)
-        </button>
-        <h1 style="text-align:center; color:#f8fafc; margin-bottom: 10px; font-size: 36px; font-weight: 900; letter-spacing: 2px;">👑 眾選主推排行</h1>
-        <div id="mainPickSportBar" style="margin-bottom: 12px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;"></div>
-    </div>
-    <div id="mainPickHeader" style="max-width: 1900px; margin: 0 auto; width: 100%; padding: 0 80px 0 20px; box-sizing: border-box; flex-shrink: 0;"></div>
-    <div id="mainPickTop4" style="max-width: 1900px; margin: 0 auto; width: 100%; padding: 0 80px 0 20px; box-sizing: border-box; flex-shrink: 0; border-bottom: 2px solid rgba(251,191,36,0.4);"></div>
-    <div id="mainPickMiddle" style="max-width: 1900px; margin: 0 auto; width: 100%; padding: 0 80px 0 20px; box-sizing: border-box; flex: 1; overflow-y: auto; min-height: 192px; scrollbar-width: none; -ms-overflow-style: none;"></div>
-    <div id="mainPickBottom4" style="max-width: 1900px; margin: 0 auto; width: 100%; padding: 0 80px 16px 20px; box-sizing: border-box; flex-shrink: 0; border-top: 2px solid rgba(251,191,36,0.4);"></div>
-</div>
 
 <div id="momentumRadarPage" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060b14; z-index: 10000; overflow-y: auto; padding: 40px 20px; box-sizing: border-box; font-family: 'Noto Sans TC', sans-serif;">
     <div style="max-width: 1400px; margin: 0 auto;">
@@ -1073,6 +1101,8 @@ document.addEventListener('click', function(e) {
       <div onclick="window.closeBulletinModal()" style="cursor:pointer;color:#64748b;font-size:20px;font-weight:bold;line-height:1;padding:4px 8px;border-radius:6px;transition:0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#64748b'">✕</div>
     </div>
     <div style="overflow-y:auto;flex:1;padding:12px 16px;">
+      <div id="bulletinTabBar" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;"></div>
+      <div id="bulletinDirBar" style="display:flex;gap:6px;margin-bottom:8px;"></div>
       <div id="bulletinExpertList" style="display:flex;flex-direction:column;gap:2px;margin-bottom:8px;"></div>
       <div id="bulletinAnnounce" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.1);border-radius:8px;padding:10px 12px;">
         <div style="color:#94a3b8;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:8px;">📢 公告</div>
@@ -1086,5 +1116,5 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 
-<script src="dashboard.js?v=1.0.1"></script></body>
+<script src="dashboard.js?v=1.0.4"></script></body>
 </html>

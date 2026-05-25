@@ -2,7 +2,7 @@
 /* ==== 【組件 E：核心引擎 - core_engine.js】 ==== */
 /* ============================================================== */
 
-const DB_KEY = 'DashboardDB_V212_Final'; 
+const DB_KEY = 'DashboardDB_V224_Final'; 
 
 window.isNegativeMode = false; // 🪄 魔法反向開關
 window.dataDB = JSON.parse(JSON.stringify(defaultDB));

@@ -141,12 +141,44 @@ window.renderRankMode = function () {
         if (a.isQualified && !b.isQualified) return -1;
         if (!a.isQualified && b.isQualified) return 1;
         if (!a.isQualified && !b.isQualified) return b.rate - a.rate;
+        // =====================================================
+        // 🎯 主推專用排序（sport_key 結尾為 _main 才觸發）
+        // 主推類別一天一場，邏輯單純，不走趨勢/進退步等複雜機制
+        // 第一步：近10場勝率高的排前
+        // 第二步：近10場相同時，近20場勝率高的排前
+        // 此區塊執行後直接 return，不進入下方任何其他計算邏輯
+        // =====================================================
+        if (window.activeSportKey && window.activeSportKey.endsWith('_main')) {
+    const r10 = a.r10 - b.r10;
+    const s1 = a.rate - b.rate;
+    // 近10場差距 > 近20場差距 → 近10場翻盤
+    if (Math.abs(r10) > Math.abs(s1)) return b.r10 - a.r10;
+    // 🎯 主推近5場機制：A總和贏但未達兩票，且近5場輸B 40%以上 → A退位
+    const getR5Valid = (name) => {
+        const recs = window.dataDB[name][window.activeSportKey] || [];
+        let tw = 0, tl = 0, count = 0;
+        for (let i = 0; i < recs.length && count < 5; i++) {
+            const wm = recs[i][1].match(/(\d+)勝/); const lm = recs[i][1].match(/(\d+)敗/);
+            const w = wm ? parseInt(wm[1]) : 0; const l = lm ? parseInt(lm[1]) : 0;
+            if (w + l === 0) continue;
+            tw += w; tl += l; count++;
+        }
+        return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
+    };
+    const s5 = getR5Valid(a.name) - getR5Valid(b.name);
+    if ((s1 + r10) > 0 && (s1 + r10) <= 0.10 && !(s1 > 0 && r10 > 0) && s5 <= -0.40) return 1;
+    // 正常：近20場高的排前
+    return b.rate - a.rate;
+}
         // 第一步：三步多數決（3:0）→ 直接決勝
         const s1 = a.rate - b.rate;
         const s2 = a.r10 - b.r10;
         const s3 = a.rPrev10 - b.rPrev10;
         const aWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
         const bWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
+        // 三票多數決（3:0）→ 最優先直接決勝
+        if (aWins === 3) return -1;
+        if (bWins === 3) return 1;
        // 一進一退大幅趨勢機制（第一觸發）
         {
             const trendA = a.r10 - a.rPrev10;
@@ -303,8 +335,8 @@ window.renderRankMode = function () {
             if (Math.abs(s5) > 0.0001) {
                 // 近5場新機制：兩條件都通過才決勝，否則走三步總和
                 const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
-                const cond2 = (s5 > 0 && (s2 < 0 || s5 > s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
-                if (cond1 || cond2) return s5 > 0 ? -1 : 1;
+const cond2 = (s5 > 0 && (s2 > 0 || s5 > -s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
+if (cond1 || cond2) return s5 > 0 ? -1 : 1;
             }
         }
         if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? -1 : 1;
@@ -315,18 +347,48 @@ window.renderRankMode = function () {
 
     const top6 = allSorted.filter(item => isActuallyPositive(item));
     const bottom6 = allSorted.filter(item => !isActuallyPositive(item)).sort((a, b) => {
-        if ((a.name === '傲慢20' || b.name === '傲慢20') && (a.name === '秉達Li da 35' || b.name === '秉達Li da 35')) {
-            console.error('[追蹤]', a.name, 'isQualified:', a.isQualified, '| trendA:', (a.r10 - a.rPrev10).toFixed(2), '|| ', b.name, 'isQualified:', b.isQualified, '| trendB:', (b.r10 - b.rPrev10).toFixed(2));
-        }
         if (a.isQualified && !b.isQualified) return -1;
         if (!a.isQualified && b.isQualified) return 1;
         if (!a.isQualified && !b.isQualified) return a.rate - b.rate;
+        // =====================================================
+        // 🎯 主推專用排序（sport_key 結尾為 _main 才觸發）
+        // 主推類別一天一場，邏輯單純，不走趨勢/進退步等複雜機制
+        // 反向區：近10場勝率低的排前（反向指標，低勝率才是NO.1）
+        // 第一步：近10場勝率低的排前
+        // 第二步：近10場相同時，近20場勝率低的排前
+        // 此區塊執行後直接 return，不進入下方任何其他計算邏輯
+        // =====================================================
+       if (window.activeSportKey && window.activeSportKey.endsWith('_main')) {
+    const r10 = a.r10 - b.r10;
+    const s1 = a.rate - b.rate;
+    // 近10場差距 > 近20場差距 → 近10場翻盤（反向：低勝率排前）
+    if (Math.abs(r10) > Math.abs(s1)) return a.r10 - b.r10;
+    // 🎯 主推近5場機制：A總和贏但未達兩票，且近5場輸B 40%以上 → A退位
+    const getR5Valid = (name) => {
+        const recs = window.dataDB[name][window.activeSportKey] || [];
+        let tw = 0, tl = 0, count = 0;
+        for (let i = 0; i < recs.length && count < 5; i++) {
+            const wm = recs[i][1].match(/(\d+)勝/); const lm = recs[i][1].match(/(\d+)敗/);
+            const w = wm ? parseInt(wm[1]) : 0; const l = lm ? parseInt(lm[1]) : 0;
+            if (w + l === 0) continue;
+            tw += w; tl += l; count++;
+        }
+        return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
+    };
+    const s5 = getR5Valid(a.name) - getR5Valid(b.name);
+    if ((s1 + r10) < 0 && (s1 + r10) >= -0.10 && !(s1 < 0 && r10 < 0) && s5 >= 0.40) return 1;
+    // 正常：近20場低的排前
+    return a.rate - b.rate;
+}
         // 第一步：三步多數決（3:0）→ 直接決勝
         const s1 = a.rate - b.rate;
         const s2 = a.r10 - b.r10;
         const s3 = a.rPrev10 - b.rPrev10;
         const aWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
         const bWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+        // 三票多數決（3:0）→ 最優先直接決勝（反向）
+        if (aWins === 3) return -1;
+        if (bWins === 3) return 1;
         // 一進一退大幅趨勢機制（第一觸發，反向）
         // 反向：進步 = r10 < rPrev10（數字低才是好），退步 = r10 > rPrev10
         {
@@ -498,7 +560,7 @@ if (bWins === 3) return 1;
             if (Math.abs(s5) > 0.0001) {
                 // 近5場新機制：兩條件都通過才決勝，否則走三步總和
                 const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
-                const cond2 = (s5 > 0 && -s5 < s2) || (s5 < 0 && s5 < -s2);
+                const cond2 = (s5 > 0 && (s2 > 0 || -s5 < s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
                 if (cond1 || cond2) return s5 > 0 ? 1 : -1;
             }
         }
@@ -772,12 +834,44 @@ window.getRankBanner = function (title, name, key) {
     let isReverse = target.rate < 0.5; let rankIdx = -1; let cls = "title-unranked"; let bCls = ""; let rankPrefix = "近況";
     if (!isReverse) {
         let topList = list.filter(item => item.rate >= 0.5); topList.sort((a, b) => {
+            // =====================================================
+            // 🎯 主推專用排序（sport_key 結尾為 _main 才觸發）
+            // 主推類別一天一場，邏輯單純，不走趨勢/進退步等複雜機制
+            // 第一步：近10場勝率高的排前
+            // 第二步：近10場相同時，近20場勝率高的排前
+            // 此區塊執行後直接 return，不進入下方任何其他計算邏輯
+            // =====================================================
+            if (key && key.endsWith('_main')) {
+    const r10 = a.r10 - b.r10;
+    const s1 = a.rate - b.rate;
+    // 近10場差距 > 近20場差距 → 近10場翻盤
+    if (Math.abs(r10) > Math.abs(s1)) return b.r10 - a.r10;
+    // 🎯 主推近5場機制：A總和贏但未達兩票，且近5場輸B 40%以上 → A退位
+    const getR5Valid = (name) => {
+        const recs = window.dataDB[name][key] || [];
+        let tw = 0, tl = 0, count = 0;
+        for (let i = 0; i < recs.length && count < 5; i++) {
+            const wm = recs[i][1].match(/(\d+)勝/); const lm = recs[i][1].match(/(\d+)敗/);
+            const w = wm ? parseInt(wm[1]) : 0; const l = lm ? parseInt(lm[1]) : 0;
+            if (w + l === 0) continue;
+            tw += w; tl += l; count++;
+        }
+        return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
+    };
+    const s5 = getR5Valid(a.name) - getR5Valid(b.name);
+    if ((s1 + r10) > 0 && (s1 + r10) <= 0.10 && !(s1 > 0 && r10 > 0) && s5 <= -0.40) return 1;
+    // 正常：近20場高的排前
+    return b.rate - a.rate;
+}
             const s1 = a.rate - b.rate;
             const s2 = a.r10 - b.r10;
             const s3 = a.rPrev10 - b.rPrev10;
             const aWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
             const bWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
-            // 一進一退大幅趨勢機制（第一觸發）
+            // 三票多數決（3:0）→ 最優先直接決勝
+            if (aWins === 3) return -1;
+            if (bWins === 3) return 1;
+            // 一進一退大幅趨勢機制（第一觸發））
             {
                 const trendA = a.r10 - a.rPrev10;
                 const trendB = b.r10 - b.rPrev10;
@@ -922,10 +1016,10 @@ window.getRankBanner = function (title, name, key) {
         if (Math.abs(totalScore) <= 0.14) {
             const s5 = a.r5 - b.r5;
             if (Math.abs(s5) > 0.0001) {
-                // 近5場新機制（反向）：兩條件都通過才決勝，否則走三步總和
-                const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
-                const cond2 = (s5 > 0 && (s2 < 0 || s5 > s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
-                if (cond1 || cond2) return s5 > 0 ? -1 : 1;
+                // 近5場新機制：兩條件都通過才決勝，否則走三步總和
+               const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
+const cond2 = (s5 > 0 && (s2 > 0 || s5 > -s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
+if (cond1 || cond2) return s5 > 0 ? -1 : 1;
             }
         }
         if (Math.abs(totalScore) > 0.0001) return totalScore > 0 ? 1 : -1;
@@ -935,11 +1029,44 @@ window.getRankBanner = function (title, name, key) {
     }
     else {
         let bottomList = list.filter(item => item.rate < 0.5); bottomList.sort((a, b) => {
+            // =====================================================
+            // 🎯 主推專用排序（sport_key 結尾為 _main 才觸發）
+            // 主推類別一天一場，邏輯單純，不走趨勢/進退步等複雜機制
+            // 反向區：近10場勝率低的排前（反向指標，低勝率才是NO.1）
+            // 第一步：近10場勝率低的排前
+            // 第二步：近10場相同時，近20場勝率低的排前
+            // 此區塊執行後直接 return，不進入下方任何其他計算邏輯
+            // =====================================================
+            if (key && key.endsWith('_main')) {
+    const r10 = a.r10 - b.r10;
+    const s1 = a.rate - b.rate;
+    // 近10場差距 > 近20場差距 → 近10場翻盤（反向：低勝率排前）
+    if (Math.abs(r10) > Math.abs(s1)) return a.r10 - b.r10;
+    // 🎯 主推近5場機制：A總和贏但未達兩票，且近5場輸B 40%以上 → A退位
+    const getR5Valid = (name) => {
+        const recs = window.dataDB[name][key] || [];
+        let tw = 0, tl = 0, count = 0;
+        for (let i = 0; i < recs.length && count < 5; i++) {
+            const wm = recs[i][1].match(/(\d+)勝/); const lm = recs[i][1].match(/(\d+)敗/);
+            const w = wm ? parseInt(wm[1]) : 0; const l = lm ? parseInt(lm[1]) : 0;
+            if (w + l === 0) continue;
+            tw += w; tl += l; count++;
+        }
+        return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
+    };
+    const s5 = getR5Valid(a.name) - getR5Valid(b.name);
+    if ((s1 + r10) < 0 && (s1 + r10) >= -0.10 && !(s1 < 0 && r10 < 0) && s5 >= 0.40) return 1;
+    // 正常：近20場低的排前
+    return a.rate - b.rate;
+}
             const s1 = a.rate - b.rate;
             const s2 = a.r10 - b.r10;
             const s3 = a.rPrev10 - b.rPrev10;
             const aWins = (s1 < 0 ? 1 : 0) + (s2 < 0 ? 1 : 0) + (s3 < 0 ? 1 : 0);
             const bWins = (s1 > 0 ? 1 : 0) + (s2 > 0 ? 1 : 0) + (s3 > 0 ? 1 : 0);
+            // 三票多數決（3:0）→ 最優先直接決勝（反向）
+            if (aWins === 3) return -1;
+            if (bWins === 3) return 1;
             // 一進一退大幅趨勢機制（第一觸發，反向）
             {
                 const trendA = a.r10 - a.rPrev10;
@@ -1106,7 +1233,7 @@ window.getRankBanner = function (title, name, key) {
             if (Math.abs(s5) > 0.0001) {
                 // 近5場新機制（反向）：兩條件都通過才決勝，否則走三步總和
                 const cond1 = (s5 > 0 && s1 > 0.05) || (s5 < 0 && s1 < -0.05);
-                const cond2 = (s5 > 0 && -s5 < s2) || (s5 < 0 && s5 < -s2);
+                const cond2 = (s5 > 0 && (s2 > 0 || -s5 < s2)) || (s5 < 0 && (s2 < 0 || s5 < -s2));
                 if (cond1 || cond2) return s5 > 0 ? 1 : -1;
             }
         }
@@ -1584,145 +1711,55 @@ window.renderMomentumRadar = function (timeframe = 20, btnElement = null) {
     });
 };
 
-window.openMainPick = function (sportKey) {
-    const mainContent = document.getElementById('mainContent');
-    const pickPage = document.getElementById('mainPickPage');
-    if (!pickPage) { alert("找不到主推介面，請確認 index.html 已更新！"); return; }
-    mainContent.style.display = 'none';
-    pickPage.style.display = 'flex';
-    window.scrollTo(0, 0);
-    pickPage.scrollTo(0, 0);
-    if (typeof window.scalePage === 'function') setTimeout(function () { window.scalePage(true); }, 50);
-    window.renderMainPick(sportKey || window.activeMainPickKey || 'mlb_main');
-};
+/* ===== system2 排名回溯支援 ===== */
+window.getRankedListFromPicks = function(picks, sportKey, category){
+  // category: 'team'=隊伍, 'total'=大小, undefined=全部
+  const year = new Date().getFullYear();
+  const dayMap = {};
 
-window.closeMainPick = function () {
-    const pickPage = document.getElementById('mainPickPage');
-    if (pickPage) pickPage.style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-    if (typeof window.scalePage === 'function') setTimeout(function () { window.scalePage(true); }, 50);
-};
+  picks.forEach(r => {
+    const [name, date, sp, pick, result, tag] = r;
+    if(sp !== sportKey || tag !== 'main') return;
+    // 分類識別：結尾是「大」或「小」= 大小，其餘 = 隊伍
+    const isTotal = /[大小]$/.test((pick||'').trim());
+    if(category === 'team' && isTotal) return;
+    if(category === 'total' && !isTotal) return;
+    if(!dayMap[name]) dayMap[name] = {};
+    if(!dayMap[name][date]) dayMap[name][date] = {w:0, l:0};
+    if(result === 'win') dayMap[name][date].w++;
+    else if(result === 'lose') dayMap[name][date].l++;
+  });
 
-window.renderMainPick = function (sportKey) {
-    window.activeMainPickKey = sportKey;
-    window.activeSportKey = sportKey;
-    const mainSports = [
-        { key: 'mlb_main', label: '⚾ MLB主推(隊伍)' },
-        { key: 'mlb_total_main', label: '⚾ MLB主推(大小)' },
-        { key: 'nba_main', label: '🏀 NBA主推(隊伍)' },
-        { key: 'nba_total_main', label: '🏀 NBA主推(大小)' },
-        { key: 'npb_main', label: '🇯🇵 NPB主推(隊伍)' },
-        { key: 'npb_total_main', label: '🇯🇵 NPB主推(大小)' },
-        { key: 'cpbl_main', label: '🇹🇼 CPBL主推(隊伍)' },
-        { key: 'cpbl_total_main', label: '🇹🇼 CPBL主推(大小)' },
-        { key: 'kbo_team', label: '🇰🇷 KBO主推(隊伍)' },
-        { key: 'kbo_total', label: '🇰🇷 KBO主推(大小)' },
-    ];
+  const allSorted = [];
+  Object.keys(dayMap).forEach(name => {
+    const list = Object.keys(dayMap[name])
+      .map(date => {
+        const {w, l} = dayMap[name][date];
+        return [date, `${w}勝${l}敗`, w - l];
+      })
+      .sort((a, b) => new Date(year+'/'+b[0]) - new Date(year+'/'+a[0]));
 
-    const sportBar = document.getElementById('mainPickSportBar');
-    const sportGroups = [
-        { league: '⚾ MLB', items: mainSports.filter(s => s.key.startsWith('mlb')) },
-        { league: '🏀 NBA', items: mainSports.filter(s => s.key.startsWith('nba')) },
-        { league: '🇯🇵 NPB', items: mainSports.filter(s => s.key.startsWith('npb')) },
-        { league: '🇹🇼 CPBL', items: mainSports.filter(s => s.key.startsWith('cpbl')) },
-        { league: '🇰🇷 KBO', items: mainSports.filter(s => s.key.startsWith('kbo')) },
-    ];
-    sportBar.innerHTML = sportGroups.map(g =>
-        `<div style="display:flex; align-items:center; gap:6px;">
-            <span style="color:#94a3b8; font-size:16px; font-weight:bold; white-space:nowrap;">${g.league}</span>
-            ${g.items.map(s =>
-                `<button onclick="window.renderMainPick('${s.key}')" style="background:${s.key === sportKey ? '#fbbf24' : 'transparent'}; color:${s.key === sportKey ? '#000' : '#cbd5e1'}; border:1px solid ${s.key === sportKey ? '#fbbf24' : '#475569'}; padding:6px 18px; border-radius:6px; font-size:16px; font-weight:bold; cursor:pointer; transition:0.2s; white-space:nowrap;">${s.key.includes('total') || s.key.includes('kbo_total') ? '大小' : '隊伍'}</button>`
-            ).join('')}
-        </div>`
-    ).join('<div style="width:1px; background:#1e293b; margin:0 4px;"></div>');
+    const uniqueDates = new Set(list.map(r => r[0]));
+    if(list.length < 20 || uniqueDates.size < 10) return;
 
-    let allSorted = [];
-    let systemLatestDate = window.getSystemLatestDate(sportKey);
-    let qualifiedWhitelist = [];
-    try { qualifiedWhitelist = JSON.parse(localStorage.getItem('AdminWhitelist_Experts')) || []; } catch (e) { console.error('qualifiedWhitelist 讀取失敗', e); }
+    const getRate = (n) => {
+      let tw=0, tl=0;
+      list.slice(0,n).forEach(r => {
+        const wm=r[1].match(/(\d+)勝/); const lm=r[1].match(/(\d+)敗/);
+        if(wm) tw+=parseInt(wm[1]); if(lm) tl+=parseInt(lm[1]);
+      });
+      return (tw+tl)>0 ? tw/(tw+tl) : 0;
+    };
 
-    for (let name in window.dataDB) {
-        if (window.excludedExperts && window.excludedExperts.includes(name)) continue;
-        let list = window.dataDB[name][sportKey] || [];
-        if (list.length === 0) continue;
-        let diffDays = window.getDaysDiff(list[0][0], systemLatestDate);
-        if (diffDays > 3) continue;
-        let uniqueDates = new Set(list.map(r => r[0]));
-        const isQualified = (list.length >= 20 && uniqueDates.size >= 10) || qualifiedWhitelist.includes(name + '||' + sportKey);
-        let w = 0, l = 0;
-        list.slice(0, 20).forEach(r => {
-            const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/);
-            if (wm) w += parseInt(wm[1]); if (lm) l += parseInt(lm[1]);
-        });
-        let rate = (w + l) > 0 ? Math.round(w / (w + l) * 100) / 100 : 0;
-        const getRate = (days) => {
-            let tw = 0, tl = 0;
-            list.slice(0, days).forEach(r => { const wm = r[1].match(/(\d+)勝/); const lm = r[1].match(/(\d+)敗/); if (wm) tw += parseInt(wm[1]); if (lm) tl += parseInt(lm[1]); });
-            return (tw + tl) > 0 ? Math.round(tw / (tw + tl) * 100) / 100 : 0;
-        };
-        const r10 = getRate(10);
-        allSorted.push({ name, rate, r10, list, isQualified });
-    }
+    allSorted.push({name, rate:getRate(20), r10:getRate(10), list});
+  });
 
-    allSorted.sort((a, b) => b.rate - a.rate);
+  allSorted.sort((a,b) => {
+    const dr10 = b.r10 - a.r10;
+    const dr20 = b.rate - a.rate;
+    if(Math.abs(dr10) > Math.abs(dr20)) return dr10;
+    return dr20;
+  });
 
-    function buildRow(item) {
-        const records = item.list.slice(0, 20);
-        const cells = [];
-        for (let i = 19; i >= 0; i--) {
-            const r = records[i];
-            if (!r) {
-                cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:#94a3b8; background:#1e293b; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">－</span>`);
-                continue;
-            }
-            const val = parseInt(r[2] || 0);
-            const wl = r[1] || '';
-            let label, color, bg;
-            if (wl.includes('延')) { label = '延'; color = '#94a3b8'; bg = '#1e293b'; }
-            else if (wl.includes('缺')) { label = '缺'; color = '#64748b'; bg = '#0f172a'; }
-            else if (val > 0) { label = '過'; color = '#16a34a'; bg = '#f0fdf4'; }
-            else if (val < 0) { label = '倒'; color = '#dc2626'; bg = '#fef2f2'; }
-            else { label = '平'; color = '#94a3b8'; bg = '#334155'; }
-            cells.push(`<span style="display:inline-block; width:52px; height:52px; line-height:52px; text-align:center; font-size:20px; font-weight:500; color:${color}; background:${bg}; border-radius:8px; margin:2px; border:1.5px solid #d4af37; box-sizing:border-box;">${label}</span>`);
-        }
-        cells.splice(10, 0, `<span style="display:inline-block; width:8px;"></span>`);
-        const pickHtml = typeof window.getPickTooltipHtml === 'function' ? window.getPickTooltipHtml(item.name) : '';
-        const rateColor = item.rate >= 0.55 ? '#16a34a' : item.rate <= 0.45 ? '#dc2626' : '#f59e0b';
-        const r10Color = item.r10 >= 0.55 ? '#16a34a' : item.r10 <= 0.45 ? '#dc2626' : '#f59e0b';
-        return `<div style="display:flex; align-items:center; padding:6px 0; border-bottom:1px solid #1e293b; ${!item.isQualified ? 'opacity:0.5;' : ''}">
-            <div style="flex:0 0 1140px;">${cells.join('')}</div>
-            <div style="flex:0 0 200px; color:#f8fafc; font-weight:bold; font-size:18px; padding:0 16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</div>
-            <div style="flex:0 0 120px; text-align:center; color:${rateColor}; font-weight:900; font-size:20px;">${(item.rate * 100).toFixed(0)}%</div>
-            <div style="flex:0 0 120px; text-align:center; color:${r10Color}; font-weight:900; font-size:20px;">${(item.r10 * 100).toFixed(0)}%</div>
-            <div style="flex:0 0 120px; text-align:center;">${pickHtml}</div>
-        </div>`;
-    }
-
-    const dividerRow = (text) =>
-        `<div style="text-align:center; padding:4px 0; color:rgba(251,191,36,0.5); font-size:12px; font-weight:bold; letter-spacing:2px;">${text}</div>`;
-
-    const qualifiedList = allSorted.filter(i => i.isQualified);
-    const unqualifiedList = allSorted.filter(i => !i.isQualified);
-    const top4 = qualifiedList.slice(0, 4);
-    const bottom4 = qualifiedList.length > 8 ? qualifiedList.slice(-4) : qualifiedList.slice(Math.max(4, qualifiedList.length - 4));
-    const middle = qualifiedList.slice(top4.length, qualifiedList.length - bottom4.length);
-
-    const headerHtml = `<div style="display:flex; align-items:center; padding:10px 0; border-bottom:2px solid #fbbf24; color:#fbbf24; font-weight:900; font-size:16px;">
-        <div style="flex:0 0 1140px;">十場（左舊→右新）十場</div>
-        <div style="flex:0 0 200px; padding:0 16px;">人名</div>
-        <div style="flex:0 0 120px; text-align:center;">20場勝率</div>
-        <div style="flex:0 0 120px; text-align:center;">近10場勝率</div>
-        <div style="flex:0 0 120px; text-align:center;">今日推薦</div>
-    </div>`;
-
-    document.getElementById('mainPickHeader').innerHTML = headerHtml;
-    document.getElementById('mainPickTop4').innerHTML =
-        top4.map(i => buildRow(i)).join('') +
-        (middle.length > 0 ? dividerRow('▼  以下可上下滑動  ▼') : '');
-    document.getElementById('mainPickMiddle').innerHTML =
-        middle.map(i => buildRow(i)).join('') +
-        unqualifiedList.map(i => buildRow(i)).join('');
-    document.getElementById('mainPickBottom4').innerHTML =
-        (bottom4.length > 0 ? dividerRow('▲  以上可上下滑動  ▲') : '') +
-        bottom4.map(i => buildRow(i)).join('');
+  return allSorted;
 };

@@ -110,10 +110,24 @@ window.getPickTooltipHtml = function(name) {
                 if (sportKey !== "") {
                     // 精準配對當下切換的賽事，並套用「垂直排版引擎」
                     const exactMatch = foundAll.find(p => p[1] === sportKey);
-                    if (exactMatch) finalContent = formatVertical(exactMatch[2]);
+                    if (exactMatch) {
+                        // 4欄位結構：[名字, sportKey, 日期, 內容]
+                        if (exactMatch.length >= 4) {
+                            const date = exactMatch[2];
+                            const content = exactMatch[exactMatch.length - 1];
+                            finalContent = `<div style="color:#94a3b8; font-size:12px; margin-bottom:6px;">${date}</div>` + formatVertical(content);
+                        } else {
+                            finalContent = formatVertical(exactMatch[2]);
+                        }
+                    }
                 } else {
                     // 若為總榜模式，串接所有推薦內容，並套用「垂直排版引擎」
-                    finalContent = foundAll.map(p => formatVertical(p[2])).join('<hr style="border-top:1px dashed #fbbf24; margin: 12px 0; opacity: 0.5;">');
+                    finalContent = foundAll.map(p => {
+                        if (p.length >= 4) {
+                            return `<div style="color:#94a3b8; font-size:12px; margin-bottom:6px;">${p[2]}</div>` + formatVertical(p[p.length - 1]);
+                        }
+                        return formatVertical(p[p.length - 1]);
+                    }).join('<hr style="border-top:1px dashed #fbbf24; margin: 12px 0; opacity: 0.5;">');
                 }
             } else {
                 // 相容舊版 2 欄位結構
@@ -140,56 +154,8 @@ window.getPickTooltipHtml = function(name) {
     return `<div class="pick-tooltip-container"><span class="pick-icon" onclick="event.stopPropagation(); if(typeof window.tooltipGateTrigger === 'function' && window.tooltipGateTrigger()) return; window.toggleMobileTooltip(this);" title="點擊查看今日推薦">💬</span><div class="pick-tooltip"><div class="pick-content">${finalContent}</div><div class="pocket-btn-wrapper"><button class="${btnClass}" onclick="event.stopPropagation(); window.toggleUserPocket('${name}', this, '${sportKey}')">${btnText}</button></div></div></div>`;
 };
 
-window.toggleMobileTooltip = function(iconElement) {
-    var inMainPick = !!iconElement.closest('#mainPickTop4, #mainPickMiddle, #mainPickBottom4');
-
-    if (inMainPick) {
-        // 先關掉其他已開的
-        document.querySelectorAll('.pick-tooltip[data-pick-open="1"]').forEach(function(el) {
-            el.setAttribute('data-pick-open', '0');
-            el.style.setProperty('visibility', 'hidden', 'important');
-            el.style.setProperty('opacity', '0', 'important');
-        });
-
-        var tooltip = iconElement.nextElementSibling;
-        var isOpen = tooltip.getAttribute('data-pick-open') === '1';
-
-        if (isOpen) {
-            // 關閉
-            tooltip.setAttribute('data-pick-open', '0');
-            tooltip.style.setProperty('visibility', 'hidden', 'important');
-            tooltip.style.setProperty('opacity', '0', 'important');
-        } else {
-            // 開啟：fixed 定位脫離 overflow，位置對齊泡泡框
-            tooltip.setAttribute('data-pick-open', '1');
-            var rect = iconElement.getBoundingClientRect();
-            var s = tooltip.style;
-            s.setProperty('visibility', 'visible', 'important');
-            s.setProperty('opacity', '1', 'important');
-            s.setProperty('z-index', '999999', 'important');
-            s.setProperty('position', 'fixed', 'important');
-            s.setProperty('transform', 'none', 'important');
-            s.setProperty('left', 'auto', 'important');
-            s.setProperty('top', 'auto', 'important');
-            s.setProperty('right', (window.innerWidth - rect.right) + 'px', 'important');
-            s.setProperty('bottom', (window.innerHeight - rect.top + 8) + 'px', 'important');
-            s.setProperty('transition', 'none', 'important');
-        }
-        return;
-    }
-
-    // 原本非主推區邏輯完全不動
-    document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => {
-        if (el !== iconElement.nextElementSibling) {
-            el.classList.remove('show-mobile');
-            el.removeAttribute('style');
-        }
-    });
-    var tooltip = iconElement.nextElementSibling;
-    var isShowing = tooltip.classList.contains('show-mobile');
-    tooltip.classList.toggle('show-mobile');
-};
-document.addEventListener('click', (e) => { if(!e.target.closest('.pick-icon') && !e.target.closest('.pick-tooltip')) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { el.classList.remove('show-mobile'); el.removeAttribute('style'); }); } });
+window.toggleMobileTooltip = function(iconElement) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => { if (el !== iconElement.nextElementSibling) el.classList.remove('show-mobile'); }); iconElement.nextElementSibling.classList.toggle('show-mobile'); };
+document.addEventListener('click', (e) => { if(!e.target.closest('.pick-icon') && !e.target.closest('.pick-tooltip')) { document.querySelectorAll('.pick-tooltip.show-mobile').forEach(el => el.classList.remove('show-mobile')); } });
 
 
 
