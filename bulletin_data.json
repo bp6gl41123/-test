@@ -1,0 +1,306 @@
+{
+  "updatedAt": "2026-05-23T09:17:39.131Z",
+  "experts": [
+    {
+      "direction": "reverse",
+      "eventKey": "mlb_runline",
+      "eventLabel": "MLB讓分",
+      "members": [
+        {
+          "name": "Yu Siang 30",
+          "status": "green"
+        },
+        {
+          "name": "Ricky",
+          "status": "red"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "nba_total",
+      "eventLabel": "NBA大小分",
+      "members": [
+        {
+          "name": "Rong 14",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "nba_total_main",
+      "eventLabel": "NBA主推(大小)",
+      "members": [
+        {
+          "name": "Rong 14",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "mlb_total",
+      "eventLabel": "MLB大小",
+      "members": [
+        {
+          "name": "秉達Li da 35",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "mlb_total_main",
+      "eventLabel": "MLB主推(大小)",
+      "members": [
+        {
+          "name": "阿綺",
+          "status": "yellow"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "mlb_ml",
+      "eventLabel": "MLB獨贏",
+      "members": [
+        {
+          "name": "Rong 14",
+          "status": "green"
+        },
+        {
+          "name": "Paul蔡47",
+          "status": "yellow"
+        },
+        {
+          "name": "世界止めて 32",
+          "status": "blue"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "nba_main",
+      "eventLabel": "NBA主推(隊伍)",
+      "members": [
+        {
+          "name": "泓佑章魚燒",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "reverse",
+      "eventKey": "mlb_main",
+      "eventLabel": "MLB主推(隊伍)",
+      "members": [
+        {
+          "name": "Reaves",
+          "status": "blue"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "mlb_ml",
+      "eventLabel": "MLB獨贏",
+      "members": [
+        {
+          "name": "阿綺",
+          "status": "green"
+        },
+        {
+          "name": "啊霖:B 16",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "mlb_total_main",
+      "eventLabel": "MLB主推(大小)",
+      "members": [
+        {
+          "name": "莊硯",
+          "status": "green"
+        },
+        {
+          "name": "Yu Siang 30",
+          "status": "green"
+        },
+        {
+          "name": "Paul蔡47",
+          "status": "yellow"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "nba_team",
+      "eventLabel": "NBA讓分盤",
+      "members": [
+        {
+          "name": "Yu lu",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "nba_total",
+      "eventLabel": "NBA大小分",
+      "members": [
+        {
+          "name": "世界止めて 32",
+          "status": "green"
+        },
+        {
+          "name": "Reaves",
+          "status": "green"
+        },
+        {
+          "name": "山Shan 46",
+          "status": "green"
+        },
+        {
+          "name": "秉達Li da 35",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "nba_total_main",
+      "eventLabel": "NBA主推(大小)",
+      "members": [
+        {
+          "name": "山Shan 46",
+          "status": "green"
+        },
+        {
+          "name": "阿綺",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "nba_main",
+      "eventLabel": "NBA主推(隊伍)",
+      "members": [
+        {
+          "name": "阿綺",
+          "status": "green"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "mlb_runline",
+      "eventLabel": "MLB讓分",
+      "members": [
+        {
+          "name": "維駿",
+          "status": "yellow"
+        },
+        {
+          "name": "熊孩子~文08",
+          "status": "yellow"
+        }
+      ]
+    },
+    {
+      "direction": "positive",
+      "eventKey": "mlb_total",
+      "eventLabel": "MLB大小",
+      "members": [
+        {
+          "name": "leon lin",
+          "status": "blue"
+        }
+      ]
+    }
+  ],
+  "bulletins": [
+    {
+      "title": "大道至簡 化繁從簡💡 ",
+      "content": "版大提醒各位 你有沒有發現\n\n隨便跟一位 榜上常客 \n開季跟到現在 也不會輸到哪去\n重點在於 持續單跟一位人 才會損益平衡\n\n所以忌諱 \n\"多人\" \"多牌\" \"多用\" \n三心二意等複雜性操作\n\n頂多1-2人 化繁為簡\n本金可控 損益可期 持之以恆   "
+    },
+    {
+      "title": "跟牌技巧 版大經驗傳授",
+      "content": "☢️ 跟牌切記：鎖定好手時\n跟牌必須持續使用並全跟不要挑選。\n\n💡 除非勝率整個變了，才需要停用。\n規律變化：以前常贏，現在兩天不贏\n基本上都要轉為觀望 系統也會幫忙更新。\n\n#技巧在這 好手多。\n\n🧏 備註：\n勝負起伏是正常頻率 輸之後就是贏 \n鎖定好手 正常規律參考 損益才能平衡\n\n⛔️跟牌最忌諱方式\n輸了就退、輸了又退，虧損停在那邊\n別人一來一往追平了，你還是漫無目的。\n\n設定好每日限額上限 \n當天全輸就是一天上限而已\n損益還能掌握 才可維持跟牌節奏 \n不用擔心不跟時 好手就持平 \n\n規劃長期可以進行的投注習慣\n才是正確的投資行為🙆\""
+    },
+    {
+      "title": "運彩玩家 技巧傳授",
+      "content": "運彩玩家 兩種配置法💡 \n\n第一種 \"主推配\"\n\n每一個賽事細項 各找一位\"推薦中\"\n以主推 配 主推 串成 運彩專屬 2x1\n\n第二種 \"勝率配\"\n\n當期若出現 賽事較穩定的玩家\n\n勝率常常四過三 三過二等....\n換角度說 常轟或常常只倒一場\n\n鎖定這類型的玩家 當日推薦五場 \n就用這五場 去配五場不同賽事的主推\n\n串成 運彩專屬 2x1 \n\n兩種配置法掌握後\n維持一個週期 如:半個月 持續操作 \n\n好手狀態何時有異動\n可參考 \"當期推薦好手榜\"\n以及另外一篇公告的 版大經驗傳授🙆"
+    }
+  ],
+  "sports": [
+    {
+      "key": "mlb",
+      "label": "MLB",
+      "enabled": true
+    },
+    {
+      "key": "nba",
+      "label": "NBA",
+      "enabled": true
+    },
+    {
+      "key": "npb",
+      "label": "日棒",
+      "enabled": true
+    },
+    {
+      "key": "cpbl",
+      "label": "台棒",
+      "enabled": true
+    },
+    {
+      "key": "nhl",
+      "label": "冰球",
+      "enabled": false
+    },
+    {
+      "key": "khl",
+      "label": "俄冰",
+      "enabled": false
+    },
+    {
+      "key": "soccer",
+      "label": "足球",
+      "enabled": false
+    },
+    {
+      "key": "euro",
+      "label": "歐籃",
+      "enabled": false
+    },
+    {
+      "key": "cba",
+      "label": "中籃",
+      "enabled": false
+    },
+    {
+      "key": "nbl",
+      "label": "澳籃",
+      "enabled": false
+    },
+    {
+      "key": "jbl",
+      "label": "日籃",
+      "enabled": false
+    },
+    {
+      "key": "kbl",
+      "label": "韓籃",
+      "enabled": false
+    },
+    {
+      "key": "lol",
+      "label": "電競",
+      "enabled": false
+    }
+  ]
+}
